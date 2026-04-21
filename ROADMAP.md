@@ -1,0 +1,140 @@
+# Roadmap
+
+Fases incrementales; cada una termina con algo publicable. Las estimaciones
+son de esfuerzo relativo, no fechas.
+
+## Fase 0 — Preparación y datos base (esfuerzo: bajo)
+
+Objetivo: tener todos los insumos de datos en disco y las decisiones de stack
+cerradas.
+
+- [x] Inicializar repo (git, `.gitignore` para datos crudos, estructura
+      `pipeline/` + `web/` + `data/`).
+- [x] Descargar HydroRIVERS Sudamérica y recortar a Uruguay
+      (`pipeline/build_red.py`: 4.569 tramos con `UPLAND_SKM >= 100`,
+      1,7 MB GeoJSON).
+- [x] Adaptar el scraper de `datauy` como `pipeline/wfs.py` +
+      `descargar_capas.py`; descargadas: `shp_cursos` (13.678),
+      `V_Catalogo_publica` (100 estaciones), `curvas_tr`, `curvas_cri`,
+      `localidades_amenazas`, `problemas_drenaje`; cuencas 1/2 y
+      departamentos copiados de `datauy`.
+- [x] Join estación ↔ tramo verificado (`pipeline/verificar_join.py`):
+      66/83 estaciones con dist < 1 km y ratio de áreas 0,5–2 (la mayoría
+      con ratio 1,00). Fallan: estaciones de estuario (Nueva Palmira, Fray
+      Bentos) y arroyos bajo el umbral de la red.
+- [x] Spike de render: MapLibre GL + capa custom WebGL de partículas
+      (animación 100 % en vertex shader) — **60 fps con 20.441 partículas y
+      4.569 tramos** en Chrome headless desktop. Falta medir en móvil real
+      (queda para Fase 1).
+
+**Criterio de salida: CUMPLIDO** (2026-08-20). Pendiente arrastrado a Fase 1:
+el eje del bajo río Uruguay (aguas abajo de Paysandú) queda fuera del buffer
+de recorte — ampliar el recorte hacia el oeste o incluir explícitamente
+`MAIN_RIV` del río Uruguay.
+
+## Fase 1 — MVP: mapa estático de caudal medio (esfuerzo: medio)
+
+Objetivo: mapa navegable de Uruguay con ríos animados según caudal **medio**
+(sin datos en vivo). Ver especificación completa en `docs/03-mvp.md`.
+
+- [ ] Pipeline: HydroRIVERS → filtrado (umbral por `UPLAND_SKM`/`ORD_STRA`) →
+      simplificación por nivel de zoom → tiles (PMTiles) o GeoJSON por capas.
+- [ ] Frontend: basemap sobrio (MapLibre + estilo propio), capa de ríos con
+      ancho y color en escala logarítmica de `DIS_AV_CMS`.
+- [ ] Animación: partículas/dashes desplazándose aguas abajo, velocidad
+      proporcional al caudal.
+- [ ] Hover: resaltar el curso y mostrar nombre + caudal medio estimado.
+- [ ] Deploy en GitHub Pages (workflow `actions/deploy-pages`).
+
+**Criterio de salida:** URL pública con el mapa animado de caudal medio,
+fluido en desktop y móvil.
+
+## Fase 2 — Capa dinámica: datos casi en tiempo real (esfuerzo: alto)
+
+Objetivo: que el mapa refleje el estado hídrico actual, no solo el promedio.
+
+- [ ] Job programado (GitHub Actions, cada 1–3 h) que genera un
+      `estado_actual.json`:
+  - WFS DINAGUA `V_Catalogo_publica` (último nivel/caudal + antigüedad del
+    dato por estación).
+  - Scraping de `saltogrande.org/datos_horarios.php` (turbinado + vertido).
+  - API INA `alerta.ina.gob.ar/pub/datos/` (alturas/caudales río Uruguay).
+  - CARU (tabla de alturas de puertos) como respaldo, tolerante a caída.
+- [ ] Modelo de escala: factor caudal_actual/caudal_normal por estación,
+      propagado a los tramos de su cuenca (nivel 2) con decaimiento; tramos
+      sin señal quedan en caudal medio con estilo "estimado" (línea pálida,
+      como el mapa de referencia).
+- [ ] Capa de estaciones: puntos con popup (nivel, caudal, fecha del dato,
+      semáforo de frescura <24 h / 24–48 h / >48 h como el SIH).
+- [ ] Manejo explícito de datos viejos: si `ultima_fecha` supera un umbral,
+      la estación no escala su cuenca.
+
+**Criterio de salida:** el mapa cambia solo, con timestamp visible de última
+actualización y distinción medido/estimado.
+
+## Fase 3 — Modo creciente: zonas inundables (esfuerzo: medio)
+
+Objetivo: mostrar qué zonas afecta la crecida de los cursos ante lluvia
+extrema, usando los productos oficiales de DINAGUA (ver
+`docs/02-arquitectura.md`, "Modo creciente").
+
+- [ ] Pipeline: descargar por WFS `curvas_tr`, `curvas_cri`,
+      `problemas_drenaje`, `localidades_amenazas`; inventariar cobertura
+      (qué localidades tienen mancha y con qué períodos de retorno).
+- [ ] Toggle "modo creciente" con selector de escenario (Tr 10 / Tr 100
+      años); pintar las manchas oficiales con popup (curso, cota, fuente del
+      estudio).
+- [ ] Capa "inundaciones registradas" (`curvas_cri`) con fecha del evento.
+- [ ] Capa de amenaza urbana (`problemas_drenaje` + `localidades_amenazas`)
+      para lluvia intensa local (drenaje pluvial, no desborde).
+- [ ] Verificación de datum: comparar `cota_oficial` de curvas contra "Cota
+      Cero (Wh)" de las estaciones por localidad (precondición del punto
+      siguiente).
+- [ ] Con la capa dinámica de Fase 2: activar automáticamente la mancha cuya
+      cota supere el nivel actual de la estación asociada y mostrar el margen
+      hasta la siguiente ("a X cm de la mancha de 10 años").
+- [ ] (Opcional/avanzado) Estimación HAND con MDT de IDEuy para zonas sin
+      estudio oficial, siempre etiquetada como estimación propia.
+
+**Criterio de salida:** en las ciudades cubiertas por DINAGUA (Durazno,
+Treinta y Tres, etc.) el mapa muestra la mancha del escenario elegido y, si
+hay dato de estación fresco, cuál está activa hoy.
+
+## Fase 4 — Contexto e histórico (esfuerzo: medio)
+
+- [ ] Precipitación: capa de lluvia acumulada 24/72 h desde el CSV horario de
+      INUMET (CKAN, actualización diaria).
+- [ ] Vista "caudal vs. normal" (anomalía) como toggle, análoga al mapa USA.
+- [ ] Cruce lluvia→creciente: resaltar cuencas con precipitación acumulada
+      extrema como aviso temprano para el modo creciente de Fase 3.
+- [ ] Persistir cada snapshot del job de Fase 2 para construir series propias
+      (Uruguay no publica series de caudal descargables).
+- [ ] Mini-gráfico de serie temporal en el popup de estación (con los datos
+      acumulados propios + niveles CKAN 2017–2019 donde existan).
+- [ ] Capa de represas/embalses (Bonete, Baygorria, Palmar, Salto Grande) con
+      datos operativos disponibles.
+
+## Fase 5 — Pulido y alcance extendido (esfuerzo: abierto)
+
+- [ ] Nombres de ríos con jerarquía por zoom (usar `nombre_2` de
+      `shp_cursos` / Natural Earth).
+- [ ] Buscador de cursos y permalinks por río/estación.
+- [ ] Detalle 1:10.000 de IDEuy en zooms altos (solo estética).
+- [ ] Pedir a `dinagua.servicios@ambiente.gub.uy` acceso a series/curvas de
+      gasto; si llegan, reemplazar la heurística de escala por conversión
+      nivel→caudal real.
+- [ ] Cobertura costera del modo creciente (`curvas_costas`, 281 k features,
+      requiere tiling).
+- [ ] Performance: presupuesto de <3 MB de datos iniciales, tiles por zoom,
+      medir en móvil real.
+
+## Riesgos principales
+
+| Riesgo | Impacto | Mitigación |
+|---|---|---|
+| Frescura heterogénea de DINAGUA (caudales a veces rezagados años) | La capa "en vivo" miente | Usar nivel (casi al día) como señal primaria; umbral de antigüedad; etiqueta "estimado" |
+| Endpoints frágiles (TLS roto en ambiente.gub.uy, CARU en IP:8080, HTML scraping) | Pipeline se rompe en silencio | Job tolerante a fallos por fuente + alerta; el mapa degrada a caudal medio |
+| Sin curvas de gasto públicas (nivel→caudal) | Escala dinámica es heurística | Documentarlo en la UI; gestionar acceso con DINAGUA (Fase 4) |
+| Rendimiento WebGL en móvil con ~14 k tramos | UX pobre | Filtrar por zoom, simplificar geometría, presupuesto de FPS en el spike de Fase 0 |
+| Datum de cotas de curvas ≠ cota cero de estaciones | El modo creciente activa manchas equivocadas | Verificación de datum por localidad antes de habilitar la activación automática; hasta entonces, solo escenarios manuales |
+| Manchas oficiales solo en ciudades estudiadas | Falsa sensación de "acá no se inunda" fuera de cobertura | Mostrar cobertura explícita (localidades con/sin estudio) y `localidades_amenazas` como señal mínima |
