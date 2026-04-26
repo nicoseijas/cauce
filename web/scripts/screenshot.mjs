@@ -16,13 +16,23 @@ page.on("pageerror", (e) => console.log("[pageerror]", e.message));
 await page.goto(url, { waitUntil: "networkidle0", timeout: 60000 });
 try {
   await page.waitForFunction(
-    () => document.getElementById("hud")?.textContent?.includes("fps"),
+    () => document.getElementById("fps")?.textContent?.includes("fps"),
     { timeout: 30000 },
   );
 } catch {
   console.log("[warn] HUD nunca mostró fps");
 }
 await new Promise((r) => setTimeout(r, 3000));
-console.log("[hud]", await page.$eval("#hud", (el) => el.textContent));
+if (process.argv[4] === "--hover") {
+  // barrido diagonal hasta que aparezca el tooltip sobre algún río
+  for (let i = 0; i < 40; i++) {
+    await page.mouse.move(400 + i * 12, 300 + i * 8);
+    await new Promise((r) => setTimeout(r, 120));
+    const visible = await page.$eval("#tooltip", (el) => el.style.display === "block");
+    if (visible) break;
+  }
+  console.log("[tooltip]", await page.$eval("#tooltip", (el) => el.textContent));
+}
+console.log("[hud]", await page.$eval("#fps", (el) => el.textContent));
 await page.screenshot({ path: out });
 await browser.close();

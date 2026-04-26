@@ -3,20 +3,50 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ríos UY — spike de render</title>
+  <title>Ríos del Uruguay</title>
   <style>
-    html, body { margin: 0; height: 100%; }
+    html, body { margin: 0; height: 100%; background: #0b141d; }
     #map { position: absolute; inset: 0; }
-    #hud {
-      position: absolute; top: 8px; left: 8px; z-index: 10;
-      font: 12px/1.4 system-ui, sans-serif; color: #cfe8ff;
-      background: rgba(10, 20, 30, 0.7); padding: 6px 10px; border-radius: 6px;
+    .panel {
+      position: absolute; z-index: 10;
+      font: 13px/1.45 system-ui, -apple-system, sans-serif; color: #cfe0ee;
+      background: rgba(10, 20, 30, 0.82); border: 1px solid #223344;
+      border-radius: 8px; padding: 10px 14px;
+      backdrop-filter: blur(4px);
     }
+    #titulo { top: 12px; left: 12px; max-width: 260px; }
+    #titulo h1 { margin: 0 0 2px; font-size: 16px; font-weight: 650; color: #eaf4fd; }
+    #titulo p { margin: 0; color: #8fa8bd; font-size: 12px; }
+    #leyenda { bottom: 28px; left: 12px; }
+    #leyenda .fila { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    #leyenda .linea { background: #57a8d8; border-radius: 2px; }
+    #leyenda .etiqueta { color: #8fa8bd; font-size: 11px; }
+    #tooltip {
+      display: none; position: absolute; z-index: 20; pointer-events: none;
+      font: 12px/1.4 system-ui, sans-serif; color: #eaf4fd;
+      background: rgba(8, 16, 24, 0.92); border: 1px solid #2c4257;
+      border-radius: 6px; padding: 6px 10px; white-space: nowrap;
+    }
+    #tooltip .q { color: #8fc6ec; }
+    #fps { top: 12px; right: 12px; font-size: 11px; color: #5c7893; padding: 4px 8px; }
+    @media (max-width: 600px) { #titulo p, #fps { display: none; } }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <div id="hud">cargando…</div>
+  <div id="titulo" class="panel">
+    <h1>Ríos del Uruguay</h1>
+    <p>Caudal medio de largo plazo. Ancho, brillo y velocidad proporcionales
+       al caudal (escala logarítmica).</p>
+  </div>
+  <div id="leyenda" class="panel">
+    <div class="fila"><div class="linea" style="width:46px;height:7px"></div><span class="etiqueta">~5.000 m³/s (río Uruguay)</span></div>
+    <div class="fila"><div class="linea" style="width:46px;height:4px;opacity:.85"></div><span class="etiqueta">~600 m³/s (Río Negro)</span></div>
+    <div class="fila"><div class="linea" style="width:46px;height:2px;opacity:.7"></div><span class="etiqueta">~40 m³/s</span></div>
+    <div class="fila"><div class="linea" style="width:46px;height:1px;opacity:.55"></div><span class="etiqueta">&lt; 5 m³/s</span></div>
+  </div>
+  <div id="tooltip"></div>
+  <div id="fps" class="panel"></div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

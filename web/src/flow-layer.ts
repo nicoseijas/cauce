@@ -35,7 +35,7 @@ varying float vQ;
 void main() {
   float d = length(gl_PointCoord - 0.5);
   if (d > 0.5) discard;
-  float alpha = smoothstep(0.5, 0.1, d) * (0.35 + 0.55 * vQ);
+  float alpha = smoothstep(0.5, 0.1, d) * (0.2 + 0.5 * vQ);
   vec3 color = mix(vec3(0.35, 0.65, 0.95), vec3(0.75, 0.95, 1.0), vQ);
   gl_FragColor = vec4(color, alpha);
 }`;

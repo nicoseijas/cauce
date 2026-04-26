@@ -6,8 +6,27 @@ ancho, color y animación proporcionales a su caudal, al estilo de
 
 ## Estado
 
-Fase de diseño. No hay código todavía; este repositorio contiene la
-documentación técnica para arrancar.
+MVP funcional (Fase 1 del [ROADMAP](ROADMAP.md)): mapa animado de caudal medio
+con hover por curso, listo para GitHub Pages. La capa de datos en vivo es la
+Fase 2.
+
+## Desarrollo
+
+```bash
+# pipeline de datos (Python)
+python -m venv .venv && .venv/Scripts/pip install geopandas pyogrio requests pandas
+.venv/Scripts/python pipeline/descargar_capas.py   # capas WFS DINAGUA -> data/raw/
+.venv/Scripts/python pipeline/build_red.py         # red recortada -> data/processed/
+.venv/Scripts/python pipeline/verificar_join.py    # chequeo estación<->tramo
+
+# web (Vite + MapLibre)
+cd web && npm install
+npm run dev        # desarrollo
+npm run build      # producción (dist/)
+```
+
+HydroRIVERS se descarga aparte (95 MB) a `data/raw/`:
+<https://data.hydrosheds.org/file/HydroRIVERS/HydroRIVERS_v10_sa_shp.zip>
 
 ## Documentos
 

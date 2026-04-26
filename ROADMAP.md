@@ -37,14 +37,24 @@ de recorte — ampliar el recorte hacia el oeste o incluir explícitamente
 Objetivo: mapa navegable de Uruguay con ríos animados según caudal **medio**
 (sin datos en vivo). Ver especificación completa en `docs/03-mvp.md`.
 
-- [ ] Pipeline: HydroRIVERS → filtrado (umbral por `UPLAND_SKM`/`ORD_STRA`) →
-      simplificación por nivel de zoom → tiles (PMTiles) o GeoJSON por capas.
-- [ ] Frontend: basemap sobrio (MapLibre + estilo propio), capa de ríos con
-      ancho y color en escala logarítmica de `DIS_AV_CMS`.
-- [ ] Animación: partículas/dashes desplazándose aguas abajo, velocidad
-      proporcional al caudal.
-- [ ] Hover: resaltar el curso y mostrar nombre + caudal medio estimado.
-- [ ] Deploy en GitHub Pages (workflow `actions/deploy-pages`).
+- [x] Pipeline: HydroRIVERS filtrado (`UPLAND_SKM >= 100`), simplificado y
+      exportado como GeoJSON único (221 KB gzip: no hacen falta tiles). Eje
+      del bajo río Uruguay recuperado por área drenada (el estuario
+      Paraná/Plata se excluye); nombres locales por join con `shp_cursos`
+      (4.115/4.585 tramos con nombre).
+- [x] Frontend: basemap propio (fondo + departamentos), capa de ríos con
+      ancho/color en escala logarítmica de `DIS_AV_CMS`.
+- [x] Animación de partículas aguas abajo en vertex shader, velocidad y
+      brillo proporcionales al caudal (60 fps, ~20.500 partículas).
+- [x] Hover: resalta el curso completo (por `codigo5`) con tooltip de nombre
+      y caudal medio.
+- [x] Workflow de deploy a GitHub Pages (`.github/workflows/deploy.yml`).
+- [ ] Publicar: crear el repo en GitHub, push y habilitar Pages.
+
+Validaciones ejecutadas (criterios de `docs/03-mvp.md`): payload ~495 KB gzip
+(presupuesto 3 MB), 60 fps desktop, los 15 cursos de referencia presentes con
+nombre, orientación aguas abajo verificada en 4.532/4.532 tramos encadenados.
+Pendientes: medición en móvil real y URL pública (requiere el push).
 
 **Criterio de salida:** URL pública con el mapa animado de caudal medio,
 fluido en desktop y móvil.

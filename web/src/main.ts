@@ -1,8 +1,15 @@
-import maplibregl from "maplibre-gl";
+import maplibregl, {
+  ExpressionSpecification,
+  MapGeoJSONFeature,
+} from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { FlowLayer } from "./flow-layer";
 
 const BASE = import.meta.env.BASE_URL;
+
+const ESCALA_LOG_Q: ExpressionSpecification = [
+  "ln", ["+", 1, ["coalesce", ["get", "DIS_AV_CMS"], 0]],
+];
 
 const map = new maplibregl.Map({
   container: "map",
@@ -38,20 +45,31 @@ const map = new maplibregl.Map({
         layout: { "line-cap": "round", "line-join": "round" },
         paint: {
           "line-color": [
-            "interpolate", ["linear"],
-            ["ln", ["+", 1, ["coalesce", ["get", "DIS_AV_CMS"], 0]]],
+            "interpolate", ["linear"], ESCALA_LOG_Q,
             0, "#1d4460",
             4, "#2e6f9e",
             8, "#57a8d8",
           ],
           "line-width": [
             "interpolate", ["exponential", 1.6], ["zoom"],
-            5, ["interpolate", ["linear"],
-              ["ln", ["+", 1, ["coalesce", ["get", "DIS_AV_CMS"], 0]]],
-              0, 0.3, 4, 1.2, 8, 3.5],
-            12, ["interpolate", ["linear"],
-              ["ln", ["+", 1, ["coalesce", ["get", "DIS_AV_CMS"], 0]]],
-              0, 1.5, 4, 6, 8, 18],
+            5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0.3, 4, 1.2, 8, 3.5],
+            12, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 1.5, 4, 6, 8, 18],
+          ],
+          "line-opacity": 0.9,
+        },
+      },
+      {
+        id: "rios-hover",
+        type: "line",
+        source: "red",
+        layout: { "line-cap": "round", "line-join": "round" },
+        filter: ["==", ["get", "codigo5"], -1],
+        paint: {
+          "line-color": "#ffd75e",
+          "line-width": [
+            "interpolate", ["exponential", 1.6], ["zoom"],
+            5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 1, 4, 2, 8, 4.5],
+            12, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 2.5, 4, 7, 8, 20],
           ],
           "line-opacity": 0.9,
         },
@@ -61,17 +79,59 @@ const map = new maplibregl.Map({
 });
 
 map.addControl(new maplibregl.AttributionControl({
+  compact: true,
   customAttribution:
     "HydroSHEDS/HydroRIVERS · DINAGUA (Min. Ambiente, Uruguay)",
 }), "bottom-right");
 
-const hud = document.getElementById("hud")!;
+const tooltip = document.getElementById("tooltip")!;
+const fpsEl = document.getElementById("fps")!;
+
+function formatoCaudal(q: number): string {
+  if (q >= 100) return `${Math.round(q).toLocaleString("es-UY")} m³/s`;
+  if (q >= 1) return `${q.toFixed(1)} m³/s`;
+  return `${q.toFixed(2)} m³/s`;
+}
+
+function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
+  const nombre = (f.properties.nombre as string) || "Curso sin nombre";
+  const q = Number(f.properties.DIS_AV_CMS) || 0;
+  tooltip.innerHTML = `<strong>${nombre}</strong><br><span class="q">caudal medio ${formatoCaudal(q)}</span>`;
+  tooltip.style.display = "block";
+  tooltip.style.left = `${x + 14}px`;
+  tooltip.style.top = `${y + 14}px`;
+}
+
+map.on("mousemove", (e) => {
+  const feats = map.queryRenderedFeatures(
+    [[e.point.x - 4, e.point.y - 4], [e.point.x + 4, e.point.y + 4]],
+    { layers: ["rios"] },
+  );
+  if (feats.length === 0) {
+    tooltip.style.display = "none";
+    map.setFilter("rios-hover", ["==", ["get", "codigo5"], -1]);
+    map.getCanvas().style.cursor = "";
+    return;
+  }
+  const f = feats.reduce((a, b) =>
+    (Number(a.properties.DIS_AV_CMS) || 0) >= (Number(b.properties.DIS_AV_CMS) || 0) ? a : b,
+  );
+  map.getCanvas().style.cursor = "pointer";
+  mostrarTooltip(f, e.point.x, e.point.y);
+  const codigo = f.properties.codigo5;
+  map.setFilter(
+    "rios-hover",
+    codigo != null
+      ? ["==", ["get", "codigo5"], codigo]
+      : ["==", ["get", "HYRIV_ID"], f.properties.HYRIV_ID],
+  );
+});
 
 map.on("load", async () => {
   const res = await fetch(`${BASE}data/red_uy.geojson`);
   const fc = await res.json();
   const flow = new FlowLayer(fc);
-  map.addLayer(flow);
+  map.addLayer(flow, "rios-hover");
 
   let frames = 0;
   let last = performance.now();
@@ -79,9 +139,8 @@ map.on("load", async () => {
     frames++;
     const now = performance.now();
     if (now - last >= 1000) {
-      hud.textContent =
-        `${frames} fps · ${flow.particleCount().toLocaleString("es-UY")} partículas · ` +
-        `${fc.features.length.toLocaleString("es-UY")} tramos`;
+      fpsEl.textContent =
+        `${frames} fps · ${flow.particleCount().toLocaleString("es-UY")} partículas`;
       frames = 0;
       last = now;
     }
