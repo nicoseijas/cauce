@@ -1,9 +1,16 @@
 import maplibregl, {
   ExpressionSpecification,
+  GeoJSONSource,
   MapGeoJSONFeature,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { FlowLayer } from "./flow-layer";
+import {
+  aplicarFactores,
+  cargarEstado,
+  estacionesComoGeoJSON,
+  type EstacionEstado,
+} from "./estado";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -96,10 +103,34 @@ function formatoCaudal(q: number): string {
 function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
   const nombre = (f.properties.nombre as string) || "Curso sin nombre";
   const q = Number(f.properties.DIS_AV_CMS) || 0;
-  tooltip.innerHTML = `<strong>${nombre}</strong><br><span class="q">caudal medio ${formatoCaudal(q)}</span>`;
+  const factor = f.properties.factor as number | undefined;
+  const linea = factor
+    ? `caudal actual ≈ ${formatoCaudal(q)} (${factor.toFixed(1)}× la media` +
+      `, est. ${f.properties.estacion_factor})`
+    : `caudal medio ${formatoCaudal(q)} (estimado)`;
+  tooltip.innerHTML = `<strong>${nombre}</strong><br><span class="q">${linea}</span>`;
   tooltip.style.display = "block";
   tooltip.style.left = `${x + 14}px`;
   tooltip.style.top = `${y + 14}px`;
+}
+
+function popupEstacion(e: EstacionEstado): string {
+  const filas: string[] = [`<strong>${e.nombre}</strong>`];
+  if (e.curso) filas.push(`<span class="q">${e.curso}</span>`);
+  if (e.nivel != null) {
+    filas.push(`nivel ${e.nivel.toFixed(2)} m · hace ${redondearHoras(e.nivel_horas)}`);
+  }
+  if (e.caudal != null) {
+    filas.push(`caudal ${formatoCaudal(e.caudal)} · hace ${redondearHoras(e.caudal_horas)}`);
+  }
+  if (e.nivel == null && e.caudal == null) filas.push("sin datos recientes");
+  return filas.join("<br>");
+}
+
+function redondearHoras(h: number | null): string {
+  if (h == null) return "—";
+  if (h < 48) return `${Math.round(h)} h`;
+  return `${Math.round(h / 24)} días`;
 }
 
 map.on("mousemove", (e) => {
@@ -128,8 +159,56 @@ map.on("mousemove", (e) => {
 });
 
 map.on("load", async () => {
-  const res = await fetch(`${BASE}data/red_uy.geojson`);
-  const fc = await res.json();
+  const [fc, estado] = await Promise.all([
+    fetch(`${BASE}data/red_uy.geojson`).then((r) => r.json()),
+    cargarEstado(`${BASE}data/estado_actual.json`),
+  ]);
+
+  const estadoEl = document.querySelector("#titulo p")!;
+  if (estado) {
+    const tocados = aplicarFactores(fc, estado);
+    (map.getSource("red") as GeoJSONSource).setData(fc);
+
+    map.addSource("estaciones", {
+      type: "geojson",
+      data: estacionesComoGeoJSON(estado) as GeoJSON.GeoJSON,
+    });
+    map.addLayer({
+      id: "estaciones",
+      type: "circle",
+      source: "estaciones",
+      paint: {
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.5, 12, 7],
+        "circle-color": [
+          "step", ["get", "frescura"],
+          "#5ad18a", 24, "#e8c95a", 48, "#5c7893",
+        ],
+        "circle-stroke-color": "#0b141d",
+        "circle-stroke-width": 1,
+        "circle-opacity": 0.9,
+      },
+    });
+    map.on("click", "estaciones", (ev) => {
+      const f = ev.features?.[0];
+      if (!f) return;
+      new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
+        .setLngLat(ev.lngLat)
+        .setHTML(popupEstacion(f.properties as unknown as EstacionEstado))
+        .addTo(map);
+    });
+    map.on("mouseenter", "estaciones", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+
+    const fecha = new Date(estado.generado);
+    estadoEl.textContent =
+      `Datos en vivo: ${tocados} tramos escalados por ${Object.keys(estado.factores_curso).length} ` +
+      `estaciones · actualizado ${fecha.toLocaleString("es-UY", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}`;
+  } else {
+    estadoEl.textContent =
+      "Caudal medio de largo plazo (sin datos en vivo disponibles).";
+  }
+
   const flow = new FlowLayer(fc);
   map.addLayer(flow, "rios-hover");
 

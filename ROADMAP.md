@@ -63,21 +63,28 @@ fluido en desktop y móvil.
 
 Objetivo: que el mapa refleje el estado hídrico actual, no solo el promedio.
 
-- [ ] Job programado (GitHub Actions, cada 1–3 h) que genera un
-      `estado_actual.json`:
-  - WFS DINAGUA `V_Catalogo_publica` (último nivel/caudal + antigüedad del
-    dato por estación).
-  - Scraping de `saltogrande.org/datos_horarios.php` (turbinado + vertido).
-  - API INA `alerta.ina.gob.ar/pub/datos/` (alturas/caudales río Uruguay).
-  - CARU (tabla de alturas de puertos) como respaldo, tolerante a caída.
-- [ ] Modelo de escala: factor caudal_actual/caudal_normal por estación,
-      propagado a los tramos de su cuenca (nivel 2) con decaimiento; tramos
-      sin señal quedan en caudal medio con estilo "estimado" (línea pálida,
-      como el mapa de referencia).
-- [ ] Capa de estaciones: puntos con popup (nivel, caudal, fecha del dato,
-      semáforo de frescura <24 h / 24–48 h / >48 h como el SIH).
-- [ ] Manejo explícito de datos viejos: si `ultima_fecha` supera un umbral,
-      la estación no escala su cuenca.
+- [x] `pipeline/build_estaciones.py`: mapping estático estación→tramo
+      (72/101 con join validado por distancia + ratio de cuencas), incluye
+      pseudo-estación Salto Grande.
+- [x] `pipeline/build_estado.py` (solo requests+stdlib, apto cron) genera
+      `estado_actual.json` + snapshot en `data/historico/`:
+  - WFS DINAGUA `V_Catalogo_publica` (último nivel/caudal por estación). ✔
+  - Scraping de `saltogrande.org/datos_horarios.php` (turbinado + vertido). ✔
+  - [ ] API INA `alerta.ina.gob.ar/pub/datos/` (alturas/caudales río
+        Uruguay) — API verificada viva, falta integrar.
+  - [ ] CARU (tabla de alturas de puertos) como respaldo.
+- [x] Modelo de escala v1: factor caudal_actual/caudal_medio por estación
+      (clamp 0,05–20), propagado a los tramos del mismo curso (`codigo5`);
+      gana la estación de mayor cuenca. Tramos sin señal quedan en caudal
+      medio, marcados "(estimado)" en el tooltip. (La propagación por cuenca
+      nivel 2 con decaimiento queda como mejora.)
+- [x] Capa de estaciones: puntos con popup (nivel, caudal, antigüedad) y
+      semáforo de frescura <24 h / 24–48 h / >48 h como el SIH.
+- [x] Datos viejos: solo escalan cursos las estaciones con caudal de <7 días
+      y join validado.
+- [x] Workflow cron cada 2 h (`.github/workflows/estado.yml`): regenera el
+      JSON, commitea y redeploya Pages (el deploy va inline porque un push
+      con `GITHUB_TOKEN` no dispara otros workflows).
 
 **Criterio de salida:** el mapa cambia solo, con timestamp visible de última
 actualización y distinción medido/estimado.
