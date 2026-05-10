@@ -16,27 +16,32 @@ attribute vec2 aStart;
 attribute vec2 aEnd;
 attribute float aPhase;
 attribute float aQ;
+attribute float aTrail;
 uniform mat4 uMatrix;
 uniform float uTime;
 uniform float uSize;
+uniform float uTrailGap;
 varying float vQ;
+varying float vFade;
 void main() {
   float speed = 0.15 + 0.85 * aQ;
-  float t = fract(aPhase + uTime * speed);
+  float t = fract(aPhase + uTime * speed - aTrail * uTrailGap);
   vec2 pos = mix(aStart, aEnd, t);
   gl_Position = uMatrix * vec4(pos, 0.0, 1.0);
-  gl_PointSize = uSize * (1.0 + 3.5 * aQ);
+  vFade = 1.0 - aTrail * 0.28;
+  gl_PointSize = uSize * (1.0 + 3.5 * aQ) * (1.0 - aTrail * 0.16);
   vQ = aQ;
 }`;
 
 const FRAG = `
 precision mediump float;
 varying float vQ;
+varying float vFade;
 void main() {
   float d = length(gl_PointCoord - 0.5);
   if (d > 0.5) discard;
-  float alpha = smoothstep(0.5, 0.1, d) * (0.2 + 0.5 * vQ);
-  vec3 color = mix(vec3(0.35, 0.65, 0.95), vec3(0.75, 0.95, 1.0), vQ);
+  float alpha = smoothstep(0.5, 0.1, d) * (0.2 + 0.5 * vQ) * vFade * vFade;
+  vec3 color = mix(vec3(0.35, 0.65, 0.95), vec3(0.75, 0.95, 1.0), vQ * vFade);
   gl_FragColor = vec4(color, alpha);
 }`;
 
@@ -80,7 +85,10 @@ function buildParticles(fc: FeatureCollection, spacingMerc: number) {
         const len = Math.hypot(b.x - a.x, b.y - a.y);
         const n = Math.max(1, Math.floor(len / spacingMerc));
         for (let k = 0; k < n; k++) {
-          data.push(a.x, a.y, b.x, b.y, Math.random(), q01);
+          const phase = Math.random();
+          for (let trail = 0; trail < TRAIL_LEN; trail++) {
+            data.push(a.x, a.y, b.x, b.y, phase, q01, trail);
+          }
         }
       }
     }
@@ -88,7 +96,8 @@ function buildParticles(fc: FeatureCollection, spacingMerc: number) {
   return new Float32Array(data);
 }
 
-const FLOATS_PER_PARTICLE = 6;
+const TRAIL_LEN = 3;
+const FLOATS_PER_PARTICLE = 7;
 
 export class FlowLayer implements CustomLayerInterface {
   id = "flow-particles";
@@ -104,6 +113,7 @@ export class FlowLayer implements CustomLayerInterface {
   private uMatrix!: WebGLUniformLocation;
   private uTime!: WebGLUniformLocation;
   private uSize!: WebGLUniformLocation;
+  private uTrailGap!: WebGLUniformLocation;
 
   constructor(private fc: FeatureCollection, private spacingMerc = 3e-5) {}
 
@@ -129,12 +139,13 @@ export class FlowLayer implements CustomLayerInterface {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, particles, gl.STATIC_DRAW);
 
-    for (const name of ["aStart", "aEnd", "aPhase", "aQ"]) {
+    for (const name of ["aStart", "aEnd", "aPhase", "aQ", "aTrail"]) {
       this.loc[name] = gl.getAttribLocation(this.program, name);
     }
     this.uMatrix = gl.getUniformLocation(this.program, "uMatrix")!;
     this.uTime = gl.getUniformLocation(this.program, "uTime")!;
     this.uSize = gl.getUniformLocation(this.program, "uSize")!;
+    this.uTrailGap = gl.getUniformLocation(this.program, "uTrailGap")!;
   }
 
   render: CustomRenderMethod = (gl, matrix) => {
@@ -143,6 +154,7 @@ export class FlowLayer implements CustomLayerInterface {
     gl.uniform1f(this.uTime, (performance.now() - this.start) / 20000);
     const zoomScale = Math.min(6, Math.pow(1.5, this.map.getZoom() - 6));
     gl.uniform1f(this.uSize, 1.5 * zoomScale * (window.devicePixelRatio || 1));
+    gl.uniform1f(this.uTrailGap, 0.05);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     const stride = FLOATS_PER_PARTICLE * 4;
@@ -154,6 +166,8 @@ export class FlowLayer implements CustomLayerInterface {
     gl.vertexAttribPointer(this.loc.aPhase, 1, gl.FLOAT, false, stride, 16);
     gl.enableVertexAttribArray(this.loc.aQ);
     gl.vertexAttribPointer(this.loc.aQ, 1, gl.FLOAT, false, stride, 20);
+    gl.enableVertexAttribArray(this.loc.aTrail);
+    gl.vertexAttribPointer(this.loc.aTrail, 1, gl.FLOAT, false, stride, 24);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

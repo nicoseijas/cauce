@@ -46,6 +46,29 @@ const map = new maplibregl.Map({
         paint: { "line-color": "#233444", "line-width": 0.6 },
       },
       {
+        id: "rios-glow",
+        type: "line",
+        source: "red",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#6fc0f2",
+          "line-opacity": [
+            "interpolate", ["linear"], ESCALA_LOG_Q,
+            3.5, 0, 5.5, 0.10, 8, 0.28,
+          ],
+          "line-width": [
+            "interpolate", ["exponential", 1.6], ["zoom"],
+            5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0, 4, 4, 8, 12],
+            12, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0, 4, 18, 8, 55],
+          ],
+          "line-blur": [
+            "interpolate", ["exponential", 1.6], ["zoom"],
+            5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0, 4, 5, 8, 14],
+            12, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0, 4, 22, 8, 60],
+          ],
+        },
+      },
+      {
         id: "rios",
         type: "line",
         source: "red",

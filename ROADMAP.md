@@ -142,6 +142,14 @@ hay dato de estación fresco, cuál está activa hoy.
       nivel→caudal real.
 - [ ] Cobertura costera del modo creciente (`curvas_costas`, 281 k features,
       requiere tiling).
+- [ ] Re-conflación de geometría en zonas donde HydroRIVERS diverge de la
+      cartografía oficial (auditoría `pipeline/comparar_fidelidad.py`,
+      2026-08-20: media 256 m y mediana 156 m dentro de Uruguay, pero 3,3 %
+      de puntos a >1 km concentrados en las tierras bajas de la Laguna Merín
+      —bañados, bajo Cebollatí/Tacuarí—, el embalse de Rincón del Bonete y
+      meandros del alto Río Negro): reemplazar la geometría de esos tramos
+      por `shp_cursos` de DINAGUA conservando los atributos de caudal de
+      HydroRIVERS.
 - [ ] Performance: presupuesto de <3 MB de datos iniciales, tiles por zoom,
       medir en móvil real.
 
