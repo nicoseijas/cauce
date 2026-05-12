@@ -20,6 +20,7 @@ const ESCALA_LOG_Q: ExpressionSpecification = [
 
 const map = new maplibregl.Map({
   container: "map",
+  hash: true,
   center: [-56.0, -32.7],
   zoom: 6.3,
   minZoom: 5,

@@ -11,25 +11,31 @@ type FeatureCollection = {
   }[];
 };
 
+// Velocidad y cola en unidades de pantalla (mercator/s y mercator, fijadas
+// por frame según el zoom): si fueran fracciones del tramo, los tramos largos
+// separarían la cola en "perlas" y los cortos parpadearían.
 const VERT = `
 attribute vec2 aStart;
 attribute vec2 aEnd;
 attribute float aPhase;
 attribute float aQ;
 attribute float aTrail;
+attribute float aLen;
 uniform mat4 uMatrix;
 uniform float uTime;
 uniform float uSize;
-uniform float uTrailGap;
+uniform float uSpeedMerc;
+uniform float uGapMerc;
 varying float vQ;
 varying float vFade;
 void main() {
-  float speed = 0.15 + 0.85 * aQ;
-  float t = fract(aPhase + uTime * speed - aTrail * uTrailGap);
+  float tSpeed = min(uSpeedMerc * (0.25 + 0.75 * aQ) / aLen, 0.9);
+  float gapT = min(uGapMerc / aLen, 0.12);
+  float t = fract(aPhase + uTime * tSpeed - aTrail * gapT);
   vec2 pos = mix(aStart, aEnd, t);
   gl_Position = uMatrix * vec4(pos, 0.0, 1.0);
   vFade = 1.0 - aTrail / 7.0;
-  gl_PointSize = uSize * (1.0 + 3.5 * aQ) * (0.35 + 0.65 * vFade);
+  gl_PointSize = uSize * (0.5 + 2.2 * aQ) * (0.35 + 0.65 * vFade);
   vQ = aQ;
 }`;
 
@@ -40,7 +46,7 @@ varying float vFade;
 void main() {
   float d = length(gl_PointCoord - 0.5);
   if (d > 0.5) discard;
-  float alpha = smoothstep(0.5, 0.1, d) * (0.25 + 0.55 * vQ) * vFade * vFade;
+  float alpha = smoothstep(0.5, 0.1, d) * (0.15 + 0.5 * vQ) * vFade * vFade;
   vec3 color = mix(vec3(0.35, 0.65, 0.95), vec3(0.75, 0.95, 1.0), vQ);
   gl_FragColor = vec4(color, alpha);
 }`;
@@ -83,11 +89,12 @@ function buildParticles(fc: FeatureCollection, spacingMerc: number) {
         const b = maplibregl.MercatorCoordinate.fromLngLat(
           { lng: line[i + 1][0], lat: line[i + 1][1] }, 0);
         const len = Math.hypot(b.x - a.x, b.y - a.y);
+        if (len < spacingMerc * 0.25) continue;
         const n = Math.max(1, Math.floor(len / spacingMerc));
         for (let k = 0; k < n; k++) {
           const phase = Math.random();
           for (let trail = 0; trail < TRAIL_LEN; trail++) {
-            data.push(a.x, a.y, b.x, b.y, phase, q01, trail);
+            data.push(a.x, a.y, b.x, b.y, phase, q01, trail, len);
           }
         }
       }
@@ -97,7 +104,7 @@ function buildParticles(fc: FeatureCollection, spacingMerc: number) {
 }
 
 const TRAIL_LEN = 6;
-const FLOATS_PER_PARTICLE = 7;
+const FLOATS_PER_PARTICLE = 8;
 
 export class FlowLayer implements CustomLayerInterface {
   id = "flow-particles";
@@ -113,7 +120,8 @@ export class FlowLayer implements CustomLayerInterface {
   private uMatrix!: WebGLUniformLocation;
   private uTime!: WebGLUniformLocation;
   private uSize!: WebGLUniformLocation;
-  private uTrailGap!: WebGLUniformLocation;
+  private uSpeedMerc!: WebGLUniformLocation;
+  private uGapMerc!: WebGLUniformLocation;
 
   constructor(private fc: FeatureCollection, private spacingMerc = 3e-5) {}
 
@@ -139,24 +147,27 @@ export class FlowLayer implements CustomLayerInterface {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, particles, gl.STATIC_DRAW);
 
-    for (const name of ["aStart", "aEnd", "aPhase", "aQ", "aTrail"]) {
+    for (const name of ["aStart", "aEnd", "aPhase", "aQ", "aTrail", "aLen"]) {
       this.loc[name] = gl.getAttribLocation(this.program, name);
     }
     this.uMatrix = gl.getUniformLocation(this.program, "uMatrix")!;
     this.uTime = gl.getUniformLocation(this.program, "uTime")!;
     this.uSize = gl.getUniformLocation(this.program, "uSize")!;
-    this.uTrailGap = gl.getUniformLocation(this.program, "uTrailGap")!;
+    this.uSpeedMerc = gl.getUniformLocation(this.program, "uSpeedMerc")!;
+    this.uGapMerc = gl.getUniformLocation(this.program, "uGapMerc")!;
   }
 
   render: CustomRenderMethod = (gl, matrix) => {
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uMatrix, false, matrix as Float32Array);
-    // 1600 ms por unidad de t: un tramo se recorre en 1,6–10,7 s según caudal
-    // (con /20000 la animación era imperceptible: <1 px/s a zoom país).
-    gl.uniform1f(this.uTime, (performance.now() - this.start) / 1600);
-    const zoomScale = Math.min(6, Math.pow(1.5, this.map.getZoom() - 6));
-    gl.uniform1f(this.uSize, 1.5 * zoomScale * (window.devicePixelRatio || 1));
-    gl.uniform1f(this.uTrailGap, 0.03);
+    gl.uniform1f(this.uTime, (performance.now() - this.start) / 1000);
+    // ~90 px/s el río más caudaloso y cola de ~3,5 px por eslabón, constantes
+    // en pantalla a cualquier zoom.
+    const pxPerWorld = 512 * Math.pow(2, this.map.getZoom());
+    gl.uniform1f(this.uSpeedMerc, 90 / pxPerWorld);
+    gl.uniform1f(this.uGapMerc, 3.5 / pxPerWorld);
+    const zoomScale = Math.min(4, Math.pow(1.35, this.map.getZoom() - 6));
+    gl.uniform1f(this.uSize, 1.3 * zoomScale * (window.devicePixelRatio || 1));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     const stride = FLOATS_PER_PARTICLE * 4;
@@ -170,6 +181,8 @@ export class FlowLayer implements CustomLayerInterface {
     gl.vertexAttribPointer(this.loc.aQ, 1, gl.FLOAT, false, stride, 20);
     gl.enableVertexAttribArray(this.loc.aTrail);
     gl.vertexAttribPointer(this.loc.aTrail, 1, gl.FLOAT, false, stride, 24);
+    gl.enableVertexAttribArray(this.loc.aLen);
+    gl.vertexAttribPointer(this.loc.aLen, 1, gl.FLOAT, false, stride, 28);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
