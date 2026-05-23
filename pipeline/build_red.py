@@ -24,7 +24,10 @@ PROCESSED = ROOT / "data" / "processed"
 BBOX_UY = (-59.2, -35.5, -52.8, -29.8)
 UMBRAL_UPLAND_SKM = 100
 BUFFER_LIMITROFE_DEG = 0.15
-TOLERANCIA_SIMPLIFICACION_DEG = 0.0005
+# Poda tras el suavizado; la angulosidad original viene de la resolución
+# nativa de HydroRIVERS (~450 m entre vértices), no de esta tolerancia.
+TOLERANCIA_SIMPLIFICACION_DEG = 0.0001
+ITERACIONES_CHAIKIN = 2
 DIST_MAX_NOMBRE_M = 300
 
 CRS_WFS_DINAGUA = "EPSG:32721"
@@ -41,6 +44,33 @@ def leer_wfs_geojson(path: Path) -> gpd.GeoDataFrame:
     elif gdf.crs is None:
         gdf = gdf.set_crs("EPSG:4326")
     return gdf.to_crs("EPSG:4326")
+
+
+def suavizar_chaikin(geom, iteraciones: int):
+    """Corte de esquinas de Chaikin: redondea los quiebres heredados de la
+    grilla del DEM manteniendo los extremos fijos (preserva la topología
+    de empalme entre tramos consecutivos)."""
+    import numpy as np
+    from shapely.geometry import LineString, MultiLineString
+
+    def una(ls: LineString) -> LineString:
+        pts = np.asarray(ls.coords)
+        for _ in range(iteraciones):
+            if len(pts) < 3:
+                break
+            a, b = pts[:-1], pts[1:]
+            q = a * 0.75 + b * 0.25
+            r = a * 0.25 + b * 0.75
+            medio = np.empty((2 * len(a), 2))
+            medio[0::2], medio[1::2] = q, r
+            pts = np.vstack([pts[0], medio, pts[-1]])
+        return LineString(pts)
+
+    if geom.geom_type == "LineString":
+        return una(geom)
+    if geom.geom_type == "MultiLineString":
+        return MultiLineString([una(ls) for ls in geom.geoms])
+    return geom
 
 
 def cargar_uruguay_buffer() -> gpd.GeoSeries:
@@ -98,6 +128,9 @@ def main() -> None:
         "UPLAND_SKM", "DIS_AV_CMS", "ORD_STRA", "geometry",
     ]]
     rios = asignar_nombres(rios)
+    rios["geometry"] = rios.geometry.apply(
+        lambda g: suavizar_chaikin(g, ITERACIONES_CHAIKIN)
+    )
     rios["geometry"] = rios.geometry.simplify(
         TOLERANCIA_SIMPLIFICACION_DEG, preserve_topology=True
     )

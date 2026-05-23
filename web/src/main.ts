@@ -11,6 +11,7 @@ import {
   estacionesComoGeoJSON,
   type EstacionEstado,
 } from "./estado";
+import { setupCreciente } from "./creciente";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -235,6 +236,7 @@ map.on("load", async () => {
 
   const flow = new FlowLayer(fc);
   map.addLayer(flow, "rios-hover");
+  setupCreciente(map, BASE);
 
   let frames = 0;
   let last = performance.now();

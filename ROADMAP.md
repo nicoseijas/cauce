@@ -95,15 +95,19 @@ Objetivo: mostrar qué zonas afecta la crecida de los cursos ante lluvia
 extrema, usando los productos oficiales de DINAGUA (ver
 `docs/02-arquitectura.md`, "Modo creciente").
 
-- [ ] Pipeline: descargar por WFS `curvas_tr`, `curvas_cri`,
-      `problemas_drenaje`, `localidades_amenazas`; inventariar cobertura
-      (qué localidades tienen mancha y con qué períodos de retorno).
-- [ ] Toggle "modo creciente" con selector de escenario (Tr 10 / Tr 100
-      años); pintar las manchas oficiales con popup (curso, cota, fuente del
-      estudio).
-- [ ] Capa "inundaciones registradas" (`curvas_cri`) con fecha del evento.
-- [ ] Capa de amenaza urbana (`problemas_drenaje` + `localidades_amenazas`)
-      para lluvia intensa local (drenaje pluvial, no desborde).
+- [x] Pipeline `build_inundacion.py`: capas WFS descargadas, simplificadas y
+      exportadas (~690 KB gzip, carga diferida). Cobertura inventariada:
+      ~70 localidades, escenarios de 5 a 1000 años + CMP; `periodo`
+      parseado a número para filtrar.
+- [x] Toggle "modo creciente" con selector de escenario (10 / 100 /
+      Extrema, filtro `periodo <=`), manchas apiladas con popup (curso,
+      cota, fuente) y nota de cobertura ("fuera de las ciudades con estudio
+      la ausencia de mancha no implica ausencia de riesgo").
+- [x] Capa "inundaciones registradas" (`curvas_cri`, línea punteada) con
+      fecha del evento en el popup.
+- [x] Capa de drenaje urbano (`problemas_drenaje`) activable.
+- [ ] Puntos de `localidades_amenazas` (554 localidades con amenaza
+      identificada sin mancha dibujada).
 - [ ] Verificación de datum: comparar `cota_oficial` de curvas contra "Cota
       Cero (Wh)" de las estaciones por localidad (precondición del punto
       siguiente).

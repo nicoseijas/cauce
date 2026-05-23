@@ -18,6 +18,18 @@
     #titulo h1 { margin: 0 0 2px; font-size: 16px; font-weight: 650; color: #eaf4fd; }
     #titulo p { margin: 0; color: #8fa8bd; font-size: 12px; }
     #leyenda { bottom: 28px; left: 12px; }
+    #creciente { top: 132px; left: 12px; max-width: 240px; }
+    #creciente button {
+      font: 12px system-ui, sans-serif; color: #cfe0ee; cursor: pointer;
+      background: #1a2a3a; border: 1px solid #2c4257; border-radius: 5px;
+      padding: 4px 10px;
+    }
+    #creciente.activo #creciente-toggle { background: #7a3030; border-color: #a04545; }
+    #creciente .grupo { margin: 10px 0 4px; font-size: 11px; color: #8fa8bd; }
+    #creciente .botones { display: flex; gap: 6px; }
+    #creciente .botones .sel { background: #7a3030; border-color: #a04545; }
+    #creciente label { display: flex; gap: 6px; margin-top: 8px; font-size: 12px; align-items: center; }
+    #creciente .nota { margin-top: 10px; font-size: 10.5px; line-height: 1.4; color: #8fa8bd; }
     #leyenda .fila { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
     #leyenda .linea { background: #57a8d8; border-radius: 2px; }
     #leyenda .etiqueta { color: #8fa8bd; font-size: 11px; }
@@ -38,6 +50,21 @@
     <h1>Ríos del Uruguay</h1>
     <p>Caudal medio de largo plazo. Ancho, brillo y velocidad proporcionales
        al caudal (escala logarítmica).</p>
+  </div>
+  <div id="creciente" class="panel">
+    <button id="creciente-toggle">Modo creciente</button>
+    <div id="creciente-opciones" style="display:none">
+      <div class="grupo">Escenario (período de retorno)</div>
+      <div class="botones">
+        <button data-periodo="10">10 años</button>
+        <button data-periodo="100" class="sel">100 años</button>
+        <button data-periodo="99999">Extrema</button>
+      </div>
+      <label><input type="checkbox" id="chk-cri"> Inundaciones registradas</label>
+      <label><input type="checkbox" id="chk-dre"> Drenaje urbano</label>
+      <div class="nota">Manchas oficiales DINAGUA. Solo ciudades con estudio:
+        fuera de ellas la ausencia de mancha no implica ausencia de riesgo.</div>
+    </div>
   </div>
   <div id="leyenda" class="panel">
     <div class="fila"><div class="linea" style="width:46px;height:7px"></div><span class="etiqueta">~5.000 m³/s (río Uruguay)</span></div>
