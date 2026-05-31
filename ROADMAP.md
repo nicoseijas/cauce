@@ -108,12 +108,19 @@ extrema, usando los productos oficiales de DINAGUA (ver
 - [x] Capa de drenaje urbano (`problemas_drenaje`) activable.
 - [ ] Puntos de `localidades_amenazas` (554 localidades con amenaza
       identificada sin mancha dibujada).
-- [ ] Verificación de datum: comparar `cota_oficial` de curvas contra "Cota
-      Cero (Wh)" de las estaciones por localidad (precondición del punto
-      siguiente).
-- [ ] Con la capa dinámica de Fase 2: activar automáticamente la mancha cuya
-      cota supere el nivel actual de la estación asociada y mostrar el margen
-      hasta la siguiente ("a X cm de la mancha de 10 años").
+- [x] Verificación de datum (`pipeline/analizar_datum.py`): los umbrales se
+      derivan como `cota_oficial − cota_cero` (datum Wharton). Hallazgo:
+      `cota_local` difiere sistemáticamente ~0,9 m de esa derivación en
+      varias localidades (referencia local sin documentar) → incertidumbre
+      declarada de ±1 m en la UI; confirmar el significado de `cota_local`
+      con `dinagua.servicios@ambiente.gub.uy`. 19 localidades con umbrales
+      utilizables (`web/public/data/activacion.json`).
+- [x] Activación automática: `build_estado.py` compara el nivel fresco
+      (<48 h) de la estación asociada contra los umbrales y emite
+      `activacion` por localidad (mancha superada + margen a la siguiente).
+      El mapa pinta las manchas activas en rojo intenso, el popup antepone
+      "ACTIVA AHORA" y el panel resume ("Carmelo: a 0,74 m de su mancha de
+      10 años").
 - [ ] (Opcional/avanzado) Estimación HAND con MDT de IDEuy para zonas sin
       estudio oficial, siempre etiquetada como estimación propia.
 

@@ -1,0 +1,380 @@
+{
+ "CA-ACS": {
+  "estacion_id": 47,
+  "estacion": "Santa Lucia R-11",
+  "dist_m": 8731,
+  "umbrales": [
+   {
+    "periodo": 100,
+    "nivel": 9.04,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 9.27,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "CA-JBY": {
+  "estacion_id": 124,
+  "estacion": "Peaje Solís",
+  "dist_m": 639,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 3.76,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 4.42,
+    "tipo_curva": "100 años"
+   }
+  ]
+ },
+ "CA-SLA": {
+  "estacion_id": 47,
+  "estacion": "Santa Lucia R-11",
+  "dist_m": 299,
+  "umbrales": [
+   {
+    "periodo": 100,
+    "nivel": 10.8,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 13.35,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "CO-CLO": {
+  "estacion_id": 208,
+  "estacion": "Carmelo - Atracadero",
+  "dist_m": 1505,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 1.94,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 3.24,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 500,
+    "nivel": 4.64,
+    "tipo_curva": "500 años"
+   }
+  ]
+ },
+ "CO-JLL": {
+  "estacion_id": 45,
+  "estacion": "Juan Lacaze",
+  "dist_m": 773,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 2.87,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 3.56,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 500,
+    "nivel": 4.13,
+    "tipo_curva": "500 años"
+   }
+  ]
+ },
+ "CO-NPA": {
+  "estacion_id": 111,
+  "estacion": "Dársena Higueritas",
+  "dist_m": 268,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 2.39,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 3.34,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 500,
+    "nivel": 3.99,
+    "tipo_curva": "500 años"
+   }
+  ]
+ },
+ "DU-CEN": {
+  "estacion_id": 189,
+  "estacion": "Paso de los Toros",
+  "dist_m": 1127,
+  "umbrales": [
+   {
+    "periodo": 20,
+    "nivel": 11.53,
+    "tipo_curva": "20 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 12.29,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 17.95,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "FD-2DA": {
+  "estacion_id": 47,
+  "estacion": "Santa Lucia R-11",
+  "dist_m": 3571,
+  "umbrales": [
+   {
+    "periodo": 9999,
+    "nivel": 14.22,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "FD-FDA": {
+  "estacion_id": 126,
+  "estacion": "Florida - Puente R.5",
+  "dist_m": 1760,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 8.11,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 10.6,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 500,
+    "nivel": 12.31,
+    "tipo_curva": "500 años"
+   }
+  ]
+ },
+ "PA-PSD": {
+  "estacion_id": 225,
+  "estacion": "Paysandú",
+  "dist_m": 1357,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 6.86,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 8.61,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 13.19,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "RN-FBS": {
+  "estacion_id": 227,
+  "estacion": "Fray Bentos",
+  "dist_m": 3754,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 2.27,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 4.42,
+    "tipo_curva": "100 años"
+   }
+  ]
+ },
+ "RN-LAR": {
+  "estacion_id": 184,
+  "estacion": "Mercedes (Puerto)",
+  "dist_m": 1895,
+  "umbrales": [
+   {
+    "periodo": 20,
+    "nivel": 8.76,
+    "tipo_curva": "20 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 9.76,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 500,
+    "nivel": 11.86,
+    "tipo_curva": "500 años"
+   }
+  ]
+ },
+ "SA-CON": {
+  "estacion_id": 223,
+  "estacion": "Constitución",
+  "dist_m": 567,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 3.31,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 3.45,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 3.93,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "SA-STO": {
+  "estacion_id": 15329,
+  "estacion": "Club Remeros Salto (Sa1)",
+  "dist_m": 3354,
+  "umbrales": [
+   {
+    "periodo": 100,
+    "nivel": 118.83,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 125.58,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "SO-DOL": {
+  "estacion_id": 207,
+  "estacion": "Dolores",
+  "dist_m": 1661,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 5.37,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 6.88,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 500,
+    "nivel": 7.79,
+    "tipo_curva": "500 años"
+   }
+  ]
+ },
+ "SO-MER": {
+  "estacion_id": 184,
+  "estacion": "Mercedes (Puerto)",
+  "dist_m": 781,
+  "umbrales": [
+   {
+    "periodo": 20,
+    "nivel": 8.73,
+    "tipo_curva": "20 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 9.75,
+    "tipo_curva": "100 años"
+   }
+  ]
+ },
+ "TA-PTS": {
+  "estacion_id": 189,
+  "estacion": "Paso de los Toros",
+  "dist_m": 1426,
+  "umbrales": [
+   {
+    "periodo": 20,
+    "nivel": 11.24,
+    "tipo_curva": "20 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 12.29,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 17.94,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "TA-SGP": {
+  "estacion_id": 17152,
+  "estacion": "San Gregorio de Polanco (lago)",
+  "dist_m": 724,
+  "umbrales": [
+   {
+    "periodo": 20,
+    "nivel": 12.98,
+    "tipo_curva": "20 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 13.71,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 9999,
+    "nivel": 18.78,
+    "tipo_curva": "CMP"
+   }
+  ]
+ },
+ "TT-GEM": {
+  "estacion_id": 201,
+  "estacion": "La Charqueada",
+  "dist_m": 324,
+  "umbrales": [
+   {
+    "periodo": 10,
+    "nivel": 5.31,
+    "tipo_curva": "10 años"
+   },
+   {
+    "periodo": 100,
+    "nivel": 6.17,
+    "tipo_curva": "100 años"
+   },
+   {
+    "periodo": 500,
+    "nivel": 6.75,
+    "tipo_curva": "500 años"
+   }
+  ]
+ }
+}

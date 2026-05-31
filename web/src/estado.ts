@@ -1,8 +1,17 @@
+export type ActivacionLocalidad = {
+  estacion: string;
+  nivel: number;
+  nivel_horas: number;
+  periodo_activo: number;
+  proximo?: { periodo: number; faltan_m: number };
+};
+
 export type Estado = {
   generado: string;
   fuentes: Record<string, string>;
   estaciones: EstacionEstado[];
   factores_curso: Record<string, { factor: number; estacion: string }>;
+  activacion?: Record<string, ActivacionLocalidad>;
 };
 
 export type EstacionEstado = {

@@ -22,8 +22,10 @@ log = logging.getLogger(__name__)
 
 ROOT = Path(__file__).parent.parent
 ESTACIONES = ROOT / "web" / "public" / "data" / "estaciones.geojson"
+ACTIVACION = ROOT / "web" / "public" / "data" / "activacion.json"
 SALIDA = ROOT / "web" / "public" / "data" / "estado_actual.json"
 HISTORICO = ROOT / "data" / "historico"
+FRESCURA_MAX_ACTIVACION_H = 48
 
 FRESCURA_MAX_CAUDAL_H = 24 * 7
 FRESCURA_MAX_NIVEL_H = 24 * 7
@@ -148,12 +150,39 @@ def main() -> None:
                     "area_km2": p["area_km2"] or 0,
                 }
 
+    # Activación de manchas: nivel actual vs umbrales por datum oficial
+    # (cota_oficial - cota_cero; incertidumbre ~±1 m, ver analizar_datum.py).
+    por_id = {e["id"]: e for e in estaciones}
+    activacion = {}
+    umbrales_loc = json.loads(ACTIVACION.read_text(encoding="utf-8")) if ACTIVACION.exists() else {}
+    for cod, cfg in umbrales_loc.items():
+        e = por_id.get(cfg["estacion_id"])
+        if not e or e["nivel"] is None or e["nivel_horas"] is None:
+            continue
+        if e["nivel_horas"] > FRESCURA_MAX_ACTIVACION_H:
+            continue
+        nivel = e["nivel"]
+        activos = [u for u in cfg["umbrales"] if nivel >= u["nivel"]]
+        proximos = [u for u in cfg["umbrales"] if nivel < u["nivel"]]
+        entrada = {
+            "estacion": cfg["estacion"],
+            "nivel": nivel,
+            "nivel_horas": round(e["nivel_horas"], 1),
+            "periodo_activo": max((u["periodo"] for u in activos), default=0),
+        }
+        if proximos:
+            u = min(proximos, key=lambda x: x["nivel"])
+            entrada["proximo"] = {"periodo": u["periodo"],
+                                  "faltan_m": round(u["nivel"] - nivel, 2)}
+        activacion[cod] = entrada
+
     estado = {
         "generado": ahora.isoformat(timespec="seconds"),
         "fuentes": fuentes,
         "estaciones": estaciones,
         "factores_curso": {k: {"factor": v["factor"], "estacion": v["estacion"]}
                            for k, v in factores.items()},
+        "activacion": activacion,
     }
 
     SALIDA.write_text(json.dumps(estado, ensure_ascii=False), encoding="utf-8")

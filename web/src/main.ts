@@ -236,7 +236,7 @@ map.on("load", async () => {
 
   const flow = new FlowLayer(fc);
   map.addLayer(flow, "rios-hover");
-  setupCreciente(map, BASE);
+  setupCreciente(map, BASE, estado?.activacion);
 
   let frames = 0;
   let last = performance.now();

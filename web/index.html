@@ -30,6 +30,7 @@
     #creciente .botones .sel { background: #7a3030; border-color: #a04545; }
     #creciente label { display: flex; gap: 6px; margin-top: 8px; font-size: 12px; align-items: center; }
     #creciente .nota { margin-top: 10px; font-size: 10.5px; line-height: 1.4; color: #8fa8bd; }
+    .alerta { color: #ff8080; font-weight: 650; }
     #leyenda .fila { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
     #leyenda .linea { background: #57a8d8; border-radius: 2px; }
     #leyenda .etiqueta { color: #8fa8bd; font-size: 11px; }
@@ -62,8 +63,10 @@
       </div>
       <label><input type="checkbox" id="chk-cri"> Inundaciones registradas</label>
       <label><input type="checkbox" id="chk-dre"> Drenaje urbano</label>
+      <div id="creciente-estado" class="nota"></div>
       <div class="nota">Manchas oficiales DINAGUA. Solo ciudades con estudio:
-        fuera de ellas la ausencia de mancha no implica ausencia de riesgo.</div>
+        fuera de ellas la ausencia de mancha no implica ausencia de riesgo.
+        Activación por nivel de estación con umbral aproximado (±1 m).</div>
     </div>
   </div>
   <div id="leyenda" class="panel">

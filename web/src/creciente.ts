@@ -1,9 +1,51 @@
-import maplibregl, { Map } from "maplibre-gl";
+import maplibregl, { ExpressionSpecification, Map } from "maplibre-gl";
+import type { ActivacionLocalidad } from "./estado";
 
 const CAPAS_TR = ["inund-tr-fill", "inund-tr-line"];
 
 let cargado = false;
 let escenario = 100;
+let activacion: Record<string, ActivacionLocalidad> = {};
+
+function nombrePeriodo(p: number): string {
+  return p >= 9999 ? "CMP" : `${p} años`;
+}
+
+function filtroActivas(): ExpressionSpecification {
+  const ramas: ExpressionSpecification[] = [];
+  for (const [cod, a] of Object.entries(activacion)) {
+    if (a.periodo_activo > 0) {
+      ramas.push([
+        "all",
+        ["==", ["get", "localidad_cod"], cod],
+        ["<=", ["get", "periodo"], a.periodo_activo],
+      ]);
+    }
+  }
+  return ramas.length
+    ? (["any", ...ramas] as unknown as ExpressionSpecification)
+    : ["==", ["get", "periodo"], -1];
+}
+
+function resumenActivacion(): string {
+  const activas = Object.entries(activacion).filter(([, a]) => a.periodo_activo > 0);
+  if (activas.length) {
+    return activas
+      .map(([, a]) =>
+        `<span class="alerta">⚠ ${a.estacion}: superada la mancha de ` +
+        `${nombrePeriodo(a.periodo_activo)} (nivel ${a.nivel.toFixed(2)} m)</span>`)
+      .join("<br>");
+  }
+  const proximos = Object.values(activacion)
+    .filter((a) => a.proximo)
+    .sort((x, y) => x.proximo!.faltan_m - y.proximo!.faltan_m)
+    .slice(0, 2);
+  if (!proximos.length) return "Sin niveles frescos para evaluar activación.";
+  const lineas = proximos.map((a) =>
+    `${a.estacion}: a ${a.proximo!.faltan_m.toFixed(2).replace(".", ",")} m de su ` +
+    `mancha de ${nombrePeriodo(a.proximo!.periodo)}`);
+  return `Ninguna mancha superada ahora.<br>${lineas.join("<br>")}`;
+}
 
 async function cargarCapas(map: Map, base: string): Promise<void> {
   const [tr, cri, dre] = await Promise.all([
@@ -52,6 +94,20 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
     layout: { visibility: "none" },
     paint: { "fill-color": "#e0a45c", "fill-opacity": 0.25 },
   }, "rios-glow");
+  map.addLayer({
+    id: "inund-activa",
+    type: "fill",
+    source: "inund-tr",
+    filter: filtroActivas(),
+    paint: { "fill-color": "#ff4d4d", "fill-opacity": 0.45 },
+  }, "rios-glow");
+  map.addLayer({
+    id: "inund-activa-line",
+    type: "line",
+    source: "inund-tr",
+    filter: filtroActivas(),
+    paint: { "line-color": "#ff6b6b", "line-width": 2 },
+  }, "rios-glow");
 
   const popup = (html: string, lngLat: maplibregl.LngLat) =>
     new maplibregl.Popup({ closeButton: false, maxWidth: "280px" })
@@ -60,7 +116,13 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
   map.on("click", "inund-tr-fill", (e) => {
     const p = e.features?.[0]?.properties;
     if (!p) return;
+    const a = activacion[p.localidad_cod as string];
+    const activa = a && a.periodo_activo >= Number(p.periodo);
+    const cabecera = activa
+      ? `<span class="alerta">⚠ ACTIVA AHORA</span> — nivel ${a.nivel.toFixed(2)} m en ${a.estacion}<br>`
+      : "";
     popup(
+      cabecera +
       `<strong>Mancha de inundación · ${p.tipo_curva}</strong><br>` +
       `${p.curso ?? ""}${p.cota_oficial ? ` · cota ${p.cota_oficial} m` : ""}<br>` +
       `<span style="color:#8fa8bd">${String(p.fuentes ?? "").slice(0, 120)}</span>`,
@@ -98,7 +160,28 @@ function visibilidad(map: Map, id: string, on: boolean): void {
   map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
 }
 
-export function setupCreciente(map: Map, base: string): void {
+function aplicarVisibilidad(map: Map, activo: boolean): void {
+  const conCri = (document.getElementById("chk-cri") as HTMLInputElement).checked;
+  const conDre = (document.getElementById("chk-dre") as HTMLInputElement).checked;
+  const visibles: Record<string, boolean> = {
+    "inund-tr-fill": activo,
+    "inund-tr-line": activo,
+    "inund-activa": activo,
+    "inund-activa-line": activo,
+    "inund-cri": activo && conCri,
+    "drenaje-fill": activo && conDre,
+  };
+  for (const [id, on] of Object.entries(visibles)) {
+    if (map.getLayer(id)) visibilidad(map, id, on);
+  }
+}
+
+export function setupCreciente(
+  map: Map,
+  base: string,
+  act?: Record<string, ActivacionLocalidad>,
+): void {
+  activacion = act ?? {};
   const panel = document.getElementById("creciente")!;
   const toggle = document.getElementById("creciente-toggle")!;
   const opciones = document.getElementById("creciente-opciones")!;
@@ -112,14 +195,9 @@ export function setupCreciente(map: Map, base: string): void {
       await cargarCapas(map, base);
       toggle.textContent = "Modo creciente";
       aplicarEscenario(map);
+      document.getElementById("creciente-estado")!.innerHTML = resumenActivacion();
     }
-    if (!cargado) return;
-    const capas = [...CAPAS_TR];
-    if ((document.getElementById("chk-cri") as HTMLInputElement).checked) capas.push("inund-cri");
-    if ((document.getElementById("chk-dre") as HTMLInputElement).checked) capas.push("drenaje-fill");
-    for (const id of ["inund-tr-fill", "inund-tr-line", "inund-cri", "drenaje-fill"]) {
-      if (map.getLayer(id)) visibilidad(map, id, activo && (capas.includes(id) || CAPAS_TR.includes(id)));
-    }
+    if (map.getLayer("inund-tr-fill")) aplicarVisibilidad(map, activo);
   });
 
   for (const btn of Array.from(opciones.querySelectorAll<HTMLButtonElement>("[data-periodo]"))) {
