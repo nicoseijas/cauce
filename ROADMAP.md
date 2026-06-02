@@ -122,7 +122,10 @@ extrema, usando los productos oficiales de DINAGUA (ver
       "ACTIVA AHORA" y el panel resume ("Carmelo: a 0,74 m de su mancha de
       10 años").
 - [ ] (Opcional/avanzado) Estimación HAND con MDT de IDEuy para zonas sin
-      estudio oficial, siempre etiquetada como estimación propia.
+      estudio oficial, siempre etiquetada como estimación propia. Elección
+      de DEM, acondicionamiento y derivación de drenaje según la skill
+      `terrain-hydrology`; validar contra eventos históricos completos por
+      cuenca (AGENTS.md), con las curvas CRI como verdad de terreno.
 
 **Criterio de salida:** en las ciudades cubiertas por DINAGUA (Durazno,
 Treinta y Tres, etc.) el mapa muestra la mancha del escenario elegido y, si
@@ -134,7 +137,9 @@ hay dato de estación fresco, cuál está activa hoy.
       INUMET (CKAN, actualización diaria).
 - [ ] Vista "caudal vs. normal" (anomalía) como toggle, análoga al mapa USA.
 - [ ] Cruce lluvia→creciente: resaltar cuencas con precipitación acumulada
-      extrema como aviso temprano para el modo creciente de Fase 3.
+      extrema como **aviso de atención**, nunca como mancha inferida — la
+      lluvia no salta directo a mancha; la cadena es lluvia → escorrentía/
+      caudal → nivel → mancha (ver AGENTS.md).
 - [ ] Persistir cada snapshot del job de Fase 2 para construir series propias
       (Uruguay no publica series de caudal descargables).
 - [ ] Mini-gráfico de serie temporal en el popup de estación (con los datos
