@@ -1,5 +1,6 @@
 import maplibregl, { ExpressionSpecification, Map } from "maplibre-gl";
-import type { ActivacionLocalidad } from "./estado";
+import type { Estado } from "./estado";
+type ActivacionLocalidad = NonNullable<Estado["activacion"]>[string];
 
 const CAPAS_TR = ["inund-tr-fill", "inund-tr-line"];
 
@@ -48,14 +49,16 @@ function resumenActivacion(): string {
 }
 
 async function cargarCapas(map: Map, base: string): Promise<void> {
-  const [tr, cri, dre] = await Promise.all([
+  const [tr, cri, dre, ame] = await Promise.all([
     fetch(`${base}data/inundacion_tr.geojson`).then((r) => r.json()),
     fetch(`${base}data/inundacion_cri.geojson`).then((r) => r.json()),
     fetch(`${base}data/drenaje.geojson`).then((r) => r.json()),
+    fetch(`${base}data/amenazas.geojson`).then((r) => r.json()),
   ]);
   map.addSource("inund-tr", { type: "geojson", data: tr });
   map.addSource("inund-cri", { type: "geojson", data: cri });
   map.addSource("drenaje", { type: "geojson", data: dre });
+  map.addSource("amenazas", { type: "geojson", data: ame });
 
   map.addLayer({
     id: "inund-tr-fill",
@@ -93,6 +96,19 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
     source: "drenaje",
     layout: { visibility: "none" },
     paint: { "fill-color": "#e0a45c", "fill-opacity": 0.25 },
+  }, "rios-glow");
+  map.addLayer({
+    id: "amenazas",
+    type: "circle",
+    source: "amenazas",
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2, 10, 5],
+      "circle-color": "#e0a45c",
+      "circle-opacity": 0.7,
+      "circle-stroke-color": "#0b141d",
+      "circle-stroke-width": 0.8,
+    },
   }, "rios-glow");
   map.addLayer({
     id: "inund-activa",
@@ -148,6 +164,63 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
       e.lngLat,
     );
   });
+  map.on("click", "amenazas", (e) => {
+    const p = e.features?.[0]?.properties;
+    if (!p) return;
+    const tipos = [
+      ["ribera", "inundación de ribera"], ["canadas", "cañadas"],
+      ["drenaje", "drenaje pluvial"], ["presas", "presas"],
+      ["costas", "costera"], ["accesibilidad", "accesibilidad"],
+    ].filter(([k]) => Number(p[k]) === 1).map(([, v]) => v);
+    popup(
+      `<strong>${p.localidad}</strong> (${p.departamento})<br>` +
+      `<span style="color:#8fa8bd">Amenazas identificadas: ${tipos.join(", ") || "s/d"}</span>`,
+      e.lngLat,
+    );
+  });
+}
+
+function crearCapaLluvia(map: Map, estado: Estado): void {
+  const lluvia = estado.lluvia;
+  if (!lluvia) return;
+  map.addSource("lluvia", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: lluvia.estaciones.map((e) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [e.lon, e.lat] },
+        properties: e,
+      })),
+    } as GeoJSON.GeoJSON,
+  });
+  map.addLayer({
+    id: "lluvia",
+    type: "circle",
+    source: "lluvia",
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["get", "mm72"], 0, 4, 150, 24],
+      "circle-color": [
+        "step", ["get", "mm72"],
+        "#3b566e", 20, "#e8c95a", 50, "#e08a5c", 100, "#ff6b6b",
+      ],
+      "circle-opacity": 0.55,
+      "circle-stroke-color": "#cfe0ee",
+      "circle-stroke-width": 1,
+    },
+  });
+  map.on("click", "lluvia", (e) => {
+    const p = e.features?.[0]?.properties;
+    if (!p) return;
+    new maplibregl.Popup({ closeButton: false, maxWidth: "240px" })
+      .setLngLat(e.lngLat)
+      .setHTML(
+        `<strong>${p.nombre}</strong> (INUMET)<br>` +
+        `lluvia 24 h: ${p.mm24} mm · 72 h: ${p.mm72} mm<br>` +
+        `<span style="color:#8fa8bd">hasta ${String(lluvia.hasta).slice(0, 16)} UTC</span>`)
+      .addTo(map);
+  });
 }
 
 function aplicarEscenario(map: Map): void {
@@ -163,6 +236,7 @@ function visibilidad(map: Map, id: string, on: boolean): void {
 function aplicarVisibilidad(map: Map, activo: boolean): void {
   const conCri = (document.getElementById("chk-cri") as HTMLInputElement).checked;
   const conDre = (document.getElementById("chk-dre") as HTMLInputElement).checked;
+  const conLlu = (document.getElementById("chk-llu") as HTMLInputElement).checked;
   const visibles: Record<string, boolean> = {
     "inund-tr-fill": activo,
     "inund-tr-line": activo,
@@ -170,18 +244,17 @@ function aplicarVisibilidad(map: Map, activo: boolean): void {
     "inund-activa-line": activo,
     "inund-cri": activo && conCri,
     "drenaje-fill": activo && conDre,
+    "amenazas": activo && conDre,
+    "lluvia": activo && conLlu,
   };
   for (const [id, on] of Object.entries(visibles)) {
     if (map.getLayer(id)) visibilidad(map, id, on);
   }
 }
 
-export function setupCreciente(
-  map: Map,
-  base: string,
-  act?: Record<string, ActivacionLocalidad>,
-): void {
-  activacion = act ?? {};
+export function setupCreciente(map: Map, base: string, estado?: Estado): void {
+  activacion = estado?.activacion ?? {};
+  if (estado) crearCapaLluvia(map, estado);
   const panel = document.getElementById("creciente")!;
   const toggle = document.getElementById("creciente-toggle")!;
   const opciones = document.getElementById("creciente-opciones")!;
@@ -209,10 +282,9 @@ export function setupCreciente(
       if (cargado) aplicarEscenario(map);
     });
   }
-  (document.getElementById("chk-cri") as HTMLInputElement).addEventListener("change", (ev) => {
-    if (cargado) visibilidad(map, "inund-cri", (ev.target as HTMLInputElement).checked);
-  });
-  (document.getElementById("chk-dre") as HTMLInputElement).addEventListener("change", (ev) => {
-    if (cargado) visibilidad(map, "drenaje-fill", (ev.target as HTMLInputElement).checked);
-  });
+  for (const id of ["chk-cri", "chk-dre", "chk-llu"]) {
+    (document.getElementById(id) as HTMLInputElement).addEventListener("change", () => {
+      aplicarVisibilidad(map, panel.classList.contains("activo"));
+    });
+  }
 }

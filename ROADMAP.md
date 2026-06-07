@@ -106,8 +106,8 @@ extrema, usando los productos oficiales de DINAGUA (ver
 - [x] Capa "inundaciones registradas" (`curvas_cri`, línea punteada) con
       fecha del evento en el popup.
 - [x] Capa de drenaje urbano (`problemas_drenaje`) activable.
-- [ ] Puntos de `localidades_amenazas` (554 localidades con amenaza
-      identificada sin mancha dibujada).
+- [x] Puntos de `localidades_amenazas` (324 con amenaza > 0), integrados al
+      checkbox "Amenaza urbana" con popup de tipos de amenaza.
 - [x] Verificación de datum (`pipeline/analizar_datum.py`): los umbrales se
       derivan como `cota_oficial − cota_cero` (datum Wharton). Hallazgo:
       `cota_local` difiere sistemáticamente ~0,9 m de esa derivación en
@@ -133,15 +133,19 @@ hay dato de estación fresco, cuál está activa hoy.
 
 ## Fase 4 — Contexto e histórico (esfuerzo: medio)
 
-- [ ] Precipitación: capa de lluvia acumulada 24/72 h desde el CSV horario de
-      INUMET (CKAN, actualización diaria).
+- [x] Precipitación: acumulados 24/72 h desde el CSV horario de INUMET,
+      integrados al cron (`leer_lluvia_inumet`). Representación **por
+      estación** (círculos por intensidad), no por cuenca: el CSV público
+      trae solo 7 estaciones y pintar cuencas enteras sobrevendería
+      cobertura (AGENTS.md). Coordenadas aproximadas (INUMET no las publica
+      con el CSV). Pendiente: sumar las 5 estaciones INIA del CKAN.
 - [ ] Vista "caudal vs. normal" (anomalía) como toggle, análoga al mapa USA.
 - [ ] Cruce lluvia→creciente: resaltar cuencas con precipitación acumulada
       extrema como **aviso de atención**, nunca como mancha inferida — la
       lluvia no salta directo a mancha; la cadena es lluvia → escorrentía/
       caudal → nivel → mancha (ver AGENTS.md).
-- [ ] Persistir cada snapshot del job de Fase 2 para construir series propias
-      (Uruguay no publica series de caudal descargables).
+- [x] Persistir cada snapshot del job de Fase 2 para construir series propias
+      (`data/historico/AAAA/MM/DD-HHMM.json`, commiteado por el cron).
 - [ ] Mini-gráfico de serie temporal en el popup de estación (con los datos
       acumulados propios + niveles CKAN 2017–2019 donde existan).
 - [ ] Capa de represas/embalses (Bonete, Baygorria, Palmar, Salto Grande) con

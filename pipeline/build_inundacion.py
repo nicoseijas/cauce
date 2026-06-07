@@ -86,6 +86,14 @@ def main() -> None:
     ]])
     exportar(dre, "drenaje.geojson")
 
+    ame = leer_wfs_geojson(RAW / "localidades_amenazas.geojson")
+    ame = ame[[
+        "localidad", "departamento", "ribera", "canadas", "drenaje",
+        "presas", "accesibilidad", "costas", "total_tipos_amenaza", "geometry",
+    ]]
+    ame = ame[ame["total_tipos_amenaza"] > 0]
+    exportar(ame, "amenazas.geojson")
+
 
 if __name__ == "__main__":
     main()

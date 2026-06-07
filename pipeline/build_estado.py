@@ -8,11 +8,13 @@ Fuentes (cada una tolera fallos de forma independiente):
 - saltogrande.org/datos_horarios.php: caudal turbinado + vertido (horario).
 """
 
+import csv
+import io
 import json
 import logging
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -32,6 +34,21 @@ FRESCURA_MAX_NIVEL_H = 24 * 7
 FACTOR_CLAMP = (0.05, 20.0)
 SALTO_GRANDE_URL = "https://www.saltogrande.org/datos_horarios.php"
 ID_SALTO_GRANDE = -1
+
+LLUVIA_URL = ("https://catalogodatos.gub.uy/dataset/fd896b11-4c04-4807-bae4-5373d65beea2"
+              "/resource/cc785e9e-d9c8-4706-b013-9a6a5b0f7d01/download"
+              "/inumet_precipitacion_acumulada_horaria.csv")
+# Coordenadas aproximadas (sitio de la estación/aeropuerto); INUMET no publica
+# las coordenadas exactas junto con el CSV.
+ESTACIONES_INUMET = {
+    "Aeropuerto Melilla G3": (-34.7892, -56.2647),
+    "Artigas G3": (-30.3990, -56.5120),
+    "Colonia G3": (-34.4564, -57.8456),
+    "Mercedes G3": (-33.2524, -58.0672),
+    "Paso de los Toros G3": (-32.8043, -56.5320),
+    "Rocha G3": (-34.4884, -54.3122),
+    "Salto G3": (-31.4382, -57.9836),
+}
 
 
 def horas_desde(fecha_iso: str | None, ahora: datetime) -> float | None:
@@ -80,6 +97,46 @@ def leer_salto_grande() -> dict | None:
     }
 
 
+def leer_lluvia_inumet(ahora: datetime) -> dict | None:
+    try:
+        r = wfs.SESSION.get(LLUVIA_URL, timeout=120)
+        r.raise_for_status()
+    except Exception as exc:
+        log.warning("lluvia INUMET inaccesible: %s", exc)
+        return None
+
+    corte = ahora - timedelta(days=5)
+    corte_txt = corte.strftime("%Y-%m-%d")
+    lecturas: dict[str, list[tuple[datetime, float]]] = {}
+    for fila in csv.reader(io.StringIO(r.text), delimiter=";"):
+        if len(fila) < 3 or fila[0][:10] < corte_txt:
+            continue
+        nombre = fila[1].strip()
+        if nombre not in ESTACIONES_INUMET:
+            continue
+        try:
+            fecha = datetime.strptime(fila[0].strip(), "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+            mm = float(fila[2])
+        except ValueError:
+            continue
+        lecturas.setdefault(nombre, []).append((fecha, mm))
+    if not lecturas:
+        return None
+
+    hasta = max(f for v in lecturas.values() for f, _ in v)
+    estaciones = []
+    for nombre, vals in sorted(lecturas.items()):
+        lat, lon = ESTACIONES_INUMET[nombre]
+        estaciones.append({
+            "nombre": nombre.removesuffix(" G3"),
+            "lat": lat,
+            "lon": lon,
+            "mm24": round(sum(m for f, m in vals if f > hasta - timedelta(hours=24)), 1),
+            "mm72": round(sum(m for f, m in vals if f > hasta - timedelta(hours=72)), 1),
+        })
+    return {"hasta": hasta.isoformat(timespec="minutes"), "estaciones": estaciones}
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
     ahora = datetime.now(timezone.utc)
@@ -87,9 +144,11 @@ def main() -> None:
     mapping = json.loads(ESTACIONES.read_text(encoding="utf-8"))
     catalogo = leer_catalogo_dinagua()
     salto = leer_salto_grande()
+    lluvia = leer_lluvia_inumet(ahora)
     fuentes = {
         "dinagua_wfs": "ok" if catalogo else "caida",
         "salto_grande": "ok" if salto else "caida",
+        "inumet_lluvia": "ok" if lluvia else "caida",
         "ina": "no_implementada",
         "caru": "no_implementada",
     }
@@ -183,6 +242,7 @@ def main() -> None:
         "factores_curso": {k: {"factor": v["factor"], "estacion": v["estacion"]}
                            for k, v in factores.items()},
         "activacion": activacion,
+        "lluvia": lluvia,
     }
 
     SALIDA.write_text(json.dumps(estado, ensure_ascii=False), encoding="utf-8")

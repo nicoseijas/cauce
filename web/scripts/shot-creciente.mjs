@@ -19,6 +19,7 @@ await page.waitForFunction(
   { timeout: 30000 },
 );
 if (periodo) await page.click(`[data-periodo="${periodo}"]`);
+for (const sel of process.argv.slice(5)) await page.click(sel);
 await new Promise((r) => setTimeout(r, 2500));
 await page.screenshot({ path: out });
 await browser.close();

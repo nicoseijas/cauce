@@ -6,12 +6,21 @@ export type ActivacionLocalidad = {
   proximo?: { periodo: number; faltan_m: number };
 };
 
+export type LluviaEstacion = {
+  nombre: string;
+  lat: number;
+  lon: number;
+  mm24: number;
+  mm72: number;
+};
+
 export type Estado = {
   generado: string;
   fuentes: Record<string, string>;
   estaciones: EstacionEstado[];
   factores_curso: Record<string, { factor: number; estacion: string }>;
   activacion?: Record<string, ActivacionLocalidad>;
+  lluvia?: { hasta: string; estaciones: LluviaEstacion[] } | null;
 };
 
 export type EstacionEstado = {
