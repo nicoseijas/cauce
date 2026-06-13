@@ -19,6 +19,18 @@ const ESCALA_LOG_Q: ExpressionSpecification = [
   "ln", ["+", 1, ["coalesce", ["get", "DIS_AV_CMS"], 0]],
 ];
 
+const COLOR_CAUDAL: ExpressionSpecification = [
+  "interpolate", ["linear"], ESCALA_LOG_Q,
+  0, "#1d4460",
+  4, "#2e6f9e",
+  8, "#57a8d8",
+];
+
+const OPACIDAD_GLOW: ExpressionSpecification = [
+  "interpolate", ["linear"], ESCALA_LOG_Q,
+  3.5, 0, 5.5, 0.10, 8, 0.28,
+];
+
 const map = new maplibregl.Map({
   container: "map",
   hash: true,
@@ -54,10 +66,7 @@ const map = new maplibregl.Map({
         layout: { "line-cap": "round", "line-join": "round" },
         paint: {
           "line-color": "#6fc0f2",
-          "line-opacity": [
-            "interpolate", ["linear"], ESCALA_LOG_Q,
-            3.5, 0, 5.5, 0.10, 8, 0.28,
-          ],
+          "line-opacity": OPACIDAD_GLOW,
           "line-width": [
             "interpolate", ["exponential", 1.6], ["zoom"],
             5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0, 4, 4, 8, 12],
@@ -76,12 +85,7 @@ const map = new maplibregl.Map({
         source: "red",
         layout: { "line-cap": "round", "line-join": "round" },
         paint: {
-          "line-color": [
-            "interpolate", ["linear"], ESCALA_LOG_Q,
-            0, "#1d4460",
-            4, "#2e6f9e",
-            8, "#57a8d8",
-          ],
+          "line-color": COLOR_CAUDAL,
           "line-width": [
             "interpolate", ["exponential", 1.6], ["zoom"],
             5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0.3, 4, 1.2, 8, 3.5],
@@ -183,6 +187,38 @@ map.on("mousemove", (e) => {
   );
 });
 
+// Rampa divergente sobre ln(factor); tramos sin medición fresca quedan
+// apagados en vez de fingir un valor.
+const COLOR_ANOMALIA: ExpressionSpecification = [
+  "case",
+  ["!", ["has", "factor"]],
+  "#2c4257",
+  ["interpolate", ["linear"], ["ln", ["get", "factor"]],
+    -1.2, "#e0a45c",
+    0, "#8fb0c8",
+    1.2, "#7ef0d8"],
+];
+
+function setupVistaAnomalia(map: maplibregl.Map, flow: FlowLayer): void {
+  document.getElementById("vista-switch")!.style.display = "flex";
+  const btnCaudal = document.getElementById("vista-caudal")!;
+  const btnAnomalia = document.getElementById("vista-anomalia")!;
+  const legCaudal = document.getElementById("leyenda-caudal")!;
+  const legAnomalia = document.getElementById("leyenda-anomalia")!;
+
+  function activar(anomalia: boolean): void {
+    map.setPaintProperty("rios", "line-color", anomalia ? COLOR_ANOMALIA : COLOR_CAUDAL);
+    map.setPaintProperty("rios-glow", "line-opacity", anomalia ? 0 : OPACIDAD_GLOW);
+    flow.setVisible(!anomalia);
+    btnCaudal.classList.toggle("sel", !anomalia);
+    btnAnomalia.classList.toggle("sel", anomalia);
+    legCaudal.style.display = anomalia ? "none" : "block";
+    legAnomalia.style.display = anomalia ? "block" : "none";
+  }
+  btnCaudal.addEventListener("click", () => activar(false));
+  btnAnomalia.addEventListener("click", () => activar(true));
+}
+
 map.on("load", async () => {
   const [fc, estado] = await Promise.all([
     fetch(`${BASE}data/red_uy.geojson`).then((r) => r.json()),
@@ -237,6 +273,7 @@ map.on("load", async () => {
   const flow = new FlowLayer(fc);
   map.addLayer(flow, "rios-hover");
   setupCreciente(map, BASE, estado ?? undefined);
+  if (estado) setupVistaAnomalia(map, flow);
 
   let frames = 0;
   let last = performance.now();

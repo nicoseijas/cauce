@@ -65,7 +65,8 @@ export function aplicarFactores(red: RedFC, estado: Estado): number {
   for (const f of red.features) {
     const p = f.properties;
     p.DIS_MEDIO = p.DIS_AV_CMS;
-    const clave = p.codigo5 != null ? String(p.codigo5) : null;
+    // factores_curso indexa por nombre de curso (codigo5 es por sección)
+    const clave = typeof p.nombre === "string" ? p.nombre : null;
     const fx = clave ? estado.factores_curso[clave] : undefined;
     if (fx) {
       p.DIS_AV_CMS = (p.DIS_AV_CMS ?? 0) * fx.factor;

@@ -129,6 +129,13 @@ export class FlowLayer implements CustomLayerInterface {
     return this.count;
   }
 
+  private visible = true;
+
+  setVisible(v: boolean): void {
+    this.visible = v;
+    this.map?.triggerRepaint();
+  }
+
   onAdd(map: Map, gl: WebGLRenderingContext): void {
     this.map = map;
     const vs = compile(gl, gl.VERTEX_SHADER, VERT);
@@ -158,6 +165,7 @@ export class FlowLayer implements CustomLayerInterface {
   }
 
   render: CustomRenderMethod = (gl, matrix) => {
+    if (!this.visible) return;
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uMatrix, false, matrix as Float32Array);
     gl.uniform1f(this.uTime, (performance.now() - this.start) / 1000);

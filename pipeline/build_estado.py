@@ -198,9 +198,10 @@ def main() -> None:
 
         estaciones.append(e)
 
-        # factor por curso: gana la estación de mayor cuenca con dato fresco
-        if e["factor"] is not None and p["codigo5"] is not None:
-            clave = str(p["codigo5"])
+        # factor por curso (nombre completo del río: codigo5 de DINAGUA es por
+        # sección, no por río); gana la estación de mayor cuenca con dato fresco
+        if e["factor"] is not None and p["curso"]:
+            clave = str(p["curso"])
             previa = factores.get(clave)
             if previa is None or p["area_km2"] > previa["area_km2"]:
                 factores[clave] = {

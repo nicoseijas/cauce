@@ -139,7 +139,12 @@ hay dato de estación fresco, cuál está activa hoy.
       trae solo 7 estaciones y pintar cuencas enteras sobrevendería
       cobertura (AGENTS.md). Coordenadas aproximadas (INUMET no las publica
       con el CSV). Pendiente: sumar las 5 estaciones INIA del CKAN.
-- [ ] Vista "caudal vs. normal" (anomalía) como toggle, análoga al mapa USA.
+- [x] Vista "caudal vs. normal" (anomalía): conmutador en la leyenda, rampa
+      divergente sobre ln(factor) (bajo ámbar / normal gris / crecida
+      verde-agua), tramos sin medición fresca apagados, partículas y glow
+      ocultos en este modo. La propagación del factor pasó a ser por nombre
+      de curso completo (el `codigo5` de DINAGUA es por sección, no por
+      río): 490 tramos escalados por 11 estaciones.
 - [ ] Cruce lluvia→creciente: resaltar cuencas con precipitación acumulada
       extrema como **aviso de atención**, nunca como mancha inferida — la
       lluvia no salta directo a mancha; la cadena es lluvia → escorrentía/
