@@ -38,6 +38,18 @@
       padding: 3px 9px;
     }
     #vista-switch .sel { background: #2c4a66; border-color: #4a7096; }
+    /* el CSS del bundle de MapLibre se inyecta después de este bloque */
+    .maplibregl-ctrl-top-right { top: 42px !important; }
+    .maplibregl-ctrl-top-right .maplibregl-ctrl-group {
+      background: rgba(10, 20, 30, 0.82); border: 1px solid #223344;
+    }
+    .maplibregl-ctrl-top-right .maplibregl-ctrl-group button {
+      background: transparent; color: #cfe0ee;
+    }
+    .maplibregl-ctrl-top-right .maplibregl-ctrl-group button + button { border-top: 1px solid #223344; }
+    .maplibregl-ctrl-top-right .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+      filter: invert(0.85);
+    }
     #leyenda .fila { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
     #leyenda .linea { background: #57a8d8; border-radius: 2px; }
     #leyenda .etiqueta { color: #8fa8bd; font-size: 11px; }

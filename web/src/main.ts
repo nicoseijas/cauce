@@ -31,13 +31,18 @@ const OPACIDAD_GLOW: ExpressionSpecification = [
   3.5, 0, 5.5, 0.10, 8, 0.28,
 ];
 
+const VISTA_INICIAL = { center: [-56.0, -32.7] as [number, number], zoom: 6.3 };
+
 const map = new maplibregl.Map({
   container: "map",
   hash: true,
-  center: [-56.0, -32.7],
-  zoom: 6.3,
+  ...VISTA_INICIAL,
   minZoom: 5,
   maxZoom: 13,
+  dragRotate: false,
+  pitchWithRotate: false,
+  touchPitch: false,
+  maxPitch: 0,
   attributionControl: false,
   style: {
     version: 8,
@@ -114,11 +119,41 @@ const map = new maplibregl.Map({
   },
 });
 
+map.touchZoomRotate.disableRotation();
+map.keyboard.disableRotation();
+
 map.addControl(new maplibregl.AttributionControl({
   compact: true,
   customAttribution:
     "HydroSHEDS/HydroRIVERS · DINAGUA (Min. Ambiente, Uruguay)",
 }), "bottom-right");
+const ICONO_CASA =
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+  'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto">' +
+  '<path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg>';
+
+class ControlesMapa implements maplibregl.IControl {
+  onAdd(m: maplibregl.Map): HTMLElement {
+    const div = document.createElement("div");
+    div.className = "maplibregl-ctrl maplibregl-ctrl-group";
+    const boton = (contenido: string, titulo: string, accion: () => void) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.title = titulo;
+      b.innerHTML = contenido;
+      b.style.font = "18px/1 system-ui, sans-serif";
+      b.addEventListener("click", accion);
+      div.appendChild(b);
+    };
+    boton("+", "Acercar", () => m.zoomIn());
+    boton("−", "Alejar", () => m.zoomOut());
+    boton(ICONO_CASA, "Volver a la vista de Uruguay", () =>
+      m.flyTo({ ...VISTA_INICIAL, bearing: 0, pitch: 0 }));
+    return div;
+  }
+  onRemove(): void {}
+}
+map.addControl(new ControlesMapa(), "top-right");
 
 const tooltip = document.getElementById("tooltip")!;
 const fpsEl = document.getElementById("fps")!;
