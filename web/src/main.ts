@@ -48,15 +48,28 @@ const map = new maplibregl.Map({
     version: 8,
     sources: {
       departamentos: { type: "geojson", data: `${BASE}data/departamentos_uy.geojson` },
+      vecinos: { type: "geojson", data: `${BASE}data/vecinos.geojson` },
       red: { type: "geojson", data: `${BASE}data/red_uy.geojson` },
     },
     layers: [
-      { id: "bg", type: "background", paint: { "background-color": "#0b141d" } },
+      { id: "bg", type: "background", paint: { "background-color": "#08101a" } },
+      {
+        id: "vecinos",
+        type: "fill",
+        source: "vecinos",
+        paint: { "fill-color": "#152230" },
+      },
+      {
+        id: "vecinos-limite",
+        type: "line",
+        source: "vecinos",
+        paint: { "line-color": "#2a3d50", "line-width": 0.8 },
+      },
       {
         id: "tierra",
         type: "fill",
         source: "departamentos",
-        paint: { "fill-color": "#16222e" },
+        paint: { "fill-color": "#182634" },
       },
       {
         id: "limites",
@@ -121,6 +134,8 @@ const map = new maplibregl.Map({
 
 map.touchZoomRotate.disableRotation();
 map.keyboard.disableRotation();
+// handle de consola para diagnóstico
+(window as unknown as { __map: maplibregl.Map }).__map = map;
 
 map.addControl(new maplibregl.AttributionControl({
   compact: true,
