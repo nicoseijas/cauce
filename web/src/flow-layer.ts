@@ -11,9 +11,11 @@ type FeatureCollection = {
   }[];
 };
 
-// Velocidad y cola en unidades de pantalla (mercator/s y mercator, fijadas
-// por frame según el zoom): si fueran fracciones del tramo, los tramos largos
-// separarían la cola en "perlas" y los cortos parpadearían.
+// La animación corre en el vertex shader. Cada partícula vive en una cuerda
+// recta; las cuerdas se re-muestrean con largo constante EN PANTALLA cada vez
+// que cambia el zoom, para que la velocidad sea uniforme en rectas y curvas
+// (con cuerdas por vértice, las curvas —vértices densos— quedaban congeladas
+// por el tope anti-parpadeo y las rectas corrían a velocidad plena).
 const VERT = `
 attribute vec2 aStart;
 attribute vec2 aEnd;
@@ -29,8 +31,8 @@ uniform float uGapMerc;
 varying float vQ;
 varying float vFade;
 void main() {
-  float tSpeed = min(uSpeedMerc * (0.25 + 0.75 * aQ) / aLen, 0.9);
-  float gapT = min(uGapMerc / aLen, 0.12);
+  float tSpeed = uSpeedMerc * (0.25 + 0.75 * aQ) / aLen;
+  float gapT = min(uGapMerc / aLen, 0.15);
   float t = fract(aPhase + uTime * tSpeed - aTrail * gapT);
   vec2 pos = mix(aStart, aEnd, t);
   gl_Position = uMatrix * vec4(pos, 0.0, 1.0);
@@ -51,6 +53,13 @@ void main() {
   gl_FragColor = vec4(color, alpha);
 }`;
 
+const TRAIL_LEN = 6;
+const FLOATS_PER_PARTICLE = 8;
+const CHORD_PX = 26;
+const SPACING_PX = 3;
+const MAX_PARTICULAS = 120_000;
+const ZOOM_CULLING = 7.5;
+
 function compile(gl: WebGLRenderingContext, type: number, src: string): WebGLShader {
   const s = gl.createShader(type)!;
   gl.shaderSource(s, src);
@@ -61,13 +70,16 @@ function compile(gl: WebGLRenderingContext, type: number, src: string): WebGLSha
   return s;
 }
 
-/**
- * Siembra partículas sobre cada segmento recto de las polilíneas.
- * Cada partícula vive en un segmento y recircula con fract(), así toda la
- * animación corre en el vertex shader sin trabajo por frame en CPU.
- */
-function buildParticles(fc: FeatureCollection, spacingMerc: number) {
-  const data: number[] = [];
+type Polilinea = {
+  xs: Float64Array;
+  ys: Float64Array;
+  acum: Float64Array;
+  largo: number;
+  q01: number;
+  bbox: [number, number, number, number];
+};
+
+function prepararPolilineas(fc: FeatureCollection): Polilinea[] {
   let qMax = 1;
   for (const f of fc.features) {
     const q = Number(f.properties["DIS_AV_CMS"]) || 0;
@@ -75,6 +87,7 @@ function buildParticles(fc: FeatureCollection, spacingMerc: number) {
   }
   const logQMax = Math.log10(1 + qMax);
 
+  const polis: Polilinea[] = [];
   for (const f of fc.features) {
     const q = Number(f.properties["DIS_AV_CMS"]) || 0;
     const q01 = Math.log10(1 + q) / logQMax;
@@ -83,28 +96,43 @@ function buildParticles(fc: FeatureCollection, spacingMerc: number) {
         ? [f.geometry.coordinates as number[][]]
         : (f.geometry.coordinates as number[][][]);
     for (const line of lines) {
-      for (let i = 0; i < line.length - 1; i++) {
-        const a = maplibregl.MercatorCoordinate.fromLngLat(
+      if (line.length < 2) continue;
+      const xs = new Float64Array(line.length);
+      const ys = new Float64Array(line.length);
+      const acum = new Float64Array(line.length);
+      let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+      for (let i = 0; i < line.length; i++) {
+        const m = maplibregl.MercatorCoordinate.fromLngLat(
           { lng: line[i][0], lat: line[i][1] }, 0);
-        const b = maplibregl.MercatorCoordinate.fromLngLat(
-          { lng: line[i + 1][0], lat: line[i + 1][1] }, 0);
-        const len = Math.hypot(b.x - a.x, b.y - a.y);
-        if (len < spacingMerc * 0.25) continue;
-        const n = Math.max(1, Math.floor(len / spacingMerc));
-        for (let k = 0; k < n; k++) {
-          const phase = Math.random();
-          for (let trail = 0; trail < TRAIL_LEN; trail++) {
-            data.push(a.x, a.y, b.x, b.y, phase, q01, trail, len);
-          }
-        }
+        xs[i] = m.x;
+        ys[i] = m.y;
+        if (m.x < minx) minx = m.x;
+        if (m.x > maxx) maxx = m.x;
+        if (m.y < miny) miny = m.y;
+        if (m.y > maxy) maxy = m.y;
+        acum[i] = i === 0 ? 0 : acum[i - 1] + Math.hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1]);
       }
+      polis.push({ xs, ys, acum, largo: acum[line.length - 1],
+                   q01, bbox: [minx, miny, maxx, maxy] });
     }
   }
-  return new Float32Array(data);
+  return polis;
 }
 
-const TRAIL_LEN = 6;
-const FLOATS_PER_PARTICLE = 8;
+function puntoEn(p: Polilinea, d: number): [number, number] {
+  const acum = p.acum;
+  let lo = 0, hi = acum.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (acum[mid] < d) lo = mid + 1;
+    else hi = mid;
+  }
+  const i = Math.max(1, lo);
+  const seg = acum[i] - acum[i - 1];
+  const t = seg > 0 ? (d - acum[i - 1]) / seg : 0;
+  return [p.xs[i - 1] + (p.xs[i] - p.xs[i - 1]) * t,
+          p.ys[i - 1] + (p.ys[i] - p.ys[i - 1]) * t];
+}
 
 export class FlowLayer implements CustomLayerInterface {
   id = "flow-particles";
@@ -112,24 +140,23 @@ export class FlowLayer implements CustomLayerInterface {
   renderingMode = "2d" as const;
 
   private map!: Map;
+  private gl!: WebGLRenderingContext;
   private program!: WebGLProgram;
   private buffer!: WebGLBuffer;
   private count = 0;
   private start = performance.now();
   private loc: Record<string, number> = {};
-  private uMatrix!: WebGLUniformLocation;
-  private uTime!: WebGLUniformLocation;
-  private uSize!: WebGLUniformLocation;
-  private uSpeedMerc!: WebGLUniformLocation;
-  private uGapMerc!: WebGLUniformLocation;
+  private uniforms: Record<string, WebGLUniformLocation> = {};
+  private polis: Polilinea[] = [];
+  private visible = true;
+  private ultimoZoom = -99;
+  private ultimoPad: [number, number, number, number] | null = null;
 
-  constructor(private fc: FeatureCollection, private spacingMerc = 3e-5) {}
+  constructor(private fc: FeatureCollection) {}
 
   particleCount(): number {
     return this.count;
   }
-
-  private visible = true;
 
   setVisible(v: boolean): void {
     this.visible = v;
@@ -138,6 +165,7 @@ export class FlowLayer implements CustomLayerInterface {
 
   onAdd(map: Map, gl: WebGLRenderingContext): void {
     this.map = map;
+    this.gl = gl;
     const vs = compile(gl, gl.VERTEX_SHADER, VERT);
     const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
     this.program = gl.createProgram()!;
@@ -147,35 +175,97 @@ export class FlowLayer implements CustomLayerInterface {
     if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
       throw new Error(gl.getProgramInfoLog(this.program) ?? "link error");
     }
-
-    const particles = buildParticles(this.fc, this.spacingMerc);
-    this.count = particles.length / FLOATS_PER_PARTICLE;
-    this.buffer = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, particles, gl.STATIC_DRAW);
-
     for (const name of ["aStart", "aEnd", "aPhase", "aQ", "aTrail", "aLen"]) {
       this.loc[name] = gl.getAttribLocation(this.program, name);
     }
-    this.uMatrix = gl.getUniformLocation(this.program, "uMatrix")!;
-    this.uTime = gl.getUniformLocation(this.program, "uTime")!;
-    this.uSize = gl.getUniformLocation(this.program, "uSize")!;
-    this.uSpeedMerc = gl.getUniformLocation(this.program, "uSpeedMerc")!;
-    this.uGapMerc = gl.getUniformLocation(this.program, "uGapMerc")!;
+    for (const name of ["uMatrix", "uTime", "uSize", "uSpeedMerc", "uGapMerc"]) {
+      this.uniforms[name] = gl.getUniformLocation(this.program, name)!;
+    }
+    this.buffer = gl.createBuffer()!;
+    this.polis = prepararPolilineas(this.fc);
+    this.reseed();
+    map.on("moveend", this.onMoveEnd);
+  }
+
+  onRemove(): void {
+    this.map.off("moveend", this.onMoveEnd);
+  }
+
+  private onMoveEnd = (): void => {
+    const z = this.map.getZoom();
+    const fueraDePad = this.ultimoPad && z >= ZOOM_CULLING
+      ? !this.vistaDentroDe(this.ultimoPad)
+      : false;
+    if (Math.abs(z - this.ultimoZoom) > 0.4 || fueraDePad) this.reseed();
+  };
+
+  private vistaDentroDe(pad: [number, number, number, number]): boolean {
+    const b = this.map.getBounds();
+    const sw = maplibregl.MercatorCoordinate.fromLngLat(b.getSouthWest(), 0);
+    const ne = maplibregl.MercatorCoordinate.fromLngLat(b.getNorthEast(), 0);
+    return sw.x >= pad[0] && ne.y >= pad[1] && ne.x <= pad[2] && sw.y <= pad[3];
+  }
+
+  private reseed(): void {
+    const z = this.map.getZoom();
+    const ppw = 512 * Math.pow(2, z);
+    const chord = CHORD_PX / ppw;
+    const spacing = SPACING_PX / ppw;
+
+    let pad: [number, number, number, number] | null = null;
+    if (z >= ZOOM_CULLING) {
+      const b = this.map.getBounds();
+      const sw = maplibregl.MercatorCoordinate.fromLngLat(b.getSouthWest(), 0);
+      const ne = maplibregl.MercatorCoordinate.fromLngLat(b.getNorthEast(), 0);
+      const dx = ne.x - sw.x, dy = sw.y - ne.y;
+      pad = [sw.x - dx, ne.y - dy, ne.x + dx, sw.y + dy];
+    }
+
+    const data: number[] = [];
+    let particulas = 0;
+    for (const p of this.polis) {
+      if (pad && (p.bbox[2] < pad[0] || p.bbox[0] > pad[2] ||
+                  p.bbox[3] < pad[1] || p.bbox[1] > pad[3])) continue;
+      const nChords = Math.max(1, Math.round(p.largo / chord));
+      const largoChord = p.largo / nChords;
+      const porChord = Math.max(1, Math.round(largoChord / spacing));
+      for (let c = 0; c < nChords; c++) {
+        const [ax, ay] = puntoEn(p, c * largoChord);
+        const [bx, by] = puntoEn(p, (c + 1) * largoChord);
+        const len = Math.hypot(bx - ax, by - ay);
+        if (len <= 0) continue;
+        for (let k = 0; k < porChord; k++) {
+          const phase = Math.random();
+          for (let trail = 0; trail < TRAIL_LEN; trail++) {
+            data.push(ax, ay, bx, by, phase, p.q01, trail, len);
+          }
+          if (++particulas >= MAX_PARTICULAS) break;
+        }
+        if (particulas >= MAX_PARTICULAS) break;
+      }
+      if (particulas >= MAX_PARTICULAS) break;
+    }
+
+    this.count = data.length / FLOATS_PER_PARTICLE;
+    const gl = this.gl;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+    this.ultimoZoom = z;
+    this.ultimoPad = pad;
+    this.map.triggerRepaint();
   }
 
   render: CustomRenderMethod = (gl, matrix) => {
-    if (!this.visible) return;
+    if (!this.visible || this.count === 0) return;
     gl.useProgram(this.program);
-    gl.uniformMatrix4fv(this.uMatrix, false, matrix as Float32Array);
-    gl.uniform1f(this.uTime, (performance.now() - this.start) / 1000);
-    // ~90 px/s el río más caudaloso y cola de ~3,5 px por eslabón, constantes
-    // en pantalla a cualquier zoom.
-    const pxPerWorld = 512 * Math.pow(2, this.map.getZoom());
-    gl.uniform1f(this.uSpeedMerc, 90 / pxPerWorld);
-    gl.uniform1f(this.uGapMerc, 3.5 / pxPerWorld);
+    gl.uniformMatrix4fv(this.uniforms.uMatrix, false, matrix as Float32Array);
+    gl.uniform1f(this.uniforms.uTime, (performance.now() - this.start) / 1000);
+    // ~90 px/s el río más caudaloso, constante en pantalla a cualquier zoom
+    const ppw = 512 * Math.pow(2, this.map.getZoom());
+    gl.uniform1f(this.uniforms.uSpeedMerc, 90 / ppw);
+    gl.uniform1f(this.uniforms.uGapMerc, 3.5 / ppw);
     const zoomScale = Math.min(4, Math.pow(1.35, this.map.getZoom() - 6));
-    gl.uniform1f(this.uSize, 1.3 * zoomScale * (window.devicePixelRatio || 1));
+    gl.uniform1f(this.uniforms.uSize, 1.3 * zoomScale * (window.devicePixelRatio || 1));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     const stride = FLOATS_PER_PARTICLE * 4;
