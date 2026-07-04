@@ -55,7 +55,9 @@ void main() {
 
 const TRAIL_LEN = 6;
 const FLOATS_PER_PARTICLE = 8;
-const CHORD_PX = 26;
+// 8 px: sagita p90 <= 1,4 px en todo el rango de zoom (auditoría 2026-08-20);
+// con 26 px las partículas se desviaban hasta 2,5 semianchos del río en z9
+const CHORD_PX = 8;
 const SPACING_PX = 3;
 const MAX_PARTICULAS = 120_000;
 const ZOOM_CULLING = 7.5;

@@ -144,6 +144,28 @@ def main() -> None:
     log.info("guardado %s: %d tramos, %.1f MB",
              out, len(rios), out.stat().st_size / 1e6)
 
+    # Fuente de etiquetas: symbol-placement line coloca por feature, y los
+    # tramos individuales son demasiado cortos para que quepa un nombre;
+    # se fusionan los tramos de cada curso en líneas largas.
+    from shapely.ops import linemerge, unary_union
+    con_nombre = rios[rios["nombre"].notna()]
+    etiquetas = con_nombre.dissolve(by="nombre", aggfunc={"DIS_AV_CMS": "max"})
+    etiquetas["geometry"] = etiquetas.geometry.apply(
+        lambda g: linemerge(unary_union(g)) if g.geom_type != "LineString" else g
+    )
+    etiquetas = etiquetas.reset_index()[["nombre", "DIS_AV_CMS", "geometry"]]
+    # Guía generalizada: el colocador de etiquetas de MapLibre rechaza líneas
+    # con vértices densos (micro-ángulos por glifo). 0.008° ~ 800 m coloca
+    # bien desde z7 sin despegarse demasiado del corredor a zoom alto.
+    etiquetas["geometry"] = etiquetas.geometry.simplify(0.008, preserve_topology=False)
+    out_n = PROCESSED / "red_nombres.geojson"
+    pyogrio.write_dataframe(
+        etiquetas, out_n, driver="GeoJSON",
+        layer_options={"COORDINATE_PRECISION": "5", "RFC7946": "YES"},
+    )
+    log.info("guardado %s: %d cursos con nombre, %.1f MB",
+             out_n, len(etiquetas), out_n.stat().st_size / 1e6)
+
 
 if __name__ == "__main__":
     main()

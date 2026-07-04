@@ -46,10 +46,15 @@ const map = new maplibregl.Map({
   attributionControl: false,
   style: {
     version: 8,
+    // glyphs autoalojados (Open Sans, Apache-2.0): la URL debe ser absoluta
+    glyphs: `${new URL(BASE, location.href).href}fonts/{fontstack}/{range}.pbf`,
     sources: {
       departamentos: { type: "geojson", data: `${BASE}data/departamentos_uy.geojson` },
       vecinos: { type: "geojson", data: `${BASE}data/vecinos.geojson` },
       red: { type: "geojson", data: `${BASE}data/red_uy.geojson` },
+      // tramos fusionados por curso: las etiquetas en línea necesitan
+      // features largas (los tramos sueltos no alcanzan para un nombre)
+      "red-nombres": { type: "geojson", data: `${BASE}data/red_nombres.geojson` },
     },
     layers: [
       { id: "bg", type: "background", paint: { "background-color": "#08101a" } },
@@ -128,6 +133,47 @@ const map = new maplibregl.Map({
           "line-opacity": 0.9,
         },
       },
+      // nombres con jerarquía: ríos grandes desde z7, medianos z8.5, resto z10
+      ...([
+        {
+          id: "nombres-1", minzoom: 7,
+          filtro: ["all", ["has", "nombre"],
+            [">=", ESCALA_LOG_Q, 5.5]] as ExpressionSpecification,
+        },
+        {
+          id: "nombres-2", minzoom: 8.5,
+          filtro: ["all", ["has", "nombre"],
+            [">=", ESCALA_LOG_Q, 2.5], ["<", ESCALA_LOG_Q, 5.5]] as ExpressionSpecification,
+        },
+        {
+          id: "nombres-3", minzoom: 10,
+          filtro: ["all", ["has", "nombre"],
+            ["<", ESCALA_LOG_Q, 2.5]] as ExpressionSpecification,
+        },
+      ].map(({ id, minzoom, filtro }) => ({
+        id,
+        type: "symbol" as const,
+        source: "red-nombres",
+        minzoom,
+        filter: filtro,
+        layout: {
+          "symbol-placement": "line" as const,
+          "text-field": ["get", "nombre"] as ExpressionSpecification,
+          "text-font": ["Open Sans Semibold"],
+          "text-size": [
+            "interpolate", ["linear"], ["zoom"],
+            7, 10, 12, 15,
+          ] as ExpressionSpecification,
+          "text-letter-spacing": 0.08,
+          "text-max-angle": 60,
+          "symbol-spacing": 300,
+        },
+        paint: {
+          "text-color": "#a9c9e2",
+          "text-halo-color": "#0b141d",
+          "text-halo-width": 1.4,
+        },
+      }))),
     ],
   },
 });
