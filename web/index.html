@@ -26,7 +26,7 @@
     }
     #creciente.activo #creciente-toggle { background: #7a3030; border-color: #a04545; }
     #creciente .grupo { margin: 10px 0 4px; font-size: 11px; color: #8fa8bd; }
-    #creciente .botones { display: flex; gap: 6px; }
+    #creciente .botones { display: flex; gap: 6px; flex-wrap: wrap; }
     #creciente .botones .sel { background: #7a3030; border-color: #a04545; }
     #creciente label { display: flex; gap: 6px; margin-top: 8px; font-size: 12px; align-items: center; }
     #creciente .nota { margin-top: 10px; font-size: 10.5px; line-height: 1.4; color: #8fa8bd; }
@@ -74,19 +74,26 @@
   <div id="creciente" class="panel">
     <button id="creciente-toggle">Modo creciente</button>
     <div id="creciente-opciones" style="display:none">
-      <div class="grupo">Escenario (período de retorno)</div>
+      <div class="grupo">Escenario precalculado (no es el estado actual)</div>
       <div class="botones">
-        <button data-periodo="10">10 años</button>
-        <button data-periodo="100" class="sel">100 años</button>
-        <button data-periodo="99999">Extrema</button>
+        <button data-periodo="0">Ocultar</button>
+        <button data-periodo="10" title="≈ 10 % de probabilidad cada año">10 años</button>
+        <button data-periodo="100" class="sel" title="≈ 1 % de probabilidad cada año">100 años</button>
+        <button data-periodo="99999" title="Creciente máxima probable: la mayor creciente físicamente concebible">Extrema</button>
       </div>
       <label><input type="checkbox" id="chk-cri"> Inundaciones registradas</label>
       <label><input type="checkbox" id="chk-dre"> Amenaza urbana (drenaje y localidades)</label>
       <label><input type="checkbox" id="chk-llu"> Lluvia INUMET (7 estaciones)</label>
       <div id="creciente-estado" class="nota"></div>
-      <div class="nota">Manchas oficiales DINAGUA. Solo ciudades con estudio:
-        fuera de ellas la ausencia de mancha no implica ausencia de riesgo.
-        Activación por nivel de estación con umbral aproximado (±1 m).</div>
+      <div class="nota">Los escenarios son manchas oficiales de DINAGUA
+        precalculadas por probabilidad: «10 años» ≈ 10 % de probabilidad en
+        cualquier año, «100 años» ≈ 1 %, «Extrema» = creciente máxima
+        probable. No indican lo que pasa hoy.</div>
+      <div class="nota">El estado actual es la mancha
+        <span style="color:#ff6b6b">roja</span>: se enciende cuando el nivel
+        medido en una estación supera su umbral (aproximado, ±1 m), con
+        cualquier escenario. Solo ciudades con estudio: fuera de ellas la
+        ausencia de mancha no implica ausencia de riesgo.</div>
     </div>
   </div>
   <div id="leyenda" class="panel">
