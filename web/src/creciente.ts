@@ -28,6 +28,46 @@ function filtroActivas(): ExpressionSpecification {
     : ["==", ["get", "periodo"], -1];
 }
 
+function recorrerCoords(c: unknown, fn: (x: number, y: number) => void): void {
+  if (Array.isArray(c) && typeof c[0] === "number") {
+    fn(c[0] as number, c[1] as number);
+  } else if (Array.isArray(c)) {
+    for (const hijo of c) recorrerCoords(hijo, fn);
+  }
+}
+
+// Las manchas son casi invisibles a zoom bajo; un marcador por localidad
+// las hace descubribles y se apaga cuando el polígono ya se distingue.
+function zonasDesdeTr(tr: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
+  const grupos: Record<string, { sx: number; sy: number; n: number; curso: string }> = {};
+  for (const f of tr.features) {
+    const p = f.properties as Record<string, unknown>;
+    const cod = String(p.localidad_cod);
+    let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    recorrerCoords((f.geometry as GeoJSON.Polygon).coordinates, (x, y) => {
+      minx = Math.min(minx, x); maxx = Math.max(maxx, x);
+      miny = Math.min(miny, y); maxy = Math.max(maxy, y);
+    });
+    const g = grupos[cod] ?? { sx: 0, sy: 0, n: 0, curso: String(p.curso ?? "") };
+    g.sx += (minx + maxx) / 2;
+    g.sy += (miny + maxy) / 2;
+    g.n++;
+    grupos[cod] = g;
+  }
+  return {
+    type: "FeatureCollection",
+    features: Object.entries(grupos).map(([cod, g]) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [g.sx / g.n, g.sy / g.n] },
+      properties: {
+        localidad_cod: cod,
+        curso: g.curso,
+        activa: activacion[cod] && activacion[cod].periodo_activo > 0 ? 1 : 0,
+      },
+    })),
+  };
+}
+
 function resumenActivacion(): string {
   const activas = Object.entries(activacion).filter(([, a]) => a.periodo_activo > 0);
   if (activas.length) {
@@ -56,28 +96,43 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
     fetch(`${base}data/amenazas.geojson`).then((r) => r.json()),
   ]);
   map.addSource("inund-tr", { type: "geojson", data: tr });
+  map.addSource("inund-zonas", { type: "geojson", data: zonasDesdeTr(tr) });
   map.addSource("inund-cri", { type: "geojson", data: cri });
   map.addSource("drenaje", { type: "geojson", data: dre });
   map.addSource("amenazas", { type: "geojson", data: ame });
 
+  const COLOR_PERIODO: ExpressionSpecification = [
+    "step", ["get", "periodo"],
+    "#e05c5c", 11, "#e08a5c", 101, "#e0b95c",
+  ];
   map.addLayer({
     id: "inund-tr-fill",
     type: "fill",
     source: "inund-tr",
     paint: {
-      "fill-color": [
-        "step", ["get", "periodo"],
-        "#e05c5c", 11, "#e08a5c", 101, "#e0b95c",
-      ],
-      "fill-opacity": 0.3,
+      "fill-color": COLOR_PERIODO,
+      "fill-opacity": ["interpolate", ["linear"], ["zoom"], 8, 0.25, 11, 0.4],
     },
   }, "rios-glow");
   map.addLayer({
     id: "inund-tr-line",
     type: "line",
     source: "inund-tr",
-    paint: { "line-color": "#e05c5c", "line-width": 0.8, "line-opacity": 0.7 },
+    paint: { "line-color": COLOR_PERIODO, "line-width": 1.2, "line-opacity": 0.8 },
   }, "rios-glow");
+  map.addLayer({
+    id: "inund-zonas",
+    type: "circle",
+    source: "inund-zonas",
+    maxzoom: 10.5,
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 4, 10, 10],
+      "circle-color": ["case", ["==", ["get", "activa"], 1], "#ff4d4d", "#e08a5c"],
+      "circle-opacity": ["case", ["==", ["get", "activa"], 1], 0.5, 0.12],
+      "circle-stroke-color": ["case", ["==", ["get", "activa"], 1], "#ff6b6b", "#e08a5c"],
+      "circle-stroke-width": 1.4,
+    },
+  });
   map.addLayer({
     id: "inund-cri",
     type: "line",
@@ -128,6 +183,21 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
   const popup = (html: string, lngLat: maplibregl.LngLat) =>
     new maplibregl.Popup({ closeButton: false, maxWidth: "280px" })
       .setLngLat(lngLat).setHTML(html).addTo(map);
+
+  map.on("click", "inund-zonas", (e) => {
+    const f = e.features?.[0];
+    if (!f) return;
+    map.flyTo({
+      center: (f.geometry as GeoJSON.Point).coordinates as [number, number],
+      zoom: 12,
+    });
+  });
+  map.on("mouseenter", "inund-zonas", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "inund-zonas", () => {
+    map.getCanvas().style.cursor = "";
+  });
 
   map.on("click", "inund-tr-fill", (e) => {
     const p = e.features?.[0]?.properties;
@@ -240,6 +310,7 @@ function aplicarVisibilidad(map: Map, activo: boolean): void {
   const visibles: Record<string, boolean> = {
     "inund-tr-fill": activo,
     "inund-tr-line": activo,
+    "inund-zonas": activo,
     "inund-activa": activo,
     "inund-activa-line": activo,
     "inund-cri": activo && conCri,

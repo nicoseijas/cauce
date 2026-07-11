@@ -28,6 +28,8 @@
     #creciente .grupo { margin: 10px 0 4px; font-size: 11px; color: #8fa8bd; }
     #creciente .botones { display: flex; gap: 6px; flex-wrap: wrap; }
     #creciente .botones .sel { background: #7a3030; border-color: #a04545; }
+    #creciente .chips { display: flex; gap: 10px; margin-top: 6px; font-size: 10.5px; color: #8fa8bd; }
+    #creciente .chips i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
     #creciente label { display: flex; gap: 6px; margin-top: 8px; font-size: 12px; align-items: center; }
     #creciente .nota { margin-top: 10px; font-size: 10.5px; line-height: 1.4; color: #8fa8bd; }
     .alerta { color: #ff8080; font-weight: 650; }
@@ -81,6 +83,11 @@
         <button data-periodo="100" class="sel" title="≈ 1 % de probabilidad cada año">100 años</button>
         <button data-periodo="99999" title="Creciente máxima probable: la mayor creciente físicamente concebible">Extrema</button>
       </div>
+      <div class="chips">
+        <span><i style="background:#e05c5c"></i>10 años</span>
+        <span><i style="background:#e08a5c"></i>100 años</span>
+        <span><i style="background:#e0b95c"></i>Extrema</span>
+      </div>
       <label><input type="checkbox" id="chk-cri"> Inundaciones registradas</label>
       <label><input type="checkbox" id="chk-dre"> Amenaza urbana (drenaje y localidades)</label>
       <label><input type="checkbox" id="chk-llu"> Lluvia INUMET (7 estaciones)</label>
@@ -88,7 +95,8 @@
       <div class="nota">Los escenarios son manchas oficiales de DINAGUA
         precalculadas por probabilidad: «10 años» ≈ 10 % de probabilidad en
         cualquier año, «100 años» ≈ 1 %, «Extrema» = creciente máxima
-        probable. No indican lo que pasa hoy.</div>
+        probable. No indican lo que pasa hoy. A zoom bajo, los círculos
+        naranjas señalan las localidades con estudio: clic para acercar.</div>
       <div class="nota">El estado actual es la mancha
         <span style="color:#ff6b6b">roja</span>: se enciende cuando el nivel
         medido en una estación supera su umbral (aproximado, ±1 m), con

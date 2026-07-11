@@ -1,0 +1,26 @@
+{
+"type": "FeatureCollection",
+"name": "departamentos_nombres",
+"xy_coordinate_resolution": 0.001,
+"features": [
+{ "type": "Feature", "properties": { "nombre": "Paysandú" }, "geometry": { "type": "Point", "coordinates": [ -57.214, -32.024 ] } },
+{ "type": "Feature", "properties": { "nombre": "Soriano" }, "geometry": { "type": "Point", "coordinates": [ -57.849, -33.478 ] } },
+{ "type": "Feature", "properties": { "nombre": "Flores" }, "geometry": { "type": "Point", "coordinates": [ -56.885, -33.545 ] } },
+{ "type": "Feature", "properties": { "nombre": "Durazno" }, "geometry": { "type": "Point", "coordinates": [ -56.053, -32.958 ] } },
+{ "type": "Feature", "properties": { "nombre": "Florida" }, "geometry": { "type": "Point", "coordinates": [ -55.864, -33.763 ] } },
+{ "type": "Feature", "properties": { "nombre": "Canelones" }, "geometry": { "type": "Point", "coordinates": [ -55.974, -34.543 ] } },
+{ "type": "Feature", "properties": { "nombre": "Lavalleja" }, "geometry": { "type": "Point", "coordinates": [ -54.984, -33.977 ] } },
+{ "type": "Feature", "properties": { "nombre": "Tacuarembó" }, "geometry": { "type": "Point", "coordinates": [ -55.51, -32.049 ] } },
+{ "type": "Feature", "properties": { "nombre": "Rivera" }, "geometry": { "type": "Point", "coordinates": [ -55.193, -31.472 ] } },
+{ "type": "Feature", "properties": { "nombre": "Artigas" }, "geometry": { "type": "Point", "coordinates": [ -57.048, -30.588 ] } },
+{ "type": "Feature", "properties": { "nombre": "Salto" }, "geometry": { "type": "Point", "coordinates": [ -57.059, -31.306 ] } },
+{ "type": "Feature", "properties": { "nombre": "Río Negro" }, "geometry": { "type": "Point", "coordinates": [ -57.451, -32.874 ] } },
+{ "type": "Feature", "properties": { "nombre": "Colonia" }, "geometry": { "type": "Point", "coordinates": [ -57.602, -34.121 ] } },
+{ "type": "Feature", "properties": { "nombre": "San José" }, "geometry": { "type": "Point", "coordinates": [ -56.755, -34.31 ] } },
+{ "type": "Feature", "properties": { "nombre": "Cerro Largo" }, "geometry": { "type": "Point", "coordinates": [ -54.268, -32.34 ] } },
+{ "type": "Feature", "properties": { "nombre": "Treinta y Tres" }, "geometry": { "type": "Point", "coordinates": [ -54.358, -33.081 ] } },
+{ "type": "Feature", "properties": { "nombre": "Rocha" }, "geometry": { "type": "Point", "coordinates": [ -54.005, -33.975 ] } },
+{ "type": "Feature", "properties": { "nombre": "Montevideo" }, "geometry": { "type": "Point", "coordinates": [ -56.234, -34.819 ] } },
+{ "type": "Feature", "properties": { "nombre": "Maldonado" }, "geometry": { "type": "Point", "coordinates": [ -54.78, -34.45 ] } }
+]
+}

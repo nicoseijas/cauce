@@ -55,6 +55,8 @@ const map = new maplibregl.Map({
       // tramos fusionados por curso: las etiquetas en línea necesitan
       // features largas (los tramos sueltos no alcanzan para un nombre)
       "red-nombres": { type: "geojson", data: `${BASE}data/red_nombres.geojson` },
+      "deptos-nombres": { type: "geojson", data: `${BASE}data/departamentos_nombres.geojson` },
+      capitales: { type: "geojson", data: `${BASE}data/capitales.geojson` },
     },
     layers: [
       { id: "bg", type: "background", paint: { "background-color": "#08101a" } },
@@ -174,6 +176,62 @@ const map = new maplibregl.Map({
           "text-halo-width": 1.4,
         },
       }))),
+      {
+        id: "capitales-punto",
+        type: "circle",
+        source: "capitales",
+        minzoom: 6,
+        paint: {
+          "circle-radius": ["case", ["==", ["get", "capital_pais"], 1], 4, 2.5],
+          "circle-color": "#c9d6e2",
+          "circle-opacity": 0.85,
+          "circle-stroke-color": "#0b141d",
+          "circle-stroke-width": 1,
+        },
+      },
+      {
+        id: "capitales-nombre",
+        type: "symbol",
+        source: "capitales",
+        minzoom: 6,
+        layout: {
+          "text-field": ["get", "nombre"],
+          "text-font": ["Open Sans Semibold"],
+          "text-size": [
+            "interpolate", ["linear"], ["zoom"],
+            6, ["case", ["==", ["get", "capital_pais"], 1], 12.5, 10.5],
+            12, ["case", ["==", ["get", "capital_pais"], 1], 17, 14],
+          ],
+          "text-anchor": "top",
+          "text-offset": [0, 0.5],
+          "symbol-sort-key": ["*", -1, ["get", "pob"]],
+        },
+        paint: {
+          "text-color": "#d8e2ec",
+          "text-halo-color": "#0b141d",
+          "text-halo-width": 1.3,
+        },
+      },
+      {
+        id: "deptos-nombres",
+        type: "symbol",
+        source: "deptos-nombres",
+        minzoom: 5.5,
+        maxzoom: 10,
+        layout: {
+          "text-field": ["upcase", ["get", "nombre"]],
+          "text-font": ["Open Sans Semibold"],
+          "text-size": ["interpolate", ["linear"], ["zoom"], 5.5, 9.5, 9, 15],
+          "text-letter-spacing": 0.25,
+          "text-padding": 6,
+        },
+        paint: {
+          "text-color": "#46617a",
+          "text-halo-color": "#0b141d",
+          "text-halo-width": 1,
+          "text-opacity": 0.8,
+        },
+      },
     ],
   },
 });

@@ -1,0 +1,26 @@
+{
+"type": "FeatureCollection",
+"name": "capitales",
+"xy_coordinate_resolution": 0.001,
+"features": [
+{ "type": "Feature", "properties": { "nombre": "Montevideo", "capital_pais": 1, "pob": 1513000 }, "geometry": { "type": "Point", "coordinates": [ -56.187, -34.905 ] } },
+{ "type": "Feature", "properties": { "nombre": "Rivera", "capital_pais": 0, "pob": 200000 }, "geometry": { "type": "Point", "coordinates": [ -55.56, -30.9 ] } },
+{ "type": "Feature", "properties": { "nombre": "Salto", "capital_pais": 0, "pob": 105690 }, "geometry": { "type": "Point", "coordinates": [ -57.969, -31.39 ] } },
+{ "type": "Feature", "properties": { "nombre": "Paysandú", "capital_pais": 0, "pob": 79016 }, "geometry": { "type": "Point", "coordinates": [ -58.08, -32.33 ] } },
+{ "type": "Feature", "properties": { "nombre": "Melo", "capital_pais": 0, "pob": 55494 }, "geometry": { "type": "Point", "coordinates": [ -54.18, -32.359 ] } },
+{ "type": "Feature", "properties": { "nombre": "Maldonado", "capital_pais": 0, "pob": 55478 }, "geometry": { "type": "Point", "coordinates": [ -54.96, -34.91 ] } },
+{ "type": "Feature", "properties": { "nombre": "Tacuarembó", "capital_pais": 0, "pob": 54277 }, "geometry": { "type": "Point", "coordinates": [ -55.98, -31.71 ] } },
+{ "type": "Feature", "properties": { "nombre": "Mercedes", "capital_pais": 0, "pob": 42359 }, "geometry": { "type": "Point", "coordinates": [ -58.03, -33.26 ] } },
+{ "type": "Feature", "properties": { "nombre": "Artigas", "capital_pais": 0, "pob": 41909 }, "geometry": { "type": "Point", "coordinates": [ -56.486, -30.416 ] } },
+{ "type": "Feature", "properties": { "nombre": "Minas", "capital_pais": 0, "pob": 41180 }, "geometry": { "type": "Point", "coordinates": [ -55.23, -34.37 ] } },
+{ "type": "Feature", "properties": { "nombre": "San José de Mayo", "capital_pais": 0, "pob": 36529 }, "geometry": { "type": "Point", "coordinates": [ -56.71, -34.35 ] } },
+{ "type": "Feature", "properties": { "nombre": "Durazno", "capital_pais": 0, "pob": 34037 }, "geometry": { "type": "Point", "coordinates": [ -56.51, -33.41 ] } },
+{ "type": "Feature", "properties": { "nombre": "Florida", "capital_pais": 0, "pob": 32234 }, "geometry": { "type": "Point", "coordinates": [ -56.215, -34.099 ] } },
+{ "type": "Feature", "properties": { "nombre": "Treinta y Tres", "capital_pais": 0, "pob": 27684 }, "geometry": { "type": "Point", "coordinates": [ -54.38, -33.23 ] } },
+{ "type": "Feature", "properties": { "nombre": "Rocha", "capital_pais": 0, "pob": 26874 }, "geometry": { "type": "Point", "coordinates": [ -54.333, -34.483 ] } },
+{ "type": "Feature", "properties": { "nombre": "Fray Bentos", "capital_pais": 0, "pob": 23279 }, "geometry": { "type": "Point", "coordinates": [ -58.304, -33.139 ] } },
+{ "type": "Feature", "properties": { "nombre": "Colonia del Sacramento", "capital_pais": 0, "pob": 21714 }, "geometry": { "type": "Point", "coordinates": [ -57.836, -34.47 ] } },
+{ "type": "Feature", "properties": { "nombre": "Trinidad", "capital_pais": 0, "pob": 21093 }, "geometry": { "type": "Point", "coordinates": [ -56.901, -33.544 ] } },
+{ "type": "Feature", "properties": { "nombre": "Canelones", "capital_pais": 0, "pob": 19698 }, "geometry": { "type": "Point", "coordinates": [ -56.284, -34.538 ] } }
+]
+}
