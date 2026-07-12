@@ -148,7 +148,13 @@ def main() -> None:
     # tramos individuales son demasiado cortos para que quepa un nombre;
     # se fusionan los tramos de cada curso en líneas largas.
     from shapely.ops import linemerge, unary_union
-    con_nombre = rios[rios["nombre"].notna()]
+    # Hidrónimos genéricos sin nombre propio: fusionarlos por nombre uniría
+    # tramos de todo el país en una sola guía de etiqueta sin sentido.
+    genericos = {"cañada", "zanjón", "zanja", "arroyo", "río", "cañadón"}
+    con_nombre = rios[
+        rios["nombre"].notna()
+        & ~rios["nombre"].str.strip().str.lower().isin(genericos)
+    ]
     etiquetas = con_nombre.dissolve(by="nombre", aggfunc={"DIS_AV_CMS": "max"})
     etiquetas["geometry"] = etiquetas.geometry.apply(
         lambda g: linemerge(unary_union(g)) if g.geom_type != "LineString" else g
