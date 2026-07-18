@@ -6,6 +6,8 @@ stdlib. El mapping estación->tramo viene precalculado por build_estaciones.py.
 Fuentes (cada una tolera fallos de forma independiente):
 - WFS DINAGUA V_Catalogo_publica: último nivel y último caudal por estación.
 - saltogrande.org/datos_horarios.php: caudal turbinado + vertido (horario).
+- INA alerta.ina.gob.ar: alturas del río Uruguay con niveles oficiales de
+  alerta/evacuación de Prefectura (escala local de cada estación).
 """
 
 import csv
@@ -49,6 +51,56 @@ ESTACIONES_INUMET = {
     "Rocha G3": (-34.4884, -54.3122),
     "Salto G3": (-31.4382, -57.9836),
 }
+
+
+INA_URL = "https://alerta.ina.gob.ar/pub/datos/datos"
+# El INA emite hora local argentina (UTC-3) sin offset explícito.
+INA_TZ = timezone(timedelta(hours=-3))
+# Niveles de alerta/evacuación oficiales de Prefectura según los metadatos de
+# /pub/datos/estaciones (2026-08), en la escala local de cada estación: solo
+# son comparables con lecturas de la misma escala, nunca con cotas DINAGUA.
+ESTACIONES_INA = [
+    (78, "Salto Grande Abajo", -31.2755, -57.9369, 17.3, 17.8),
+    (79, "Concordia", -31.4000, -58.0167, 11.0, 12.5),
+    (80, "Colón", -32.2333, -58.1167, 7.1, 7.9),
+    (81, "Concepción del Uruguay", -32.4833, -58.2333, 5.3, 6.3),
+    (1699, "Nueva Palmira", -33.8785, -58.4220, None, None),
+]
+
+
+def leer_ina(ahora: datetime) -> dict | None:
+    import requests
+
+    t0 = (ahora - timedelta(days=6)).strftime("%Y-%m-%d")
+    t1 = (ahora + timedelta(days=1)).strftime("%Y-%m-%d")
+    estaciones = []
+    for code, nombre, lat, lon, alerta, evacuacion in ESTACIONES_INA:
+        url = (f"{INA_URL}&siteCode={code}&varId=2"
+               f"&timeStart={t0}&timeEnd={t1}&format=json")
+        try:
+            r = requests.get(url, timeout=60)
+            r.raise_for_status()
+            datos = r.json().get("data", [])
+        except Exception as exc:
+            log.warning("INA %s inaccesible: %s", nombre, exc)
+            continue
+        if not datos:
+            log.warning("INA %s sin datos en la ventana", nombre)
+            continue
+        ultimo = max(datos, key=lambda o: o["timestart"])
+        fecha = datetime.fromisoformat(ultimo["timestart"]).replace(tzinfo=INA_TZ)
+        estaciones.append({
+            "id": f"ina-{code}",
+            "nombre": nombre,
+            "lat": lat,
+            "lon": lon,
+            "nivel": ultimo["valor"],
+            "nivel_fecha": fecha.isoformat(timespec="minutes"),
+            "nivel_horas": round((ahora - fecha).total_seconds() / 3600, 1),
+            "alerta": alerta,
+            "evacuacion": evacuacion,
+        })
+    return {"estaciones": estaciones} if estaciones else None
 
 
 def horas_desde(fecha_iso: str | None, ahora: datetime) -> float | None:
@@ -145,11 +197,12 @@ def main() -> None:
     catalogo = leer_catalogo_dinagua()
     salto = leer_salto_grande()
     lluvia = leer_lluvia_inumet(ahora)
+    ina = leer_ina(ahora)
     fuentes = {
         "dinagua_wfs": "ok" if catalogo else "caida",
         "salto_grande": "ok" if salto else "caida",
         "inumet_lluvia": "ok" if lluvia else "caida",
-        "ina": "no_implementada",
+        "ina": "ok" if ina else "caida",
         "caru": "no_implementada",
     }
 
@@ -244,6 +297,7 @@ def main() -> None:
                            for k, v in factores.items()},
         "activacion": activacion,
         "lluvia": lluvia,
+        "ina": ina,
     }
 
     SALIDA.write_text(json.dumps(estado, ensure_ascii=False), encoding="utf-8")

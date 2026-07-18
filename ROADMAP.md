@@ -70,8 +70,15 @@ Objetivo: que el mapa refleje el estado hídrico actual, no solo el promedio.
       `estado_actual.json` + snapshot en `data/historico/`:
   - WFS DINAGUA `V_Catalogo_publica` (último nivel/caudal por estación). ✔
   - Scraping de `saltogrande.org/datos_horarios.php` (turbinado + vertido). ✔
-  - [ ] API INA `alerta.ina.gob.ar/pub/datos/` (alturas/caudales río
-        Uruguay) — API verificada viva, falta integrar.
+  - [x] API INA `alerta.ina.gob.ar/pub/datos/`: alturas diarias del río
+        Uruguay (Salto Grande Abajo, Concordia, Colón, C. del Uruguay) y
+        horarias de Nueva Palmira, con niveles oficiales de
+        alerta/evacuación de Prefectura en escala local. ✔
+    - [ ] Pronóstico INA: `datosProno` funciona (probado con el Paraná)
+          pero la serie de Nueva Palmira (26203/calId 433) devuelve "no se
+          encontró serie"; resolver apareamiento serie/corrida o consultar
+          al INA. Las estaciones CARU vía INA (Paysandú, Fray Bentos,
+          Nuevo Berlín) están listadas pero sin datos en la ventana.
   - [ ] CARU (tabla de alturas de puertos) como respaldo.
 - [x] Modelo de escala v1: factor caudal_actual/caudal_medio por estación
       (clamp 0,05–20), propagado a los tramos del mismo curso (`codigo5`);

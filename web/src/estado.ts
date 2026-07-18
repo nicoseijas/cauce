@@ -14,6 +14,18 @@ export type LluviaEstacion = {
   mm72: number;
 };
 
+export type EstacionINA = {
+  id: string;
+  nombre: string;
+  lat: number;
+  lon: number;
+  nivel: number;
+  nivel_fecha: string;
+  nivel_horas: number;
+  alerta: number | null;
+  evacuacion: number | null;
+};
+
 export type Estado = {
   generado: string;
   fuentes: Record<string, string>;
@@ -21,6 +33,7 @@ export type Estado = {
   factores_curso: Record<string, { factor: number; estacion: string }>;
   activacion?: Record<string, ActivacionLocalidad>;
   lluvia?: { hasta: string; estaciones: LluviaEstacion[] } | null;
+  ina?: { estaciones: EstacionINA[] } | null;
 };
 
 export type EstacionEstado = {
@@ -86,12 +99,20 @@ export function frescuraHoras(e: EstacionEstado): number | null {
 }
 
 export function estacionesComoGeoJSON(estado: Estado) {
-  return {
-    type: "FeatureCollection",
-    features: estado.estaciones.map((e) => ({
-      type: "Feature",
-      geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-      properties: { ...e, frescura: frescuraHoras(e) ?? 9999 },
-    })),
-  };
+  const propias = estado.estaciones.map((e) => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [e.lon, e.lat] },
+    properties: { ...e, frescura: frescuraHoras(e) ?? 9999 },
+  }));
+  const ina = (estado.ina?.estaciones ?? []).map((e) => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [e.lon, e.lat] },
+    properties: {
+      ...e,
+      curso: "Río Uruguay",
+      fuente: "INA / Prefectura (Argentina)",
+      frescura: e.nivel_horas,
+    },
+  }));
+  return { type: "FeatureCollection", features: [...propias, ...ina] };
 }

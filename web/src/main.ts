@@ -297,7 +297,13 @@ function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
   tooltip.style.top = `${y + 14}px`;
 }
 
-function popupEstacion(e: EstacionEstado): string {
+type EstacionPopup = EstacionEstado & {
+  alerta?: number | null;
+  evacuacion?: number | null;
+  fuente?: string;
+};
+
+function popupEstacion(e: EstacionPopup): string {
   const filas: string[] = [`<strong>${e.nombre}</strong>`];
   if (e.curso) filas.push(`<span class="q">${e.curso}</span>`);
   if (e.nivel != null) {
@@ -307,6 +313,20 @@ function popupEstacion(e: EstacionEstado): string {
     filas.push(`caudal ${formatoCaudal(e.caudal)} · hace ${redondearHoras(e.caudal_horas)}`);
   }
   if (e.nivel == null && e.caudal == null) filas.push("sin datos recientes");
+  if (e.alerta != null && e.nivel != null) {
+    if (e.evacuacion != null && e.nivel >= e.evacuacion) {
+      filas.push(`<span class="alerta">⚠ nivel de evacuación superado</span>`);
+    } else if (e.nivel >= e.alerta) {
+      filas.push(`<span class="alerta">⚠ nivel de alerta superado</span>`);
+    } else {
+      filas.push(`a ${(e.alerta - e.nivel).toFixed(2)} m del nivel de alerta`);
+    }
+    filas.push(
+      `<span class="q">alerta ${e.alerta} m · evacuación ` +
+      `${e.evacuacion ?? "—"} m (escala local)</span>`,
+    );
+  }
+  if (e.fuente) filas.push(`<span class="q">${e.fuente}</span>`);
   return filas.join("<br>");
 }
 
