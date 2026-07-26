@@ -79,6 +79,14 @@ Objetivo: que el mapa refleje el estado hídrico actual, no solo el promedio.
           encontró serie"; resolver apareamiento serie/corrida o consultar
           al INA. Las estaciones CARU vía INA (Paysandú, Fray Bentos,
           Nuevo Berlín) están listadas pero sin datos en la ventana.
+  - [x] UTE `CUPubNivCau` (cuenca del río Negro): niveles observados y
+        previsión a 7 días de niveles (San Gregorio, Paso de los Toros,
+        Mercedes) y de caudales a erogar en Bonete y Palmar; publicación
+        diaria ~12:00. El erogado previsto de Palmar escala el río Negro
+        como pseudo-estación (declarado "previsto"). ✔
+    - Nota: los informes post-operativos de ADME (cota/erogado observados)
+      están rotos del lado del servidor (`po_excel.php` con parse error de
+      PHP) y rezagan ~8 días; sus datos abiertos son solo MW por central.
   - [ ] CARU (tabla de alturas de puertos) como respaldo.
 - [x] Modelo de escala v1: factor caudal_actual/caudal_medio por estación
       (clamp 0,05–20), propagado a los tramos del mismo curso (`codigo5`);

@@ -7,6 +7,7 @@ const CAPAS_TR = ["inund-tr-fill", "inund-tr-line"];
 let cargado = false;
 let escenario = 100;
 let activacion: Record<string, ActivacionLocalidad> = {};
+let uteRioNegro: Estado["ute_rio_negro"];
 
 function nombrePeriodo(p: number): string {
   return p >= 9999 ? "CMP" : `${p} años`;
@@ -46,6 +47,30 @@ function resumenActivacion(): string {
     `${a.estacion}: a ${a.proximo!.faltan_m.toFixed(2).replace(".", ",")} m de su ` +
     `mancha de ${nombrePeriodo(a.proximo!.periodo)}`);
   return `Ninguna mancha superada ahora.<br>${lineas.join("<br>")}`;
+}
+
+function coma(n: number): string {
+  return n.toFixed(2).replace(".", ",");
+}
+
+function resumenUte(): string {
+  if (!uteRioNegro?.dias?.length) return "";
+  const hoy = uteRioNegro.dias[0];
+  const act = uteRioNegro.actualizado
+    ? ` (act. ${uteRioNegro.actualizado.slice(8, 10)}/${uteRioNegro.actualizado.slice(5, 7)})`
+    : "";
+  const partes: string[] = [`<br><strong>Río Negro — previsión UTE${act}</strong>`];
+  if (hoy.erogado_palmar) {
+    partes.push(`Palmar eroga hoy ${hoy.erogado_palmar.toLocaleString("es-UY")} m³/s`);
+  }
+  // se conserva el paréntesis con la escala de referencia de cada nivel
+  const ciudades = uteRioNegro.maximos.filter((m) =>
+    /Mercedes|Paso de los Toros|Polanco/.test(m.lugar));
+  for (const m of ciudades) {
+    const lugar = m.lugar.replace(/^Ciudad( de)?\s*/, "");
+    partes.push(`${lugar}: máx previsto ${coma(m.nivel)} m el ${m.fecha.slice(0, 5)}`);
+  }
+  return partes.join("<br>");
 }
 
 async function cargarCapas(map: Map, base: string): Promise<void> {
@@ -258,6 +283,7 @@ function aplicarVisibilidad(map: Map, activo: boolean): void {
 
 export function setupCreciente(map: Map, base: string, estado?: Estado): void {
   activacion = estado?.activacion ?? {};
+  uteRioNegro = estado?.ute_rio_negro;
   if (estado) crearCapaLluvia(map, estado);
   const panel = document.getElementById("creciente")!;
   const toggle = document.getElementById("creciente-toggle")!;
@@ -272,7 +298,8 @@ export function setupCreciente(map: Map, base: string, estado?: Estado): void {
       await cargarCapas(map, base);
       toggle.textContent = "Modo creciente";
       aplicarEscenario(map);
-      document.getElementById("creciente-estado")!.innerHTML = resumenActivacion();
+      document.getElementById("creciente-estado")!.innerHTML =
+        resumenActivacion() + resumenUte();
     }
     if (map.getLayer("inund-tr-fill")) aplicarVisibilidad(map, activo);
   });

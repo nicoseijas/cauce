@@ -26,6 +26,19 @@ export type EstacionINA = {
   evacuacion: number | null;
 };
 
+export type UteRioNegro = {
+  actualizado: string | null;
+  dias: {
+    fecha: string;
+    san_gregorio_local: number | null;
+    paso_toros_oficial: number | null;
+    mercedes_local: number | null;
+    erogado_bonete: number | null;
+    erogado_palmar: number | null;
+  }[];
+  maximos: { lugar: string; nivel: number; fecha: string }[];
+};
+
 export type Estado = {
   generado: string;
   fuentes: Record<string, string>;
@@ -34,6 +47,7 @@ export type Estado = {
   activacion?: Record<string, ActivacionLocalidad>;
   lluvia?: { hasta: string; estaciones: LluviaEstacion[] } | null;
   ina?: { estaciones: EstacionINA[] } | null;
+  ute_rio_negro?: UteRioNegro | null;
 };
 
 export type EstacionEstado = {

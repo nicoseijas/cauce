@@ -8,6 +8,8 @@ Fuentes (cada una tolera fallos de forma independiente):
 - saltogrande.org/datos_horarios.php: caudal turbinado + vertido (horario).
 - INA alerta.ina.gob.ar: alturas del río Uruguay con niveles oficiales de
   alerta/evacuación de Prefectura (escala local de cada estación).
+- UTE CUPubNivCau: niveles observados y previsión a 7 días de niveles y
+  caudales a erogar en la cuenca del río Negro (publicación diaria ~12:00).
 """
 
 import csv
@@ -66,6 +68,75 @@ ESTACIONES_INA = [
     (81, "Concepción del Uruguay", -32.4833, -58.2333, 5.3, 6.3),
     (1699, "Nueva Palmira", -33.8785, -58.4220, None, None),
 ]
+
+
+# La página pública exige la cookie de sesión anónima que reparte el portal;
+# visitar el portal primero y luego la página de datos con la misma sesión.
+UTE_PORTAL_URL = ("https://apps.ute.com.uy/sge/portal/nucleo/paginas/"
+                  "portal_utei.aspx?c=GerGdeE_CUPubNivCau")
+UTE_NIVELES_URL = ("https://apps.ute.com.uy/sge/portal/GestionEmbalseWeb/"
+                   "Paginas/GdeE/Previsiones/CUPubNivCau.aspx")
+ID_PALMAR = -2
+COORDS_PALMAR = (-33.067, -57.459)
+# Media de largo plazo del tramo HydroRIVERS más cercano a Palmar
+# (HYRIV_ID 61495605): el factor debe ser consistente con el DIS_AV_CMS
+# con el que se escala la red.
+Q_MEDIO_PALMAR = 838.8
+AREA_PALMAR_KM2 = 62_000
+
+
+def leer_ute_rio_negro(ahora: datetime) -> dict | None:
+    import requests
+
+    def limpiar(c: str) -> str:
+        return re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip()
+
+    def num(x: str) -> float | None:
+        x = x.strip()
+        # "< 55,5" = por debajo de la escala: sin lectura
+        if not x or not re.fullmatch(r"[\d.,]+", x):
+            return None
+        return float(x.replace(".", "").replace(",", "."))
+
+    try:
+        s = requests.Session()
+        s.headers["User-Agent"] = "Mozilla/5.0"
+        s.get(UTE_PORTAL_URL, timeout=60)
+        r = s.get(UTE_NIVELES_URL, timeout=60)
+        r.raise_for_status()
+    except Exception as exc:
+        log.warning("UTE río Negro inaccesible: %s", exc)
+        return None
+    html = r.text
+
+    m = re.search(r"actualizada el d[íi]a (\d{2})/(\d{2})/(\d{4}) a la hora "
+                  r"(\d{1,2}):(\d{2})", html)
+    actualizado = None
+    if m:
+        d, mes, anio, hh, mm = (int(g) for g in m.groups())
+        actualizado = datetime(anio, mes, d, hh, mm, tzinfo=INA_TZ).isoformat(timespec="minutes")
+
+    dias, maximos = [], []
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", html, re.S):
+        celdas = [limpiar(c) for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", tr, re.S)]
+        if celdas and re.fullmatch(r"\d{2}/\d{2}/\d{4}", celdas[0]) and len(celdas) == 9:
+            d, mes, anio = celdas[0].split("/")
+            dias.append({
+                "fecha": f"{anio}-{mes}-{d}",
+                "san_gregorio_local": num(celdas[2]),
+                "paso_toros_oficial": num(celdas[4]),
+                "mercedes_local": num(celdas[6]),
+                "erogado_bonete": num(celdas[7]),
+                "erogado_palmar": num(celdas[8]),
+            })
+        elif (len(celdas) == 3 and re.fullmatch(r"\d{2}/\d{2}/\d{4}", celdas[2] or "")
+              and num(celdas[1]) is not None):
+            maximos.append({"lugar": re.sub(r"\*+\s*$", "", celdas[0]).strip(),
+                            "nivel": num(celdas[1]), "fecha": celdas[2]})
+    if not dias:
+        log.warning("UTE río Negro: página sin tabla de previsión")
+        return None
+    return {"actualizado": actualizado, "dias": dias, "maximos": maximos}
 
 
 def leer_ina(ahora: datetime) -> dict | None:
@@ -198,11 +269,13 @@ def main() -> None:
     salto = leer_salto_grande()
     lluvia = leer_lluvia_inumet(ahora)
     ina = leer_ina(ahora)
+    ute = leer_ute_rio_negro(ahora)
     fuentes = {
         "dinagua_wfs": "ok" if catalogo else "caida",
         "salto_grande": "ok" if salto else "caida",
         "inumet_lluvia": "ok" if lluvia else "caida",
         "ina": "ok" if ina else "caida",
+        "ute_rio_negro": "ok" if ute else "caida",
         "caru": "no_implementada",
     }
 
@@ -263,6 +336,38 @@ def main() -> None:
                     "area_km2": p["area_km2"] or 0,
                 }
 
+    # Palmar como pseudo-estación: el erogado previsto para hoy manda sobre el
+    # bajo río Negro igual que Salto Grande sobre el río Uruguay. Es previsión
+    # hidráulica de UTE, no medición: el nombre lo declara.
+    if ute and ute["dias"]:
+        erogado = ute["dias"][0].get("erogado_palmar")
+        horas_ute = horas_desde(ute.get("actualizado"), ahora)
+        if erogado and horas_ute is not None and horas_ute <= FRESCURA_MAX_CAUDAL_H:
+            factor = round(min(max(erogado / Q_MEDIO_PALMAR, FACTOR_CLAMP[0]),
+                               FACTOR_CLAMP[1]), 3)
+            estaciones.append({
+                "id": ID_PALMAR,
+                "nombre": "Palmar — erogado previsto (UTE)",
+                "curso": "Río Negro",
+                "tipo": "erogado_previsto",
+                "lat": COORDS_PALMAR[0],
+                "lon": COORDS_PALMAR[1],
+                "q_medio": Q_MEDIO_PALMAR,
+                "codigo5": None,
+                "nivel": None, "nivel_fecha": None, "nivel_horas": None,
+                "caudal": erogado,
+                "caudal_fecha": ute.get("actualizado"),
+                "caudal_horas": round(horas_ute, 1),
+                "factor": factor,
+            })
+            previa = factores.get("Río Negro")
+            if previa is None or AREA_PALMAR_KM2 > previa["area_km2"]:
+                factores["Río Negro"] = {
+                    "factor": factor,
+                    "estacion": "Palmar — erogado previsto (UTE)",
+                    "area_km2": AREA_PALMAR_KM2,
+                }
+
     # Activación de manchas: nivel actual vs umbrales por datum oficial
     # (cota_oficial - cota_cero; incertidumbre ~±1 m, ver analizar_datum.py).
     por_id = {e["id"]: e for e in estaciones}
@@ -298,6 +403,7 @@ def main() -> None:
         "activacion": activacion,
         "lluvia": lluvia,
         "ina": ina,
+        "ute_rio_negro": ute,
     }
 
     SALIDA.write_text(json.dumps(estado, ensure_ascii=False), encoding="utf-8")
