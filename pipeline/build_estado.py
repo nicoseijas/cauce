@@ -10,6 +10,8 @@ Fuentes (cada una tolera fallos de forma independiente):
   alerta/evacuación de Prefectura (escala local de cada estación).
 - UTE CUPubNivCau: niveles observados y previsión a 7 días de niveles y
   caudales a erogar en la cuenca del río Negro (publicación diaria ~12:00).
+- ANA (Brasil) telemetría: nivel/caudal cada 15 min en cuencas compartidas
+  (Cuareim/Quaraí y Yaguarón/Jaguarão).
 """
 
 import csv
@@ -137,6 +139,75 @@ def leer_ute_rio_negro(ahora: datetime) -> dict | None:
         log.warning("UTE río Negro: página sin tabla de previsión")
         return None
     return {"actualizado": actualizado, "dias": dias, "maximos": maximos}
+
+
+ANA_URL = "https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos"
+# q_medio = DIS_AV_CMS del tramo HydroRIVERS más cercano (consistencia con la
+# escala de la red); area_km2 solo ordena prioridad entre estaciones del curso.
+# Jaguarão ciudad (88300040) y Laguna Merín (88045010) están sin transmitir.
+ESTACIONES_ANA = [
+    ("77500000", "Quaraí — río Cuareim", "Río Cuareim",
+     -30.3844, -56.4656, 101.4, 4574),
+    ("88260000", "Passo das Pedras — río Yaguarón", "Río Yaguarón",
+     -32.5194, -53.4558, 139.5, 7038),
+]
+
+
+def leer_ana(ahora: datetime) -> dict | None:
+    import xml.etree.ElementTree as ET
+
+    import requests
+
+    d0 = (ahora - timedelta(days=3)).strftime("%d/%m/%Y")
+    d1 = (ahora + timedelta(days=1)).strftime("%d/%m/%Y")
+    estaciones = []
+    for cod, nombre, curso, lat, lon, q_medio, area in ESTACIONES_ANA:
+        try:
+            r = requests.get(ANA_URL, timeout=90, params={
+                "codEstacao": cod, "dataInicio": d0, "dataFim": d1})
+            r.raise_for_status()
+            root = ET.fromstring(r.content)
+        except Exception as exc:
+            log.warning("ANA %s inaccesible: %s", nombre, exc)
+            continue
+        filas = []
+        for f in root.iter("DadosHidrometereologicos"):
+            d = {c.tag: (c.text or "").strip() for c in f}
+            if d.get("DataHora"):
+                filas.append(d)
+        if not filas:
+            log.warning("ANA %s sin datos en la ventana", nombre)
+            continue
+        filas.sort(key=lambda d: d["DataHora"])
+
+        def num(fila: dict, k: str) -> float | None:
+            try:
+                return float(fila[k]) if fila.get(k) else None
+            except ValueError:
+                return None
+
+        ult = filas[-1]
+        # la telemetría emite hora de Brasilia (UTC-3, sin DST desde 2019)
+        fecha = datetime.fromisoformat(ult["DataHora"]).replace(tzinfo=INA_TZ)
+        mm24 = sum(num(f, "Chuva") or 0 for f in filas
+                   if f["DataHora"] >= (fecha - timedelta(hours=24))
+                   .strftime("%Y-%m-%d %H:%M:%S"))
+        nivel_cm = num(ult, "Nivel")
+        estaciones.append({
+            "id": f"ana-{cod}",
+            "nombre": nombre,
+            "curso": curso,
+            "lat": lat,
+            "lon": lon,
+            "nivel": round(nivel_cm / 100, 2) if nivel_cm is not None else None,
+            "caudal": num(ult, "Vazao"),
+            "fecha": fecha.isoformat(timespec="minutes"),
+            "horas": round((ahora - fecha).total_seconds() / 3600, 1),
+            "mm24": round(mm24, 1),
+            "q_medio": q_medio,
+            "area_km2": area,
+        })
+    return {"estaciones": estaciones} if estaciones else None
 
 
 def leer_ina(ahora: datetime) -> dict | None:
@@ -270,12 +341,14 @@ def main() -> None:
     lluvia = leer_lluvia_inumet(ahora)
     ina = leer_ina(ahora)
     ute = leer_ute_rio_negro(ahora)
+    ana = leer_ana(ahora)
     fuentes = {
         "dinagua_wfs": "ok" if catalogo else "caida",
         "salto_grande": "ok" if salto else "caida",
         "inumet_lluvia": "ok" if lluvia else "caida",
         "ina": "ok" if ina else "caida",
         "ute_rio_negro": "ok" if ute else "caida",
+        "ana": "ok" if ana else "caida",
         "caru": "no_implementada",
     }
 
@@ -368,6 +441,23 @@ def main() -> None:
                     "area_km2": AREA_PALMAR_KM2,
                 }
 
+    # Caudal ANA fresco -> factor del curso compartido (misma regla: gana la
+    # estación de mayor cuenca).
+    if ana:
+        for e in ana["estaciones"]:
+            if not e["caudal"] or e["horas"] > FRESCURA_MAX_CAUDAL_H:
+                continue
+            factor = round(min(max(e["caudal"] / e["q_medio"], FACTOR_CLAMP[0]),
+                               FACTOR_CLAMP[1]), 3)
+            e["factor"] = factor
+            previa = factores.get(e["curso"])
+            if previa is None or e["area_km2"] > previa["area_km2"]:
+                factores[e["curso"]] = {
+                    "factor": factor,
+                    "estacion": e["nombre"],
+                    "area_km2": e["area_km2"],
+                }
+
     # Activación de manchas: nivel actual vs umbrales por datum oficial
     # (cota_oficial - cota_cero; incertidumbre ~±1 m, ver analizar_datum.py).
     por_id = {e["id"]: e for e in estaciones}
@@ -404,6 +494,7 @@ def main() -> None:
         "lluvia": lluvia,
         "ina": ina,
         "ute_rio_negro": ute,
+        "ana": ana,
     }
 
     SALIDA.write_text(json.dumps(estado, ensure_ascii=False), encoding="utf-8")

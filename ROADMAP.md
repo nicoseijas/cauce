@@ -87,6 +87,12 @@ Objetivo: que el mapa refleje el estado hídrico actual, no solo el promedio.
     - Nota: los informes post-operativos de ADME (cota/erogado observados)
       están rotos del lado del servidor (`po_excel.php` con parse error de
       PHP) y rezagan ~8 días; sus datos abiertos son solo MW por central.
+  - [x] ANA (Brasil) `telemetriaws1.ana.gov.br`: nivel/caudal cada 15 min en
+        Quaraí (río Cuareim) y Passo das Pedras (río Yaguarón); el caudal
+        fresco escala esos cursos compartidos. ✔
+    - Nota: Jaguarão ciudad (88300040) y Laguna Merín (88045010) figuran
+      activas en el inventario pero no transmiten desde hace >11 días;
+      recomprobar periódicamente.
   - [ ] CARU (tabla de alturas de puertos) como respaldo.
 - [x] Modelo de escala v1: factor caudal_actual/caudal_medio por estación
       (clamp 0,05–20), propagado a los tramos del mismo curso (`codigo5`);

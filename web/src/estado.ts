@@ -26,6 +26,22 @@ export type EstacionINA = {
   evacuacion: number | null;
 };
 
+export type EstacionANA = {
+  id: string;
+  nombre: string;
+  curso: string;
+  lat: number;
+  lon: number;
+  nivel: number | null;
+  caudal: number | null;
+  fecha: string;
+  horas: number;
+  mm24: number;
+  q_medio: number;
+  area_km2: number;
+  factor?: number;
+};
+
 export type UteRioNegro = {
   actualizado: string | null;
   dias: {
@@ -48,6 +64,7 @@ export type Estado = {
   lluvia?: { hasta: string; estaciones: LluviaEstacion[] } | null;
   ina?: { estaciones: EstacionINA[] } | null;
   ute_rio_negro?: UteRioNegro | null;
+  ana?: { estaciones: EstacionANA[] } | null;
 };
 
 export type EstacionEstado = {
@@ -128,5 +145,16 @@ export function estacionesComoGeoJSON(estado: Estado) {
       frescura: e.nivel_horas,
     },
   }));
-  return { type: "FeatureCollection", features: [...propias, ...ina] };
+  const ana = (estado.ana?.estaciones ?? []).map((e) => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [e.lon, e.lat] },
+    properties: {
+      ...e,
+      nivel_horas: e.horas,
+      caudal_horas: e.horas,
+      fuente: "ANA (Brasil)",
+      frescura: e.horas,
+    },
+  }));
+  return { type: "FeatureCollection", features: [...propias, ...ina, ...ana] };
 }
