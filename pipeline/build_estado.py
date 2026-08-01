@@ -64,11 +64,13 @@ INA_TZ = timezone(timedelta(hours=-3))
 # /pub/datos/estaciones (2026-08), en la escala local de cada estación: solo
 # son comparables con lecturas de la misma escala, nunca con cotas DINAGUA.
 ESTACIONES_INA = [
-    (78, "Salto Grande Abajo", -31.2755, -57.9369, 17.3, 17.8),
-    (79, "Concordia", -31.4000, -58.0167, 11.0, 12.5),
-    (80, "Colón", -32.2333, -58.1167, 7.1, 7.9),
-    (81, "Concepción del Uruguay", -32.4833, -58.2333, 5.3, 6.3),
-    (1699, "Nueva Palmira", -33.8785, -58.4220, None, None),
+    (78, "Salto Grande Abajo", "Río Uruguay", -31.2755, -57.9369, 17.3, 17.8),
+    (79, "Concordia", "Río Uruguay", -31.4000, -58.0167, 11.0, 12.5),
+    (80, "Colón", "Río Uruguay", -32.2333, -58.1167, 7.1, 7.9),
+    (81, "Concepción del Uruguay", "Río Uruguay", -32.4833, -58.2333, 5.3, 6.3),
+    (1699, "Nueva Palmira", "Río Uruguay", -33.8785, -58.4220, None, None),
+    # isla frente a Carmelo: único mareógrafo público del alto estuario
+    (47, "Martín García", "Río de la Plata", -34.1903, -58.2530, 2.5, 5.0),
 ]
 
 
@@ -162,13 +164,17 @@ def leer_ana(ahora: datetime) -> dict | None:
     d1 = (ahora + timedelta(days=1)).strftime("%d/%m/%Y")
     estaciones = []
     for cod, nombre, curso, lat, lon, q_medio, area in ESTACIONES_ANA:
-        try:
-            r = requests.get(ANA_URL, timeout=90, params={
-                "codEstacao": cod, "dataInicio": d0, "dataFim": d1})
-            r.raise_for_status()
-            root = ET.fromstring(r.content)
-        except Exception as exc:
-            log.warning("ANA %s inaccesible: %s", nombre, exc)
+        root = None
+        for intento in range(2):
+            try:
+                r = requests.get(ANA_URL, timeout=90, params={
+                    "codEstacao": cod, "dataInicio": d0, "dataFim": d1})
+                r.raise_for_status()
+                root = ET.fromstring(r.content)
+                break
+            except Exception as exc:
+                log.warning("ANA %s intento %d: %s", nombre, intento + 1, exc)
+        if root is None:
             continue
         filas = []
         for f in root.iter("DadosHidrometereologicos"):
@@ -216,7 +222,7 @@ def leer_ina(ahora: datetime) -> dict | None:
     t0 = (ahora - timedelta(days=6)).strftime("%Y-%m-%d")
     t1 = (ahora + timedelta(days=1)).strftime("%Y-%m-%d")
     estaciones = []
-    for code, nombre, lat, lon, alerta, evacuacion in ESTACIONES_INA:
+    for code, nombre, curso, lat, lon, alerta, evacuacion in ESTACIONES_INA:
         url = (f"{INA_URL}&siteCode={code}&varId=2"
                f"&timeStart={t0}&timeEnd={t1}&format=json")
         try:
@@ -234,6 +240,7 @@ def leer_ina(ahora: datetime) -> dict | None:
         estaciones.append({
             "id": f"ina-{code}",
             "nombre": nombre,
+            "curso": curso,
             "lat": lat,
             "lon": lon,
             "nivel": ultimo["valor"],

@@ -17,6 +17,7 @@ export type LluviaEstacion = {
 export type EstacionINA = {
   id: string;
   nombre: string;
+  curso: string;
   lat: number;
   lon: number;
   nivel: number;
@@ -140,7 +141,6 @@ export function estacionesComoGeoJSON(estado: Estado) {
     geometry: { type: "Point", coordinates: [e.lon, e.lat] },
     properties: {
       ...e,
-      curso: "Río Uruguay",
       fuente: "INA / Prefectura (Argentina)",
       frescura: e.nivel_horas,
     },
