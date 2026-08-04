@@ -43,6 +43,17 @@ export type EstacionANA = {
   factor?: number;
 };
 
+export type EstacionSOHMA = {
+  id: string;
+  nombre: string;
+  curso: string;
+  lat: number;
+  lon: number;
+  nivel: number;
+  fecha: string;
+  horas: number;
+};
+
 export type UteRioNegro = {
   actualizado: string | null;
   dias: {
@@ -66,6 +77,7 @@ export type Estado = {
   ina?: { estaciones: EstacionINA[] } | null;
   ute_rio_negro?: UteRioNegro | null;
   ana?: { estaciones: EstacionANA[] } | null;
+  sohma?: { estaciones: EstacionSOHMA[] } | null;
 };
 
 export type EstacionEstado = {
@@ -156,5 +168,18 @@ export function estacionesComoGeoJSON(estado: Estado) {
       frescura: e.horas,
     },
   }));
-  return { type: "FeatureCollection", features: [...propias, ...ina, ...ana] };
+  const sohma = (estado.sohma?.estaciones ?? []).map((e) => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [e.lon, e.lat] },
+    properties: {
+      ...e,
+      nivel_horas: e.horas,
+      fuente: "SOHMA (Armada) · cero Ex Wharton",
+      frescura: e.horas,
+    },
+  }));
+  return {
+    type: "FeatureCollection",
+    features: [...propias, ...ina, ...ana, ...sohma],
+  };
 }

@@ -96,16 +96,16 @@ Objetivo: que el mapa refleje el estado hídrico actual, no solo el promedio.
   - [x] Martín García (INA, alto estuario frente a Carmelo) con umbrales de
         alerta/evacuación de Prefectura: única referencia costera con feed
         público. ✔
-  - [ ] Nivel del agua en la costa uruguaya (Montevideo/este): **sin feed
-        público hoy** (auditado 2026-08). SOHMA solo ofrece la marea en
-        tiempo real por teléfono (099 679 071) y tablas astronómicas
-        anuales en PDF que excluyen la sobreelevación meteorológica (±1,5 m,
-        extraordinariamente +4 m). Las estaciones mareográficas automáticas
-        de la Armada (meteo.armada.mil.uy, La Paloma y Punta Lobos,
-        Est8/Est9) responden 501 del lado del servidor; el mareógrafo del
-        puerto ANP solo publica meteorología; el modelo SMARA del SHN no
-        tiene puntos uruguayos y publica imágenes. Recomprobar Est8/Est9 y
-        evaluar contacto con SOHMA/ANP.
+  - [x] Mareógrafos SOHMA (meteo.armada.mil.uy): Punta Lobos (bahía de
+        Montevideo, `Est5Armada.php`) y La Paloma (`Est4Armada.php`), nivel
+        cada 5 min referido al cero local Ex Wharton. ✔
+    - Notas de la auditoría 2026-08: `Est8`–`Est11` responden 501 (parecen
+      ser las mareográficas "en desarrollo": Colonia, Piriápolis, Punta del
+      Este); el mareógrafo del puerto ANP solo publica meteorología; el
+      modelo SMARA del SHN no tiene puntos uruguayos y publica imágenes;
+      las tablas de marea SOHMA son astronómicas y excluyen la
+      sobreelevación meteorológica. Sin umbrales oficiales de alerta
+      costera publicados: los mareógrafos se muestran informativos.
   - [ ] CARU (tabla de alturas de puertos) como respaldo.
 - [x] Modelo de escala v1: factor caudal_actual/caudal_medio por estación
       (clamp 0,05–20), propagado a los tramos del mismo curso (`codigo5`);

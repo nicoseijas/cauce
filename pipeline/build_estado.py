@@ -12,6 +12,8 @@ Fuentes (cada una tolera fallos de forma independiente):
   caudales a erogar en la cuenca del río Negro (publicación diaria ~12:00).
 - ANA (Brasil) telemetría: nivel/caudal cada 15 min en cuencas compartidas
   (Cuareim/Quaraí y Yaguarón/Jaguarão).
+- SOHMA (Armada) meteo.armada.mil.uy: mareógrafos de Punta Lobos (bahía de
+  Montevideo) y La Paloma, cada 5 min, cero local Ex Wharton.
 """
 
 import csv
@@ -87,6 +89,50 @@ COORDS_PALMAR = (-33.067, -57.459)
 # con el que se escala la red.
 Q_MEDIO_PALMAR = 838.8
 AREA_PALMAR_KM2 = 62_000
+
+
+# Coordenadas aproximadas del sitio del mareógrafo; la página no las publica.
+ESTACIONES_SOHMA = [
+    (5, "sohma-puntalobos", "Punta Lobos — bahía de Montevideo",
+     "Río de la Plata", -34.9011, -56.2470),
+    (4, "sohma-lapaloma", "La Paloma", "Océano Atlántico", -34.6486, -54.1453),
+]
+
+
+def leer_sohma(ahora: datetime) -> dict | None:
+    import requests
+
+    estaciones = []
+    for n, sid, nombre, curso, lat, lon in ESTACIONES_SOHMA:
+        try:
+            r = requests.get(f"https://meteo.armada.mil.uy/Est{n}Armada.php",
+                             timeout=60, headers={"User-Agent": "Mozilla/5.0"})
+            r.raise_for_status()
+        except Exception as exc:
+            log.warning("SOHMA %s inaccesible: %s", nombre, exc)
+            continue
+        texto = re.sub(r"<script.*?</script>", "", r.text, flags=re.S)
+        texto = re.sub(r"<[^>]+>", " ", texto)
+        texto = re.sub(r"\s+", " ", texto)
+        # primera fila de la tabla = lectura más reciente
+        m = re.search(r"(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):\d{2} ([\d.]+)", texto)
+        if not m:
+            log.warning("SOHMA %s: página sin tabla de lecturas", nombre)
+            continue
+        d, mes, anio, hh, mi, valor = m.groups()
+        # hora oficial de Uruguay (UTC-3, sin horario de verano)
+        fecha = datetime(int(anio), int(mes), int(d), int(hh), int(mi), tzinfo=INA_TZ)
+        estaciones.append({
+            "id": sid,
+            "nombre": nombre,
+            "curso": curso,
+            "lat": lat,
+            "lon": lon,
+            "nivel": float(valor),
+            "fecha": fecha.isoformat(timespec="minutes"),
+            "horas": round((ahora - fecha).total_seconds() / 3600, 1),
+        })
+    return {"estaciones": estaciones} if estaciones else None
 
 
 def leer_ute_rio_negro(ahora: datetime) -> dict | None:
@@ -349,6 +395,7 @@ def main() -> None:
     ina = leer_ina(ahora)
     ute = leer_ute_rio_negro(ahora)
     ana = leer_ana(ahora)
+    sohma = leer_sohma(ahora)
     fuentes = {
         "dinagua_wfs": "ok" if catalogo else "caida",
         "salto_grande": "ok" if salto else "caida",
@@ -356,6 +403,7 @@ def main() -> None:
         "ina": "ok" if ina else "caida",
         "ute_rio_negro": "ok" if ute else "caida",
         "ana": "ok" if ana else "caida",
+        "sohma": "ok" if sohma else "caida",
         "caru": "no_implementada",
     }
 
@@ -502,6 +550,7 @@ def main() -> None:
         "ina": ina,
         "ute_rio_negro": ute,
         "ana": ana,
+        "sohma": sohma,
     }
 
     SALIDA.write_text(json.dumps(estado, ensure_ascii=False), encoding="utf-8")
