@@ -192,8 +192,9 @@ hay dato de estación fresco, cuál está activa hoy.
 
 ## Fase 5 — Pulido y alcance extendido (esfuerzo: abierto)
 
-- [ ] Nombres de ríos con jerarquía por zoom (usar `nombre_2` de
-      `shp_cursos` / Natural Earth).
+- [x] Nombres de ríos con jerarquía por zoom (glyphs autoalojados, guía
+      fusionada por curso y generalizada; sin hidrónimos genéricos). También:
+      nombres de departamentos y capitales (Natural Earth). ✔
 - [ ] Buscador de cursos y permalinks por río/estación.
 - [ ] Detalle 1:10.000 de IDEuy en zooms altos (solo estética).
 - [ ] Pedir a `dinagua.servicios@ambiente.gub.uy` acceso a series/curvas de
