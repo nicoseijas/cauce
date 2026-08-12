@@ -5,7 +5,7 @@ type ActivacionLocalidad = NonNullable<Estado["activacion"]>[string];
 const CAPAS_TR = ["inund-tr-fill", "inund-tr-line"];
 
 let cargado = false;
-let escenario = 100;
+let escenario = 0;
 let activacion: Record<string, ActivacionLocalidad> = {};
 let uteRioNegro: Estado["ute_rio_negro"];
 
@@ -318,4 +318,7 @@ export function setupCreciente(map: Map, base: string, estado?: Estado): void {
       aplicarVisibilidad(map, panel.classList.contains("activo"));
     });
   }
+
+  // abierto por defecto: el estado de activación es lo primero que se ve
+  (toggle as HTMLButtonElement).click();
 }
