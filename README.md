@@ -1,14 +1,18 @@
-# Ríos UY — Mapa animado de caudales de Uruguay
+# Cauce — ríos del Uruguay en tiempo real
 
 Mapa web interactivo de la red hídrica uruguaya donde cada río se dibuja con
 ancho, color y animación proporcionales a su caudal, al estilo de
 [River Flow Map USA](https://norway-charts.netlify.app/river_flow_map_usa/).
+Incluye datos en vivo de 8 fuentes (DINAGUA, Salto Grande, INUMET, INA, UTE,
+ANA Brasil, SOHMA), modo creciente con manchas oficiales de inundación y
+activación automática por nivel de estación, y previsión a 7 días en la
+cuenca del río Negro.
 
 ## Estado
 
-MVP funcional (Fase 1 del [ROADMAP](ROADMAP.md)): mapa animado de caudal medio
-con hover por curso, listo para GitHub Pages. La capa de datos en vivo es la
-Fase 2.
+Fases 0–4 del [ROADMAP](ROADMAP.md) completas: mapa animado con datos en
+vivo (cron cada 2 h), modo creciente y vista de anomalía. Pendiente de
+publicación en GitHub Pages.
 
 ## Desarrollo
 

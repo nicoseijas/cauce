@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ríos del Uruguay</title>
+  <title>Cauce — ríos del Uruguay</title>
   <style>
     html, body { margin: 0; height: 100%; background: #0b141d; }
     #map { position: absolute; inset: 0; }
@@ -16,6 +16,7 @@
     }
     #titulo { top: 12px; left: 12px; max-width: 260px; }
     #titulo h1 { margin: 0 0 2px; font-size: 16px; font-weight: 650; color: #eaf4fd; }
+    #titulo .tagline { font-size: 12px; font-weight: 400; color: #8fa8bd; margin-left: 4px; }
     #titulo p { margin: 0; color: #8fa8bd; font-size: 12px; }
     #leyenda { bottom: 28px; left: 12px; }
     #creciente { top: 132px; left: 12px; max-width: 240px; }
@@ -69,7 +70,7 @@
 <body>
   <div id="map"></div>
   <div id="titulo" class="panel">
-    <h1>Ríos del Uruguay</h1>
+    <h1>Cauce <span class="tagline">ríos del Uruguay</span></h1>
     <p>Caudal medio de largo plazo. Ancho, brillo y velocidad proporcionales
        al caudal (escala logarítmica).</p>
   </div>
