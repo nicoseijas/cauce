@@ -8,6 +8,7 @@ let cargado = false;
 let escenario = 0;
 let activacion: Record<string, ActivacionLocalidad> = {};
 let uteRioNegro: Estado["ute_rio_negro"];
+let factoresCurso: Estado["factores_curso"] = {};
 
 function nombrePeriodo(p: number): string {
   return p >= 9999 ? "CMP" : `${p} años`;
@@ -29,48 +30,96 @@ function filtroActivas(): ExpressionSpecification {
     : ["==", ["get", "periodo"], -1];
 }
 
-function resumenActivacion(): string {
-  const activas = Object.entries(activacion).filter(([, a]) => a.periodo_activo > 0);
-  if (activas.length) {
-    return activas
-      .map(([, a]) =>
-        `<span class="alerta">⚠ ${a.estacion}: superada la mancha de ` +
-        `${nombrePeriodo(a.periodo_activo)} (nivel ${a.nivel.toFixed(2)} m)</span>`)
-      .join("<br>");
-  }
-  const proximos = Object.values(activacion)
-    .filter((a) => a.proximo)
-    .sort((x, y) => x.proximo!.faltan_m - y.proximo!.faltan_m)
-    .slice(0, 2);
-  if (!proximos.length) return "Sin niveles frescos para evaluar activación.";
-  const lineas = proximos.map((a) =>
-    `${a.estacion}: a ${a.proximo!.faltan_m.toFixed(2).replace(".", ",")} m de su ` +
-    `mancha de ${nombrePeriodo(a.proximo!.periodo)}`);
-  return `Ninguna mancha superada ahora.<br>${lineas.join("<br>")}`;
-}
-
 function coma(n: number): string {
   return n.toFixed(2).replace(".", ",");
 }
 
-function resumenUte(): string {
-  if (!uteRioNegro?.dias?.length) return "";
+function resumenAhora(): { html: string; nivel: string; corto: string } {
+  const activas = Object.entries(activacion).filter(([, a]) => a.periodo_activo > 0);
+  const crecidas = Object.entries(factoresCurso)
+    .filter(([, v]) => v.factor >= 2)
+    .sort((a, b) => b[1].factor - a[1].factor);
+
+  const lineas: string[] = [];
+  let nivel = "verde";
+  let corto = "Sin manchas de inundación superadas";
+
+  if (activas.length) {
+    nivel = "roja";
+    corto = `${activas.length} mancha${activas.length > 1 ? "s" : ""} de inundación superada${activas.length > 1 ? "s" : ""}`;
+    lineas.push(
+      `<div class="ahora-linea"><span class="dot roja"></span><span class="alerta">` +
+      activas.map(([, a]) =>
+        `⚠ ${a.estacion}: superada la mancha de ${nombrePeriodo(a.periodo_activo)} ` +
+        `(nivel ${coma(a.nivel)} m)`).join("<br>") +
+      `</span></div>`);
+  } else {
+    if (crecidas.length) nivel = "ambar";
+    lineas.push(
+      `<div class="ahora-linea"><span class="dot ${nivel}"></span>` +
+      `Ninguna mancha de inundación superada</div>`);
+  }
+
+  if (crecidas.length) {
+    corto += ` · ${crecidas.length} río${crecidas.length > 1 ? "s" : ""} en crecida`;
+    const top = crecidas.slice(0, 3).map(([curso, v], i) => {
+      // el factor llega recortado al clamp del pipeline: 20 significa "al menos 20"
+      const fx = v.factor >= 20 ? "≥20" : v.factor.toFixed(1).replace(".", ",");
+      const texto = `${curso} ${fx}×`;
+      return i === 0 ? `<strong>${texto}</strong>` : texto;
+    });
+    const resto = crecidas.length > 3 ? ` · +${crecidas.length - 3} más` : "";
+    lineas.push(
+      `<div class="ahora-det"><span class="dot ambar"></span><span>` +
+      `${crecidas.length} río${crecidas.length > 1 ? "s" : ""} en crecida: ` +
+      `${top.join(" · ")}${resto} <span style="color:#5c7893">(× su media)</span></span></div>`);
+  }
+
+  const proximos = Object.values(activacion)
+    .filter((a) => a.proximo)
+    .sort((x, y) => x.proximo!.faltan_m - y.proximo!.faltan_m)
+    .slice(0, 2);
+  for (const a of proximos) {
+    lineas.push(
+      `<div class="ahora-det"><span class="dot ambar"></span><span>` +
+      `${a.estacion}: a ${coma(a.proximo!.faltan_m)} m de su mancha de ` +
+      `${nombrePeriodo(a.proximo!.periodo)}</span></div>`);
+  }
+  if (!activas.length && !proximos.length && !crecidas.length) {
+    lineas.push(`<div class="ahora-det"><span class="dot" style="background:#5c7893"></span>` +
+      `<span>Sin niveles frescos para evaluar activación.</span></div>`);
+  }
+  return { html: lineas.join(""), nivel, corto };
+}
+
+function llenarPrevision(): void {
+  const det = document.getElementById("creciente-prevision")!;
+  if (!uteRioNegro?.dias?.length) return;
   const hoy = uteRioNegro.dias[0];
+  const maxMercedes = uteRioNegro.maximos.find((m) => /Mercedes/.test(m.lugar));
+  document.getElementById("prevision-resumen")!.innerHTML =
+    `Río Negro — previsión 7 días` +
+    (maxMercedes
+      ? ` <span style="color:#8fa8bd">· Mercedes máx ${coma(maxMercedes.nivel)} m` +
+        ` el ${maxMercedes.fecha.slice(0, 5)}</span>`
+      : "");
   const act = uteRioNegro.actualizado
-    ? ` (act. ${uteRioNegro.actualizado.slice(8, 10)}/${uteRioNegro.actualizado.slice(5, 7)})`
-    : "";
-  const partes: string[] = [`<br><strong>Río Negro — previsión UTE${act}</strong>`];
+    ? `act. ${uteRioNegro.actualizado.slice(8, 10)}/${uteRioNegro.actualizado.slice(5, 7)} (UTE)`
+    : "UTE";
+  const partes: string[] = [];
   if (hoy.erogado_palmar) {
-    partes.push(`Palmar eroga hoy ${hoy.erogado_palmar.toLocaleString("es-UY")} m³/s`);
+    partes.push(`<div>Palmar eroga hoy ${hoy.erogado_palmar.toLocaleString("es-UY")} m³/s</div>`);
   }
   // se conserva el paréntesis con la escala de referencia de cada nivel
   const ciudades = uteRioNegro.maximos.filter((m) =>
     /Mercedes|Paso de los Toros|Polanco/.test(m.lugar));
   for (const m of ciudades) {
     const lugar = m.lugar.replace(/^Ciudad( de)?\s*/, "");
-    partes.push(`${lugar}: máx previsto ${coma(m.nivel)} m el ${m.fecha.slice(0, 5)}`);
+    partes.push(`<div>${lugar}: máx previsto ${coma(m.nivel)} m el ${m.fecha.slice(0, 5)}</div>`);
   }
-  return partes.join("<br>");
+  partes.push(`<div style="color:#5c7893">${act}</div>`);
+  document.getElementById("prevision-detalle")!.innerHTML = partes.join("");
+  det.style.display = "block";
 }
 
 async function cargarCapas(map: Map, base: string): Promise<void> {
@@ -229,9 +278,10 @@ function crearCapaLluvia(map: Map, estado: Estado): void {
     layout: { visibility: "none" },
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["get", "mm72"], 0, 4, 150, 24],
+      // escala fría: el rojo queda reservado para manchas activas
       "circle-color": [
         "step", ["get", "mm72"],
-        "#3b566e", 20, "#e8c95a", 50, "#e08a5c", 100, "#ff6b6b",
+        "#3b566e", 20, "#5a9bd6", 50, "#8f7ce0", 100, "#c46fe0",
       ],
       "circle-opacity": 0.55,
       "circle-stroke-color": "#cfe0ee",
@@ -284,22 +334,28 @@ function aplicarVisibilidad(map: Map, activo: boolean): void {
 export function setupCreciente(map: Map, base: string, estado?: Estado): void {
   activacion = estado?.activacion ?? {};
   uteRioNegro = estado?.ute_rio_negro;
+  factoresCurso = estado?.factores_curso ?? {};
   if (estado) crearCapaLluvia(map, estado);
   const panel = document.getElementById("creciente")!;
   const toggle = document.getElementById("creciente-toggle")!;
+  const titulo = document.getElementById("creciente-titulo")!;
   const opciones = document.getElementById("creciente-opciones")!;
+
+  const ahora = resumenAhora();
+  document.getElementById("creciente-estado")!.innerHTML = ahora.html;
+  document.getElementById("hoja-resumen")!.textContent = ahora.corto;
+  document.getElementById("hoja-dot")!.className = `dot ${ahora.nivel}`;
+  llenarPrevision();
 
   toggle.addEventListener("click", async () => {
     const activo = panel.classList.toggle("activo");
     opciones.style.display = activo ? "block" : "none";
     if (activo && !cargado) {
       cargado = true;
-      toggle.textContent = "Cargando…";
+      titulo.textContent = "Cargando…";
       await cargarCapas(map, base);
-      toggle.textContent = "Modo creciente";
+      titulo.textContent = "Modo creciente";
       aplicarEscenario(map);
-      document.getElementById("creciente-estado")!.innerHTML =
-        resumenActivacion() + resumenUte();
     }
     if (map.getLayer("inund-tr-fill")) aplicarVisibilidad(map, activo);
   });

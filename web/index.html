@@ -5,57 +5,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cauce — ríos del Uruguay</title>
   <style>
+    @font-face {
+      font-family: "Bricolage Grotesque";
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      /* relativa al index para que funcione bajo el subpath de GitHub Pages */
+      src: url("fonts/bricolage-grotesque-700-latin.woff2") format("woff2");
+    }
     html, body { margin: 0; height: 100%; background: #0b141d; }
     #map { position: absolute; inset: 0; }
     .panel {
-      position: absolute; z-index: 10;
       font: 13px/1.45 system-ui, -apple-system, sans-serif; color: #cfe0ee;
-      background: rgba(10, 20, 30, 0.82); border: 1px solid #223344;
+      background: rgba(10, 20, 30, 0.85); border: 1px solid #223344;
       border-radius: 8px; padding: 10px 14px;
       backdrop-filter: blur(4px);
     }
-    #titulo { top: 12px; left: 12px; max-width: 260px; }
-    #titulo h1 { margin: 0 0 2px; font-size: 16px; font-weight: 650; color: #eaf4fd; }
-    #titulo .tagline { font-size: 12px; font-weight: 400; color: #8fa8bd; margin-left: 4px; }
-    #titulo p { margin: 0; color: #8fa8bd; font-size: 12px; }
-    #leyenda { bottom: 28px; left: 12px; }
-    #creciente { top: 132px; left: 12px; max-width: 240px; }
+
+    /* columna única: nada puede superponerse por construcción */
+    #columna {
+      position: absolute; z-index: 10; left: 12px; top: 12px; bottom: 12px;
+      width: 276px; display: flex; flex-direction: column; gap: 10px;
+      pointer-events: none;
+    }
+    #columna > *, #hoja > * { pointer-events: auto; }
+    #hoja { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+    #hoja-cuerpo {
+      display: flex; flex-direction: column; gap: 10px; min-height: 0;
+      overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2c4257 transparent;
+    }
+    #hoja-barra { display: none; }
+
+    #titulo h1 {
+      margin: 0; font-size: 19px; font-weight: 700; color: #eaf4fd;
+      font-family: "Bricolage Grotesque", system-ui, sans-serif;
+      display: flex; align-items: baseline; gap: 8px;
+    }
+    #titulo .tagline { font: 400 12px system-ui, sans-serif; color: #8fa8bd; }
+    #envivo {
+      display: none; align-items: center; gap: 5px; margin-left: auto;
+      background: #122a1e; border: 1px solid #24513a; border-radius: 999px;
+      padding: 2px 8px; font: 650 9.5px system-ui, sans-serif; color: #5ad18a;
+      letter-spacing: 0.06em;
+    }
+    #envivo i { width: 6px; height: 6px; border-radius: 50%; background: #5ad18a; }
+    #titulo p { margin: 4px 0 0; color: #5c7893; font-size: 11px; }
+
+    #creciente-toggle {
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+      font-weight: 650; color: #eaf4fd; user-select: none;
+    }
+    #creciente-toggle svg { transition: transform 0.15s; }
+    #creciente.activo #creciente-toggle svg { transform: rotate(90deg); }
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+    .dot.verde { background: #5ad18a; }
+    .dot.ambar { background: #e8c95a; }
+    .dot.roja { background: #ff4d4d; }
+    .ahora { margin-top: 10px; display: flex; flex-direction: column; gap: 7px; }
+    .ahora-linea { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #eaf4fd; font-weight: 650; line-height: 1.35; }
+    .ahora-linea .dot { margin-top: 4px; }
+    .ahora-det { display: flex; gap: 8px; font-size: 12px; color: #8fa8bd; line-height: 1.4; }
+    .ahora-det .dot { width: 7px; height: 7px; margin-top: 4px; }
+    .ahora-det strong { color: #7ef0d8; font-weight: 650; }
+    .alerta { color: #ff8080; font-weight: 650; }
+
+    details.seccion { margin-top: 10px; border-top: 1px solid #1a2a3a; padding-top: 8px; }
+    details.seccion summary {
+      list-style: none; cursor: pointer; font-size: 12px; color: #cfe0ee;
+      display: flex; align-items: center; gap: 7px;
+    }
+    details.seccion summary::before {
+      content: ""; width: 0; height: 0; flex: none;
+      border-left: 5px solid #8fa8bd; border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent; transition: transform 0.15s;
+    }
+    details.seccion[open] summary::before { transform: rotate(90deg); }
+    details.seccion .cuerpo { margin-top: 8px; font-size: 12px; color: #8fa8bd; line-height: 1.5; display: flex; flex-direction: column; gap: 6px; }
+
+    #creciente .grupo { margin: 12px 0 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; color: #8fa8bd; }
+    #creciente .grupo .suave { font-weight: 400; letter-spacing: 0; text-transform: none; color: #5c7893; }
     #creciente button {
       font: 12px system-ui, sans-serif; color: #cfe0ee; cursor: pointer;
       background: #1a2a3a; border: 1px solid #2c4257; border-radius: 5px;
       padding: 4px 10px;
     }
-    #creciente.activo #creciente-toggle { background: #7a3030; border-color: #a04545; }
-    #creciente .grupo { margin: 10px 0 4px; font-size: 11px; color: #8fa8bd; }
     #creciente .botones { display: flex; gap: 6px; flex-wrap: wrap; }
-    #creciente .botones .sel { background: #7a3030; border-color: #a04545; }
+    #creciente .botones .sel { background: #2c4a66; border-color: #4a7096; color: #eaf4fd; }
     #creciente .chips { display: flex; gap: 10px; margin-top: 6px; font-size: 10.5px; color: #8fa8bd; }
     #creciente .chips i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-    #creciente label { display: flex; gap: 6px; margin-top: 8px; font-size: 12px; align-items: center; }
-    #creciente .nota { margin-top: 10px; font-size: 10.5px; line-height: 1.4; color: #8fa8bd; }
-    .alerta { color: #ff8080; font-weight: 650; }
-    #vista-switch { display: flex; gap: 6px; margin-bottom: 8px; }
+    #creciente label { display: flex; gap: 8px; margin-top: 7px; font-size: 12.5px; align-items: center; }
+    #creciente .nota { font-size: 11px; line-height: 1.45; color: #8fa8bd; }
+
+    #vista-switch { display: none; gap: 6px; margin-bottom: 8px; align-items: center; }
+    #vista-switch .rotulo { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; color: #8fa8bd; margin-right: 2px; }
     #vista-switch button {
       font: 11px system-ui, sans-serif; color: #cfe0ee; cursor: pointer;
       background: #1a2a3a; border: 1px solid #2c4257; border-radius: 5px;
       padding: 3px 9px;
     }
     #vista-switch .sel { background: #2c4a66; border-color: #4a7096; }
+    #leyenda .fila { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    #leyenda .linea { background: #57a8d8; border-radius: 2px; }
+    #leyenda .etiqueta { color: #8fa8bd; font-size: 11px; }
+
     /* el CSS del bundle de MapLibre se inyecta después de este bloque */
     .maplibregl-ctrl-top-right { top: 42px !important; }
     .maplibregl-ctrl-top-right .maplibregl-ctrl-group {
-      background: rgba(10, 20, 30, 0.82); border: 1px solid #223344;
+      background: rgba(10, 20, 30, 0.85); border: 1px solid #223344;
     }
     .maplibregl-ctrl-top-right .maplibregl-ctrl-group button {
       background: transparent; color: #cfe0ee;
     }
     .maplibregl-ctrl-top-right .maplibregl-ctrl-group button + button { border-top: 1px solid #223344; }
-    .maplibregl-ctrl-top-right .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
-      filter: invert(0.85);
-    }
-    #leyenda .fila { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-    #leyenda .linea { background: #57a8d8; border-radius: 2px; }
-    #leyenda .etiqueta { color: #8fa8bd; font-size: 11px; }
+
     #tooltip {
       display: none; position: absolute; z-index: 20; pointer-events: none;
       font: 12px/1.4 system-ui, sans-serif; color: #eaf4fd;
@@ -63,67 +126,118 @@
       border-radius: 6px; padding: 6px 10px; white-space: nowrap;
     }
     #tooltip .q { color: #8fc6ec; }
-    #fps { top: 12px; right: 12px; font-size: 11px; color: #5c7893; padding: 4px 8px; }
-    @media (max-width: 600px) { #titulo p, #fps { display: none; } }
+    #fps { position: absolute; z-index: 10; top: 12px; right: 12px; font-size: 11px; color: #5c7893; padding: 4px 8px; }
+
+    @media (max-width: 640px) {
+      #columna { left: 0; right: 0; top: auto; bottom: 0; width: auto; gap: 0; }
+      #titulo { position: fixed; top: 10px; left: 10px; padding: 6px 12px; }
+      #titulo p { display: none; }
+      #hoja {
+        gap: 0; background: rgba(9, 17, 26, 0.96);
+        border-top: 1px solid #2c4257; border-radius: 14px 14px 0 0;
+      }
+      #hoja-barra {
+        display: flex; align-items: center; gap: 9px;
+        padding: 14px 16px 12px; cursor: pointer; user-select: none;
+        font: 650 13px/1.3 system-ui, sans-serif; color: #eaf4fd;
+      }
+      #hoja-barra svg { margin-left: auto; flex: none; transition: transform 0.15s; }
+      #hoja.abierta #hoja-barra svg { transform: rotate(180deg); }
+      #hoja:not(.abierta) #hoja-cuerpo { display: none; }
+      #hoja-cuerpo { max-height: 55vh; padding: 0 8px 10px; }
+      #hoja-cuerpo .panel {
+        border: none; background: transparent; backdrop-filter: none;
+        border-radius: 0; padding: 8px 8px 12px;
+      }
+      #hoja-cuerpo > .panel + .panel { border-top: 1px solid #1a2a3a; }
+      #fps { display: none; }
+      .maplibregl-ctrl-attrib { font-size: 10px; }
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <div id="titulo" class="panel">
-    <h1>Cauce <span class="tagline">ríos del Uruguay</span></h1>
-    <p>Caudal medio de largo plazo. Ancho, brillo y velocidad proporcionales
-       al caudal (escala logarítmica).</p>
-  </div>
-  <div id="creciente" class="panel">
-    <button id="creciente-toggle">Modo creciente</button>
-    <div id="creciente-opciones" style="display:none">
-      <div class="grupo">Escenario precalculado (no es el estado actual)</div>
-      <div class="botones">
-        <button data-periodo="0" class="sel">Ocultar</button>
-        <button data-periodo="10" title="≈ 10 % de probabilidad cada año">10 años</button>
-        <button data-periodo="100" title="≈ 1 % de probabilidad cada año">100 años</button>
-        <button data-periodo="99999" title="Creciente máxima probable: la mayor creciente físicamente concebible">Extrema</button>
+  <div id="columna">
+    <div id="titulo" class="panel">
+      <h1>Cauce <span class="tagline">ríos del Uruguay</span>
+        <span id="envivo"><i></i>EN VIVO</span></h1>
+      <p>Caudal medio de largo plazo. Ancho, brillo y velocidad proporcionales
+         al caudal (escala logarítmica).</p>
+    </div>
+    <div id="hoja">
+      <div id="hoja-barra">
+        <span id="hoja-dot" class="dot verde"></span>
+        <span id="hoja-resumen">Cargando estado…</span>
+        <svg width="15" height="15" viewBox="0 0 16 16"><path d="M 3 6 L 8 11 L 13 6" fill="none" stroke="#8fa8bd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div class="chips">
-        <span><i style="background:#e05c5c"></i>10 años</span>
-        <span><i style="background:#e08a5c"></i>100 años</span>
-        <span><i style="background:#e0b95c"></i>Extrema</span>
+      <div id="hoja-cuerpo">
+        <div id="creciente" class="panel">
+          <div id="creciente-toggle">
+            <svg width="12" height="12" viewBox="0 0 16 16"><path d="M 5 3 L 11 8 L 5 13" fill="none" stroke="#8fa8bd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="creciente-titulo">Modo creciente</span>
+          </div>
+          <div id="creciente-opciones" style="display:none">
+            <div id="creciente-estado" class="ahora"></div>
+            <details id="creciente-prevision" class="seccion" style="display:none">
+              <summary id="prevision-resumen"></summary>
+              <div id="prevision-detalle" class="cuerpo"></div>
+            </details>
+            <div class="grupo">CAPAS</div>
+            <label><input type="checkbox" id="chk-cri"> Inundaciones registradas</label>
+            <label><input type="checkbox" id="chk-dre"> Amenaza urbana (drenaje y localidades)</label>
+            <label><input type="checkbox" id="chk-llu"> Lluvia INUMET (7 estaciones)</label>
+            <div class="grupo">ESCENARIO PRECALCULADO <span class="suave">(no es el estado actual)</span></div>
+            <div class="botones">
+              <button data-periodo="0" class="sel">Oculto</button>
+              <button data-periodo="10" title="≈ 10 % de probabilidad cada año">10 años</button>
+              <button data-periodo="100" title="≈ 1 % de probabilidad cada año">100 años</button>
+              <button data-periodo="99999" title="Creciente máxima probable: la mayor creciente físicamente concebible">Extrema</button>
+            </div>
+            <div class="chips">
+              <span><i style="background:#e05c5c"></i>10 años</span>
+              <span><i style="background:#e08a5c"></i>100 años</span>
+              <span><i style="background:#e0b95c"></i>Extrema</span>
+            </div>
+            <details id="como-leer" class="seccion">
+              <summary>¿Cómo leer este mapa?</summary>
+              <div class="cuerpo">
+                <div class="nota">Los escenarios son manchas oficiales de DINAGUA
+                  precalculadas por probabilidad: «10 años» ≈ 10 % de probabilidad en
+                  cualquier año, «100 años» ≈ 1 %, «Extrema» = creciente máxima
+                  probable. No indican lo que pasa hoy.</div>
+                <div class="nota">El estado actual es la mancha
+                  <span style="color:#ff6b6b">roja</span>: se enciende cuando el nivel
+                  medido en una estación supera su umbral (aproximado, ±1 m), con
+                  cualquier escenario. Solo ciudades con estudio: fuera de ellas la
+                  ausencia de mancha no implica ausencia de riesgo.</div>
+              </div>
+            </details>
+          </div>
+        </div>
+        <div id="leyenda" class="panel">
+          <div id="vista-switch">
+            <span class="rotulo">VER</span>
+            <button id="vista-caudal" class="sel">Caudal</button>
+            <button id="vista-anomalia">vs. normal</button>
+          </div>
+          <div id="leyenda-caudal">
+          <div class="fila"><div class="linea" style="width:46px;height:7px"></div><span class="etiqueta">~5.000 m³/s (río Uruguay)</span></div>
+          <div class="fila"><div class="linea" style="width:46px;height:4px;opacity:.85"></div><span class="etiqueta">~600 m³/s (Río Negro)</span></div>
+          <div class="fila"><div class="linea" style="width:46px;height:2px;opacity:.7"></div><span class="etiqueta">~40 m³/s</span></div>
+          <div class="fila"><div class="linea" style="width:46px;height:1px;opacity:.55"></div><span class="etiqueta">&lt; 5 m³/s</span></div>
+          </div>
+          <div id="leyenda-anomalia" style="display:none">
+          <div class="fila"><div class="linea" style="width:46px;height:3px;background:#7ef0d8"></div><span class="etiqueta">crecida (&gt;3× la media)</span></div>
+          <div class="fila"><div class="linea" style="width:46px;height:3px;background:#8fb0c8"></div><span class="etiqueta">normal (≈1×)</span></div>
+          <div class="fila"><div class="linea" style="width:46px;height:3px;background:#e0a45c"></div><span class="etiqueta">bajo (&lt;⅓ de la media)</span></div>
+          <div class="fila"><div class="linea" style="width:46px;height:3px;background:#2c4257"></div><span class="etiqueta">sin medición reciente</span></div>
+          </div>
+          <div class="fila" style="margin-top:8px"><span class="dot verde" style="width:9px;height:9px"></span><span class="etiqueta">estación con dato &lt; 24 h</span></div>
+          <div class="fila"><span class="dot ambar" style="width:9px;height:9px"></span><span class="etiqueta">24–48 h</span></div>
+          <div class="fila"><span class="dot" style="width:9px;height:9px;background:#5c7893"></span><span class="etiqueta">&gt; 48 h / sin dato</span></div>
+        </div>
       </div>
-      <label><input type="checkbox" id="chk-cri"> Inundaciones registradas</label>
-      <label><input type="checkbox" id="chk-dre"> Amenaza urbana (drenaje y localidades)</label>
-      <label><input type="checkbox" id="chk-llu"> Lluvia INUMET (7 estaciones)</label>
-      <div id="creciente-estado" class="nota"></div>
-      <div class="nota">Los escenarios son manchas oficiales de DINAGUA
-        precalculadas por probabilidad: «10 años» ≈ 10 % de probabilidad en
-        cualquier año, «100 años» ≈ 1 %, «Extrema» = creciente máxima
-        probable. No indican lo que pasa hoy.</div>
-      <div class="nota">El estado actual es la mancha
-        <span style="color:#ff6b6b">roja</span>: se enciende cuando el nivel
-        medido en una estación supera su umbral (aproximado, ±1 m), con
-        cualquier escenario. Solo ciudades con estudio: fuera de ellas la
-        ausencia de mancha no implica ausencia de riesgo.</div>
     </div>
-  </div>
-  <div id="leyenda" class="panel">
-    <div id="vista-switch" class="botones" style="display:none">
-      <button id="vista-caudal" class="sel">Caudal</button>
-      <button id="vista-anomalia">vs. normal</button>
-    </div>
-    <div id="leyenda-caudal">
-    <div class="fila"><div class="linea" style="width:46px;height:7px"></div><span class="etiqueta">~5.000 m³/s (río Uruguay)</span></div>
-    <div class="fila"><div class="linea" style="width:46px;height:4px;opacity:.85"></div><span class="etiqueta">~600 m³/s (Río Negro)</span></div>
-    <div class="fila"><div class="linea" style="width:46px;height:2px;opacity:.7"></div><span class="etiqueta">~40 m³/s</span></div>
-    <div class="fila"><div class="linea" style="width:46px;height:1px;opacity:.55"></div><span class="etiqueta">&lt; 5 m³/s</span></div>
-    </div>
-    <div id="leyenda-anomalia" style="display:none">
-    <div class="fila"><div class="linea" style="width:46px;height:3px;background:#7ef0d8"></div><span class="etiqueta">crecida (&gt;3× la media)</span></div>
-    <div class="fila"><div class="linea" style="width:46px;height:3px;background:#8fb0c8"></div><span class="etiqueta">normal (≈1×)</span></div>
-    <div class="fila"><div class="linea" style="width:46px;height:3px;background:#e0a45c"></div><span class="etiqueta">bajo (&lt;⅓ de la media)</span></div>
-    <div class="fila"><div class="linea" style="width:46px;height:3px;background:#2c4257"></div><span class="etiqueta">sin medición reciente</span></div>
-    </div>
-    <div class="fila" style="margin-top:8px"><span style="width:9px;height:9px;border-radius:50%;background:#5ad18a;display:inline-block"></span><span class="etiqueta">estación con dato &lt; 24 h</span></div>
-    <div class="fila"><span style="width:9px;height:9px;border-radius:50%;background:#e8c95a;display:inline-block"></span><span class="etiqueta">24–48 h</span></div>
-    <div class="fila"><span style="width:9px;height:9px;border-radius:50%;background:#5c7893;display:inline-block"></span><span class="etiqueta">&gt; 48 h / sin dato</span></div>
   </div>
   <div id="tooltip"></div>
   <div id="fps" class="panel"></div>

@@ -276,6 +276,15 @@ map.addControl(new ControlesMapa(), "top-right");
 
 const tooltip = document.getElementById("tooltip")!;
 const fpsEl = document.getElementById("fps")!;
+// telemetría de desarrollo: visible solo con ?debug (el texto se sigue
+// actualizando porque los scripts de captura lo usan como señal de carga)
+if (!new URLSearchParams(location.search).has("debug")) {
+  fpsEl.style.display = "none";
+}
+
+document.getElementById("hoja-barra")!.addEventListener("click", () => {
+  document.getElementById("hoja")!.classList.toggle("abierta");
+});
 
 function formatoCaudal(q: number): string {
   if (q >= 100) return `${Math.round(q).toLocaleString("es-UY")} m³/s`;
@@ -287,8 +296,9 @@ function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
   const nombre = (f.properties.nombre as string) || "Curso sin nombre";
   const q = Number(f.properties.DIS_AV_CMS) || 0;
   const factor = f.properties.factor as number | undefined;
+  const fx = factor && factor >= 20 ? "≥20" : factor?.toFixed(1);
   const linea = factor
-    ? `caudal actual ≈ ${formatoCaudal(q)} (${factor.toFixed(1)}× la media` +
+    ? `caudal actual ≈ ${formatoCaudal(q)} (${fx}× la media` +
       `, est. ${f.properties.estacion_factor})`
     : `caudal medio ${formatoCaudal(q)} (estimado)`;
   tooltip.innerHTML = `<strong>${nombre}</strong><br><span class="q">${linea}</span>`;
@@ -399,8 +409,11 @@ map.on("load", async () => {
     cargarEstado(`${BASE}data/estado_actual.json`),
   ]);
 
+  document.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
+
   const estadoEl = document.querySelector("#titulo p")!;
   if (estado) {
+    document.getElementById("envivo")!.style.display = "inline-flex";
     const tocados = aplicarFactores(fc, estado);
     (map.getSource("red") as GeoJSONSource).setData(fc);
 
