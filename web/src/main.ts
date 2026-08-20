@@ -26,9 +26,18 @@ const COLOR_CAUDAL: ExpressionSpecification = [
   8, "#57a8d8",
 ];
 
+// el resplandor azul se apaga en tramos en crecida para no tapar el halo ámbar
 const OPACIDAD_GLOW: ExpressionSpecification = [
-  "interpolate", ["linear"], ESCALA_LOG_Q,
-  3.5, 0, 5.5, 0.10, 8, 0.28,
+  "case",
+  ["all", ["has", "factor"], [">=", ["get", "factor"], 2]],
+  0,
+  ["interpolate", ["linear"], ESCALA_LOG_Q, 3.5, 0, 5.5, 0.10, 8, 0.28],
+];
+
+const ANCHO_RIOS: ExpressionSpecification = [
+  "interpolate", ["exponential", 1.6], ["zoom"],
+  5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0.3, 4, 1.2, 8, 3.5],
+  12, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 1.5, 4, 6, 8, 18],
 ];
 
 const VISTA_INICIAL = { center: [-56.0, -32.7] as [number, number], zoom: 6.3 };
@@ -111,11 +120,7 @@ const map = new maplibregl.Map({
         layout: { "line-cap": "round", "line-join": "round" },
         paint: {
           "line-color": COLOR_CAUDAL,
-          "line-width": [
-            "interpolate", ["exponential", 1.6], ["zoom"],
-            5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 0.3, 4, 1.2, 8, 3.5],
-            12, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 1.5, 4, 6, 8, 18],
-          ],
+          "line-width": ANCHO_RIOS,
           "line-opacity": 0.9,
         },
       },
@@ -393,6 +398,8 @@ function setupVistaAnomalia(map: maplibregl.Map, flow: FlowLayer): void {
   function activar(anomalia: boolean): void {
     map.setPaintProperty("rios", "line-color", anomalia ? COLOR_ANOMALIA : COLOR_CAUDAL);
     map.setPaintProperty("rios-glow", "line-opacity", anomalia ? 0 : OPACIDAD_GLOW);
+    // en la vista anomalía el color ya codifica el factor: el halo sobraría
+    map.setLayoutProperty("rios-crecida", "visibility", anomalia ? "none" : "visible");
     flow.setVisible(!anomalia);
     btnCaudal.classList.toggle("sel", !anomalia);
     btnAnomalia.classList.toggle("sel", anomalia);
@@ -416,6 +423,31 @@ map.on("load", async () => {
     document.getElementById("envivo")!.style.display = "inline-flex";
     const tocados = aplicarFactores(fc, estado);
     (map.getSource("red") as GeoJSONSource).setData(fc);
+
+    // advertencia visual de crecida: halo ámbar (el mismo del semáforo del
+    // panel) bajo los cursos medidos a ≥2× su caudal medio
+    map.addLayer({
+      id: "rios-crecida",
+      type: "line",
+      source: "red",
+      layout: { "line-cap": "round", "line-join": "round" },
+      filter: ["all", ["has", "factor"], [">=", ["get", "factor"], 2]],
+      paint: {
+        "line-color": "#e8c95a",
+        // ancho de "rios" + margen: no se puede componer con ["+"] porque
+        // MapLibre admite un solo interpolate por zoom en cada expresión
+        "line-width": [
+          "interpolate", ["exponential", 1.6], ["zoom"],
+          5, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 3.8, 4, 4.7, 8, 7],
+          12, ["interpolate", ["linear"], ESCALA_LOG_Q, 0, 10.5, 4, 15, 8, 27],
+        ],
+        "line-blur": ["interpolate", ["linear"], ["zoom"], 5, 2, 12, 5],
+        "line-opacity": [
+          "interpolate", ["linear"], ["get", "factor"],
+          2, 0.45, 5, 0.6, 20, 0.75,
+        ],
+      },
+    }, "rios");
 
     map.addSource("estaciones", {
       type: "geojson",
