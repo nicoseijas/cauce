@@ -108,6 +108,30 @@ export async function cargarEstado(url: string): Promise<Estado | null> {
   }
 }
 
+/** Pares [epoch_s, valor] ordenados por fecha de observación. */
+export type SeriePuntos = [number, number][];
+
+export type Series = {
+  generado: string;
+  ventana_dias: number;
+  estaciones: Record<string, { nivel?: SeriePuntos; caudal?: SeriePuntos }>;
+};
+
+let seriesCache: Promise<Series | null> | undefined;
+
+export function cargarSeries(url: string): Promise<Series | null> {
+  seriesCache ??= (async () => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      return (await res.json()) as Series;
+    } catch {
+      return null;
+    }
+  })();
+  return seriesCache;
+}
+
 export type RedFC = {
   features: { properties: Record<string, unknown> & {
     DIS_AV_CMS?: number; DIS_MEDIO?: number; codigo5?: number | null;

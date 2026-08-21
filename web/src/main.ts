@@ -8,8 +8,10 @@ import { FlowLayer } from "./flow-layer";
 import {
   aplicarFactores,
   cargarEstado,
+  cargarSeries,
   estacionesComoGeoJSON,
   type EstacionEstado,
+  type SeriePuntos,
 } from "./estado";
 import { setupCreciente } from "./creciente";
 
@@ -350,6 +352,40 @@ function redondearHoras(h: number | null): string {
   return `${Math.round(h / 24)} días`;
 }
 
+function miniGrafico(serie: { nivel?: SeriePuntos; caudal?: SeriePuntos }): string {
+  const puntos = serie.nivel ?? serie.caudal;
+  if (!puntos || puntos.length < 3) return "";
+  const variable = serie.nivel ? "nivel" : "caudal";
+
+  const W = 220, H = 44, PAD = 3;
+  const ts = puntos.map(([t]) => t);
+  const vs = puntos.map(([, v]) => v);
+  const t0 = Math.min(...ts), t1 = Math.max(...ts);
+  let v0 = Math.min(...vs), v1 = Math.max(...vs);
+  if (v1 - v0 < 1e-9) { v0 -= 0.5; v1 += 0.5; }
+  const x = (t: number) => PAD + ((t - t0) / (t1 - t0)) * (W - 2 * PAD);
+  const y = (v: number) => H - PAD - ((v - v0) / (v1 - v0)) * (H - 2 * PAD);
+  const linea = puntos.map(([t, v]) => `${x(t).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const [tf, vf] = puntos[puntos.length - 1];
+
+  const horas = (t1 - t0) / 3600;
+  const lapso = horas < 48 ? `${Math.round(horas)} h` : `${Math.round(horas / 24)} días`;
+  const num = (v: number) =>
+    variable === "nivel"
+      ? v.toFixed(2)
+      : v >= 100 ? Math.round(v).toLocaleString("es-UY") : v.toFixed(1);
+  const unidad = variable === "nivel" ? "m" : "m³/s";
+  const rango = `${num(Math.min(...vs))}–${num(Math.max(...vs))} ${unidad}`;
+
+  return (
+    `<div class="serie"><span class="q">${variable} · ${lapso} · ${rango}</span>` +
+    `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
+    `<polyline points="${linea}" fill="none" stroke="#4a7096" stroke-width="1.5"/>` +
+    `<circle cx="${x(tf).toFixed(1)}" cy="${y(vf).toFixed(1)}" r="2.2" fill="#1d7a68"/>` +
+    `</svg></div>`
+  );
+}
+
 map.on("mousemove", (e) => {
   const feats = map.queryRenderedFeatures(
     [[e.point.x - 4, e.point.y - 4], [e.point.x + 4, e.point.y + 4]],
@@ -440,13 +476,19 @@ map.on("load", async () => {
         "circle-opacity": 0.9,
       },
     });
-    map.on("click", "estaciones", (ev) => {
+    map.on("click", "estaciones", async (ev) => {
       const f = ev.features?.[0];
       if (!f) return;
-      new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
+      const props = f.properties as unknown as EstacionPopup;
+      const popup = new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
         .setLngLat(ev.lngLat)
-        .setHTML(popupEstacion(f.properties as unknown as EstacionEstado))
+        .setHTML(popupEstacion(props))
         .addTo(map);
+      const series = await cargarSeries(`${BASE}data/series.json`);
+      const serie = series?.estaciones[String(props.id)];
+      if (!serie || !popup.isOpen()) return;
+      const grafico = miniGrafico(serie);
+      if (grafico) popup.setHTML(popupEstacion(props) + grafico);
     });
     map.on("mouseenter", "estaciones", () => {
       map.getCanvas().style.cursor = "pointer";
