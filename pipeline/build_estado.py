@@ -58,6 +58,18 @@ ESTACIONES_INUMET = {
     "Salto G3": (-31.4382, -57.9836),
 }
 
+# INIA GRAS vía CKAN: acumulado diario de pluviómetro (09 a 09 h), un CSV por
+# año; el recurso vigente se resuelve por package_show para sobrevivir al
+# cambio de año. Coordenadas del JSON de metadatos de cada dataset.
+CKAN_PACKAGE_URL = "https://catalogodatos.gub.uy/api/3/action/package_show?id="
+ESTACIONES_INIA = {
+    "inia-precipitacion-temps-extremas-le": ("INIA La Estanzuela", -34.3372, -57.6922),
+    "inia-precipitacion-temps-extremas-lb": ("INIA Las Brujas", -34.67, -56.34),
+    "inia-precipitacion-temps-extremas-tb": ("INIA Tacuarembó", -31.7089, -55.8267),
+    "inia-precipitacion-temps-extremas-sg": ("INIA Salto Grande", -31.2728, -57.8908),
+    "inia-precipitacion-temps-extremas-tyt": ("INIA Treinta y Tres", -33.2750, -54.1722),
+}
+
 
 INA_URL = "https://alerta.ina.gob.ar/pub/datos/datos"
 # El INA emite hora local argentina (UTC-3) sin offset explícito.
@@ -380,8 +392,52 @@ def leer_lluvia_inumet(ahora: datetime) -> dict | None:
             "lon": lon,
             "mm24": round(sum(m for f, m in vals if f > hasta - timedelta(hours=24)), 1),
             "mm72": round(sum(m for f, m in vals if f > hasta - timedelta(hours=72)), 1),
+            "fuente": "INUMET",
         })
     return {"hasta": hasta.isoformat(timespec="minutes"), "estaciones": estaciones}
+
+
+def leer_lluvia_inia(ahora: datetime) -> list[dict] | None:
+    estaciones = []
+    anio = str(ahora.year)
+    for dataset, (nombre, lat, lon) in ESTACIONES_INIA.items():
+        try:
+            r = wfs.SESSION.get(CKAN_PACKAGE_URL + dataset, timeout=60)
+            r.raise_for_status()
+            recursos = r.json()["result"]["resources"]
+            url = next(
+                x["url"] for x in recursos
+                if x.get("format") == "CSV" and anio in (x.get("name") or "")
+            )
+            rc = wfs.SESSION.get(url, timeout=60)
+            rc.raise_for_status()
+        except Exception as exc:
+            log.warning("lluvia INIA %s: %s", dataset, exc)
+            continue
+        filas = [
+            f for f in csv.DictReader(io.StringIO(rc.text))
+            if f.get("pluviometro") not in (None, "", "NA")
+        ]
+        if not filas:
+            continue
+        try:
+            fecha = datetime.strptime(filas[-1]["fecha"], "%Y-%m-%d").replace(
+                tzinfo=timezone.utc)
+            mm = [float(f["pluviometro"]) for f in filas[-3:]]
+        except ValueError:
+            continue
+        if ahora - fecha > timedelta(days=3):
+            continue
+        estaciones.append({
+            "nombre": nombre,
+            "lat": lat,
+            "lon": lon,
+            "mm24": round(mm[-1], 1),
+            "mm72": round(sum(mm), 1),
+            "fecha": filas[-1]["fecha"],
+            "fuente": "INIA",
+        })
+    return estaciones or None
 
 
 def main() -> None:
@@ -391,7 +447,14 @@ def main() -> None:
     mapping = json.loads(ESTACIONES.read_text(encoding="utf-8"))
     catalogo = leer_catalogo_dinagua()
     salto = leer_salto_grande()
-    lluvia = leer_lluvia_inumet(ahora)
+    lluvia_inumet = leer_lluvia_inumet(ahora)
+    lluvia_inia = leer_lluvia_inia(ahora)
+    lluvia = lluvia_inumet
+    if lluvia_inia:
+        if lluvia:
+            lluvia["estaciones"].extend(lluvia_inia)
+        else:
+            lluvia = {"hasta": None, "estaciones": lluvia_inia}
     ina = leer_ina(ahora)
     ute = leer_ute_rio_negro(ahora)
     ana = leer_ana(ahora)
@@ -399,7 +462,8 @@ def main() -> None:
     fuentes = {
         "dinagua_wfs": "ok" if catalogo else "caida",
         "salto_grande": "ok" if salto else "caida",
-        "inumet_lluvia": "ok" if lluvia else "caida",
+        "inumet_lluvia": "ok" if lluvia_inumet else "caida",
+        "inia_lluvia": "ok" if lluvia_inia else "caida",
         "ina": "ok" if ina else "caida",
         "ute_rio_negro": "ok" if ute else "caida",
         "ana": "ok" if ana else "caida",

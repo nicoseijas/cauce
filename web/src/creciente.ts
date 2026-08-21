@@ -339,12 +339,16 @@ function crearCapaLluvia(map: Map, estado: Estado): void {
   map.on("click", "lluvia", (e) => {
     const p = e.features?.[0]?.properties;
     if (!p) return;
+    const fuente = p.fuente ?? "INUMET";
+    const pie = fuente === "INIA"
+      ? `acumulado diario 09–09 h · último día ${p.fecha}`
+      : `hasta ${String(lluvia.hasta).slice(0, 16)} UTC`;
     new maplibregl.Popup({ closeButton: false, maxWidth: "240px" })
       .setLngLat(e.lngLat)
       .setHTML(
-        `<strong>${p.nombre}</strong> (INUMET)<br>` +
+        `<strong>${p.nombre}</strong> (${fuente})<br>` +
         `lluvia 24 h: ${p.mm24} mm · 72 h: ${p.mm72} mm<br>` +
-        `<span style="color:#8fa8bd">hasta ${String(lluvia.hasta).slice(0, 16)} UTC</span>`)
+        `<span style="color:#8fa8bd">${pie}</span>`)
       .addTo(map);
   });
 }

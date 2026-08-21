@@ -173,7 +173,10 @@ hay dato de estación fresco, cuál está activa hoy.
       estación** (círculos por intensidad), no por cuenca: el CSV público
       trae solo 7 estaciones y pintar cuencas enteras sobrevendería
       cobertura (AGENTS.md). Coordenadas aproximadas (INUMET no las publica
-      con el CSV). Pendiente: sumar las 5 estaciones INIA del CKAN.
+      con el CSV). Sumadas las 5 estaciones INIA del CKAN (pluviómetro
+      diario 09–09 h, La Estanzuela / Las Brujas / Tacuarembó / Salto
+      Grande / Treinta y Tres): 12 estaciones de lluvia y 11 cuencas con
+      cobertura de aviso.
 - [x] Vista "caudal vs. normal" (anomalía): conmutador en la leyenda, rampa
       divergente sobre ln(factor) (bajo ámbar / normal gris / crecida
       verde-agua), tramos sin medición fresca apagados, partículas y glow

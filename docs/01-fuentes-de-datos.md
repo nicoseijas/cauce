@@ -86,6 +86,11 @@ valor", no una serie temporal. El pipeline debe filtrar por antigüedad.
   modificado el mismo 2026-08-20). Licencia odc-uy.
 - Descarga directa de recurso CSV sin auth. No existe API REST propia de
   INUMET (`api.inumet.gub.uy` no resuelve).
+- Complemento INIA GRAS vía CKAN (`inia-precipitacion-temps-extremas-{le,lb,
+  tb,sg,tyt}`): pluviómetro **diario** (09 a 09 h), un CSV por año,
+  actualización diaria (verificado 2026-08-21). El recurso del año se
+  resuelve por `package_show`; coordenadas en el JSON de metadatos de cada
+  dataset. Licencia odc-uy.
 
 ## 7. CKAN catalogodatos.gub.uy — histórico — VERIFICADO
 

@@ -12,6 +12,9 @@ export type LluviaEstacion = {
   lon: number;
   mm24: number;
   mm72: number;
+  fuente?: "INUMET" | "INIA";
+  /** solo INIA: fecha del último acumulado diario (09 a 09 h) */
+  fecha?: string;
 };
 
 export type EstacionINA = {
