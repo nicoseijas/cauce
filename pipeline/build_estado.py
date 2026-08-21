@@ -96,10 +96,10 @@ UTE_NIVELES_URL = ("https://apps.ute.com.uy/sge/portal/GestionEmbalseWeb/"
                    "Paginas/GdeE/Previsiones/CUPubNivCau.aspx")
 ID_PALMAR = -2
 COORDS_PALMAR = (-33.067, -57.459)
-# Media de largo plazo del tramo HydroRIVERS más cercano a Palmar
-# (HYRIV_ID 61495605): el factor debe ser consistente con el DIS_AV_CMS
-# con el que se escala la red.
-Q_MEDIO_PALMAR = 838.8
+# Media de largo plazo del tramo más cercano a Palmar (HYRIV_ID 61495605),
+# según la climatología de DINAGUA: el factor debe ser consistente con la
+# referencia con la que se escala la red (ver build_climatologia.py).
+Q_MEDIO_PALMAR = 922.7
 AREA_PALMAR_KM2 = 62_000
 
 

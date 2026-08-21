@@ -3,14 +3,19 @@
 Entrada:  data/raw/catalogo_estaciones.geojson + data/processed/red_uy.geojson
 Salida:   data/processed/estaciones.geojson (también copiado a web/public/data/)
 
-Corre junto con build_red.py (no en el cron): build_estado.py usa este archivo
-para no depender de geopandas en CI.
+Corre junto con build_red.py y build_climatologia.py (no en el cron):
+build_estado.py usa este archivo para no depender de geopandas en CI.
+
+El caudal medio de referencia (`q_medio`), con el que se calcula el factor
+"× la media", sale de la climatología de DINAGUA cuando el tramo la tiene; si
+no, del `DIS_AV_CMS` de HydroRIVERS. El campo `q_medio_fuente` lo declara.
 
 Incluye una pseudo-estación para la represa de Salto Grande: su caudal
 (turbinado + vertido) se scrapea en build_estado.py y el join aquí le asigna
 el tramo y caudal medio del río Uruguay en ese punto.
 """
 
+import json
 import logging
 from pathlib import Path
 
@@ -57,6 +62,19 @@ def main() -> None:
     )
     join = join[~join.index.duplicated(keep="first")]
 
+    climatologia = ROOT / "data" / "processed" / "climatologia.json"
+    if climatologia.exists():
+        q_dinagua = {int(k): v["q_dinagua"]
+                     for k, v in json.loads(climatologia.read_text(encoding="utf-8")).items()}
+        propio = join["HYRIV_ID"].map(lambda h: q_dinagua.get(int(h)) if h == h else None)
+        join["q_medio_fuente"] = propio.notna().map({True: "DINAGUA", False: "HydroRIVERS"})
+        join["DIS_AV_CMS"] = propio.fillna(join["DIS_AV_CMS"])
+        log.info("caudal medio de DINAGUA en %d de %d estaciones",
+                 int(propio.notna().sum()), len(join))
+    else:
+        join["q_medio_fuente"] = "HydroRIVERS"
+        log.warning("sin %s: el caudal medio queda en HydroRIVERS", climatologia)
+
     ratio = join["UPLAND_SKM"] / join["Area (km2)"]
     join["join_ok"] = (
         (join["dist_m"] < DIST_MAX_M)
@@ -65,7 +83,8 @@ def main() -> None:
 
     out = join[[
         "id", "Código", "Nombre", "Curso", "Tipo", "Area (km2)", "Cota Cero (Wh)",
-        "HYRIV_ID", "DIS_AV_CMS", "codigo5", "dist_m", "join_ok", "geometry",
+        "HYRIV_ID", "DIS_AV_CMS", "q_medio_fuente", "codigo5", "dist_m", "join_ok",
+        "geometry",
     ]].rename(columns={
         "Código": "codigo", "Nombre": "nombre", "Curso": "curso", "Tipo": "tipo",
         "Area (km2)": "area_km2", "Cota Cero (Wh)": "cota_cero",
