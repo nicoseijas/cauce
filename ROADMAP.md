@@ -49,12 +49,13 @@ Objetivo: mapa navegable de Uruguay con ríos animados según caudal **medio**
 - [x] Hover: resalta el curso completo (por `codigo5`) con tooltip de nombre
       y caudal medio.
 - [x] Workflow de deploy a GitHub Pages (`.github/workflows/deploy.yml`).
-- [ ] Publicar: crear el repo en GitHub, push y habilitar Pages.
+- [x] Publicar: repo `nicoseijas/cauce` en GitHub, Pages habilitado con
+      origen Actions — https://nicoseijas.github.io/cauce/ (2026-08-21).
 
 Validaciones ejecutadas (criterios de `docs/03-mvp.md`): payload ~495 KB gzip
 (presupuesto 3 MB), 60 fps desktop, los 15 cursos de referencia presentes con
 nombre, orientación aguas abajo verificada en 4.532/4.532 tramos encadenados.
-Pendientes: medición en móvil real y URL pública (requiere el push).
+Pendiente: medición en móvil real.
 
 **Criterio de salida:** URL pública con el mapa animado de caudal medio,
 fluido en desktop y móvil.
