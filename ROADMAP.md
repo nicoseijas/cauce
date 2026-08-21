@@ -180,10 +180,13 @@ hay dato de estación fresco, cuál está activa hoy.
       ocultos en este modo. La propagación del factor pasó a ser por nombre
       de curso completo (el `codigo5` de DINAGUA es por sección, no por
       río): 490 tramos escalados por 11 estaciones.
-- [ ] Cruce lluvia→creciente: resaltar cuencas con precipitación acumulada
-      extrema como **aviso de atención**, nunca como mancha inferida — la
-      lluvia no salta directo a mancha; la cadena es lluvia → escorrentía/
-      caudal → nivel → mancha (ver AGENTS.md).
+- [x] Cruce lluvia→creciente: subcuenca (nivel 2, `scp2`) de cada estación
+      de lluvia resaltada en ámbar punteado como **aviso de atención** cuando
+      el acumulado supera 50 mm/24 h o 100 mm/72 h (umbral orientativo),
+      nunca como mancha inferida (AGENTS.md). `build_cuencas_lluvia.py`
+      exporta solo las 8 cuencas con estación (INUMET + ANA); el aviso
+      aparece en el bloque AHORA y el popup explica la cadena
+      lluvia → caudal → nivel → mancha.
 - [x] Persistir cada snapshot del job de Fase 2 para construir series propias
       (`data/historico/AAAA/MM/DD-HHMM.json`, commiteado por el cron).
 - [x] Mini-gráfico de serie temporal en el popup de estación

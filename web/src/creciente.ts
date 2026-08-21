@@ -9,6 +9,43 @@ let escenario = 0;
 let activacion: Record<string, ActivacionLocalidad> = {};
 let uteRioNegro: Estado["ute_rio_negro"];
 let factoresCurso: Estado["factores_curso"] = {};
+let avisosLluvia: AvisoLluvia[] = [];
+
+// Umbrales orientativos de "lluvia abundante" (del orden de las advertencias
+// meteorológicas de INUMET); son un aviso de atención sobre la cuenca, nunca
+// una mancha inferida: la cadena es lluvia → caudal → nivel → mancha.
+const AVISO_MM24 = 50;
+const AVISO_MM72 = 100;
+
+type AvisoLluvia = { clave: string; lugar: string; detalle: string };
+
+function mm(v: number): string {
+  return String(v).replace(".", ",");
+}
+
+function calcularAvisosLluvia(estado?: Estado): AvisoLluvia[] {
+  if (!estado) return [];
+  const avisos: AvisoLluvia[] = [];
+  for (const e of estado.lluvia?.estaciones ?? []) {
+    if (e.mm24 >= AVISO_MM24 || e.mm72 >= AVISO_MM72) {
+      avisos.push({
+        clave: e.nombre,
+        lugar: e.nombre,
+        detalle: `${mm(e.mm24)} mm/24 h · ${mm(e.mm72)} mm/72 h (INUMET)`,
+      });
+    }
+  }
+  for (const e of estado.ana?.estaciones ?? []) {
+    if (e.mm24 >= AVISO_MM24 && e.horas <= 24) {
+      avisos.push({
+        clave: e.id,
+        lugar: e.nombre,
+        detalle: `${mm(e.mm24)} mm/24 h (ANA)`,
+      });
+    }
+  }
+  return avisos;
+}
 
 function nombrePeriodo(p: number): string {
   return p >= 9999 ? "CMP" : `${p} años`;
@@ -75,6 +112,17 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
       `${top.join(" · ")}${resto} <span style="color:#5c7893">(× su media)</span></span></div>`);
   }
 
+  if (avisosLluvia.length) {
+    if (nivel === "verde") nivel = "ambar";
+    corto += ` · lluvia abundante (${avisosLluvia.length})`;
+    lineas.push(
+      `<div class="ahora-det"><span class="dot ambar"></span><span>` +
+      `Lluvia abundante: ` +
+      avisosLluvia.map((a) => `${a.lugar} ${a.detalle}`).join(" · ") +
+      ` — atención en su cuenca ` +
+      `<span style="color:#5c7893">(no implica inundación)</span></span></div>`);
+  }
+
   const proximos = Object.values(activacion)
     .filter((a) => a.proximo)
     .sort((x, y) => x.proximo!.faltan_m - y.proximo!.faltan_m)
@@ -85,7 +133,7 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
       `${a.estacion}: a ${coma(a.proximo!.faltan_m)} m de su mancha de ` +
       `${nombrePeriodo(a.proximo!.periodo)}</span></div>`);
   }
-  if (!activas.length && !proximos.length && !crecidas.length) {
+  if (!activas.length && !proximos.length && !crecidas.length && !avisosLluvia.length) {
     lineas.push(`<div class="ahora-det"><span class="dot" style="background:#5c7893"></span>` +
       `<span>Sin niveles frescos para evaluar activación.</span></div>`);
   }
@@ -301,6 +349,64 @@ function crearCapaLluvia(map: Map, estado: Estado): void {
   });
 }
 
+async function crearCapaCuencasLluvia(map: Map, base: string): Promise<void> {
+  if (!avisosLluvia.length) return;
+  const claves = new Set(avisosLluvia.map((a) => a.clave));
+  let fc: GeoJSON.FeatureCollection;
+  try {
+    fc = await (await fetch(`${base}data/cuencas_lluvia.geojson`)).json();
+  } catch {
+    return;
+  }
+  fc.features = fc.features.filter((f) =>
+    ((f.properties?.estaciones ?? []) as string[]).some((e) => claves.has(e)),
+  );
+  if (!fc.features.length) return;
+
+  map.addSource("cuencas-lluvia", { type: "geojson", data: fc });
+  const debajo = map.getLayer("rios-glow") ? "rios-glow" : undefined;
+  map.addLayer({
+    id: "cuencas-lluvia-fill",
+    type: "fill",
+    source: "cuencas-lluvia",
+    layout: { visibility: "none" },
+    paint: { "fill-color": "#e8c95a", "fill-opacity": 0.08 },
+  }, debajo);
+  map.addLayer({
+    id: "cuencas-lluvia-line",
+    type: "line",
+    source: "cuencas-lluvia",
+    layout: { visibility: "none" },
+    paint: {
+      "line-color": "#e8c95a",
+      "line-width": 1.6,
+      "line-dasharray": [3, 2],
+      "line-opacity": 0.8,
+    },
+  }, debajo);
+  map.on("click", "cuencas-lluvia-fill", (e) => {
+    const p = e.features?.[0]?.properties;
+    if (!p) return;
+    const popup = (html: string, lngLat: maplibregl.LngLat) =>
+      new maplibregl.Popup({ closeButton: false, maxWidth: "280px" })
+        .setLngLat(lngLat).setHTML(html).addTo(map);
+    const dentro = (JSON.parse(String(p.estaciones)) as string[])
+      .map((c) => avisosLluvia.find((a) => a.clave === c))
+      .filter((a): a is AvisoLluvia => a != null);
+    popup(
+      `<strong>Cuenca: ${p.cuenca}</strong><br>` +
+      dentro.map((a) => `${a.lugar}: ${a.detalle}`).join("<br>") +
+      `<br><span style="color:#8fa8bd">Aviso de atención por lluvia ` +
+      `abundante. No implica inundación: la lluvia se traduce en caudal y ` +
+      `nivel antes que en mancha.</span>`,
+      e.lngLat,
+    );
+  });
+
+  const activo = document.getElementById("creciente")!.classList.contains("activo");
+  aplicarVisibilidad(map, activo);
+}
+
 function aplicarEscenario(map: Map): void {
   for (const id of CAPAS_TR) {
     map.setFilter(id, ["<=", ["get", "periodo"], escenario]);
@@ -325,6 +431,10 @@ function aplicarVisibilidad(map: Map, activo: boolean): void {
     "drenaje-fill": activo && conDre,
     "amenazas": activo && conDre,
     "lluvia": activo && conLlu,
+    // el aviso por lluvia abundante es excepcional: se muestra siempre que
+    // el modo creciente esté activo, sin depender del checkbox de lluvia
+    "cuencas-lluvia-fill": activo,
+    "cuencas-lluvia-line": activo,
   };
   for (const [id, on] of Object.entries(visibles)) {
     if (map.getLayer(id)) visibilidad(map, id, on);
@@ -335,7 +445,9 @@ export function setupCreciente(map: Map, base: string, estado?: Estado): void {
   activacion = estado?.activacion ?? {};
   uteRioNegro = estado?.ute_rio_negro;
   factoresCurso = estado?.factores_curso ?? {};
+  avisosLluvia = calcularAvisosLluvia(estado);
   if (estado) crearCapaLluvia(map, estado);
+  void crearCapaCuencasLluvia(map, base);
   const panel = document.getElementById("creciente")!;
   const toggle = document.getElementById("creciente-toggle")!;
   const titulo = document.getElementById("creciente-titulo")!;
