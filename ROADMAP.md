@@ -186,8 +186,10 @@ hay dato de estación fresco, cuál está activa hoy.
       caudal → nivel → mancha (ver AGENTS.md).
 - [x] Persistir cada snapshot del job de Fase 2 para construir series propias
       (`data/historico/AAAA/MM/DD-HHMM.json`, commiteado por el cron).
-- [ ] Mini-gráfico de serie temporal en el popup de estación (con los datos
-      acumulados propios + niveles CKAN 2017–2019 donde existan).
+- [x] Mini-gráfico de serie temporal en el popup de estación
+      (`pipeline/build_series.py` consolida los snapshots en `series.json`,
+      ventana de 45 días; el sparkline aparece con ≥3 observaciones).
+      Pendiente: sumar los niveles CKAN 2017–2019 donde existan.
 - [ ] Capa de represas/embalses (Bonete, Baygorria, Palmar, Salto Grande) con
       datos operativos disponibles.
 
