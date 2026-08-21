@@ -224,6 +224,191 @@ hay dato de estación fresco, cuál está activa hoy.
 - [ ] Performance: presupuesto de <3 MB de datos iniciales, tiles por zoom,
       medir en móvil real.
 
+## Fase 6 — Validación y rigor científico (esfuerzo: alto)
+
+Objetivo: pasar de "infraestructura de datos abierta" a producto con error
+declarado. Sale de la auditoría de 2026-08-21 (bloque B); los ítems de
+lenguaje y descargo de responsabilidad del bloque A ya están resueltos.
+
+- [x] Validación retrospectiva de la activación de manchas contra `curvas_cri`
+      (82 polígonos, `fecha_evento` de 1941 a 2025-07-03).
+      **El bloqueo se levantó (2026-08-21):** DINAGUA publica en CKAN las
+      lecturas horarias de nivel de 2017, 2018 y 2019
+      (`ambiente-dinagua-mediciones-de-nivel-AAAA`, odc-uy, ~50 MB por año),
+      que es la serie histórica de las estaciones uruguayas que el WFS no
+      sirve. `pipeline/validar_activacion.py` reproduce la regla del sitio día
+      a día sobre esos años y la contrasta con los eventos registrados.
+      Resultado sobre 2019, el único año con eventos y cobertura simultáneas:
+  - **4 aciertos y 1 fallo** sobre 5 eventos con umbral y serie. Aciertos:
+    Paysandú 2019-01-23 (pico 8,43 m → TR10), Florida 2019-06-16 (10,03 →
+    TR10), Aguas Corrientes 2019-06-17 (11,48 → TR9999) y Santa Lucía
+    2019-06-18 (11,48 → TR100). Los tres hidrogramas se verificaron
+    físicamente coherentes (ascenso, pico y recesión).
+  - **Fallo estructural en 25 de Agosto (FD-2DA):** su único umbral utilizable
+    es el de creciente extrema (14,22 m), así que el pico real de 11,48 m no
+    activó nada. El sitio solo puede anunciar el escenario extremo para esa
+    localidad, o ninguno.
+  - **Magnitud sobreestimada en Aguas Corrientes (CA-ACS):** anunció creciente
+    extrema para una crecida ordinaria porque sus umbrales de TR100 y de CMP
+    están a **0,23 m** uno del otro, cuatro veces menos que la incertidumbre
+    declarada de ±1 m.
+  - Sin cobertura: Salto, Fray Bentos y San Gregorio de Polanco no figuran en
+    los CSV; Mercedes deja de transmitir el 13-03-2019, antes de su evento de
+    junio.
+- [ ] Actuar sobre los hallazgos de la validación:
+  - 21 de los 32 pares de umbrales consecutivos están a menos de 2 m, o sea
+    dentro de ±1 m en ambos. El caso extremo es Constitución: TR10 = 3,31 m,
+    TR100 = 3,45 m y CMP = 3,93 m, los tres escenarios en 62 cm. Colapsar los
+    umbrales indistinguibles en uno solo en vez de nombrar un período de
+    retorno que la incertidumbre no sostiene.
+  - Activaciones recurrentes en estaciones estuarinas, estables entre años y
+    sin evento registrado: Carmelo 6–9 % de los días, Juan Lacaze 3–5 %,
+    Nueva Palmira 0–6 %, La Charqueada 4 %. Ahí el nivel lo mueven la marea y
+    la sudestada, no el caudal. Son cota superior de falsa alarma, no falsas
+    alarmas confirmadas: el registro CRI es incompleto.
+  - `curvas_cri` como capa de verificación no basta para medir falsa alarma.
+    Para eso hace falta un registro de eventos negativo, que no existe.
+- [ ] Control de calidad en el pipeline en vivo, no solo en el análisis. La
+      validación encontró que Santa Lucía R-11 —la estación que alimenta tres
+      de las 19 localidades con umbral— cambió su marco de referencia dos
+      veces en catorce meses: **+12,91 m el 2018-12-16** y **−9,40 m el
+      2019-02-22**, con una deriva a valores negativos entre medio. Un cambio
+      así deja los umbrales desfasados en metros sin que nada avise, y el
+      pipeline toma el último valor tal cual. Otras anomalías del mismo
+      barrido sobre las 80 estaciones de 2019: Paso Barrancas con 84 lecturas
+      entre 370 y 590 m, y Paso Andrés Pérez con escalones de hasta +12 m.
+      Nota metodológica: corregir un escalón desplazando el tramo previo
+      **inventa activaciones** (produjo 42 espurias en diciembre de 2018 antes
+      de detectarse); el tramo con otro marco hay que descartarlo.
+- [x] Climatología nacional en lugar de la media modelada de HydroRIVERS
+      (`DIS_AV_CMS` viene de WaterGAP con clima 1971–2000). **Hecho
+      (2026-08-21).** Fuente: *Regionalización de estadísticas de caudales* de
+      DINAGUA (actualización octubre 2025), cuya **Tabla 1** da el caudal
+      específico medio mensual, cuatrimestral y anual (L/s/km²) de las 48
+      subcuencas de nivel 2, período 1980–2010, del balance hídrico de
+      PLANAGUA revisado en 2025 y contrastado contra la red hidrométrica.
+      <https://www.gub.uy/ministerio-ambiente/politicas-y-gestion/publicaciones-hidrologia>
+  - La Tabla 1 está en el PDF como imagen: transcrita a
+    `data/referencia/caudal_especifico_dinagua.csv`. Las 48 filas se validaron
+    contra la redundancia interna de la propia tabla (cada cuatrimestre es la
+    media de sus meses y el anual la media de los cuatrimestres); las cuatro
+    filas que no cierran exactas difieren ≤0,08, que es el redondeo a un
+    decimal de la fuente. La fila 15 se verificó dígito por dígito.
+  - `pipeline/build_climatologia.py` asigna a cada tramo su subcuenca de nivel
+    2, deriva el área incremental de la topología de HydroRIVERS y acumula
+    aguas abajo, como pide el estudio: `Q = Σ (área incremental × q)`. Emite
+    `data/processed/climatologia.json` y escribe `q_medio_uy` en la red.
+    `build_estaciones.py` lo usa como `q_medio` (88 de 101 estaciones) y el
+    frontend lo prefiere para el ancho y para el factor.
+  - **Magnitud de la corrección**, sobre 3.877 de 4.585 tramos: la razón entre
+    la media vieja y la nueva tiene mediana **1,27**, con p10 0,88 y p90 1,80.
+    HydroRIVERS **sobrestimaba más de 1,5×** en el 29 % de los tramos y
+    subestimaba por debajo de 0,9× en el 11 %. Por río: San Salvador 1,97×,
+    San José 1,81×, Santa Lucía 1,65×, Yí 1,54×, Olimar 1,33×, Queguay 1,28×,
+    Cebollatí 1,26×, Arapey 1,07×, Tacuarembó 0,97×, Negro 0,94×. El error
+    estaba concentrado en el sur y el suroeste y **subdeclaraba la anomalía**
+    justo donde vive más gente.
+  - Las subcuencas más secas del país son el litoral suroeste —Río de la Plata
+    entre el río Uruguay y el San Juan (5,9 L/s/km²), entre el San Juan y el
+    Rosario (6,7), el propio río San Juan (7,0) y el Rosario (9,3)— y los
+    tramos bajos del Santa Lucía (8,9 a 9,6). Las más húmedas son del norte:
+    Cuareim 19,6, Arapey Grande 18,6 y Tacuarembó 18,4.
+  - **Qué queda fuera y por qué:** la Tabla 1 solo describe territorio
+    uruguayo (sus 48 filas suman 177.168 km², y los polígonos `cod_pais=URU`
+    de la capa de cuencas suman 176.031). Los cursos cuya cuenca entra al país
+    ya formada conservan HydroRIVERS y quedan marcados: río Uruguay, Cuareim,
+    Yaguarón y Daymán. El corte se hace por cobertura: si el área acumulada
+    dentro del país cae por debajo del 80 % del `UPLAND_SKM` del tramo, no se
+    publica valor nacional.
+  - Dos trampas de los datos, ya resueltas en el script: la capa de cuencas del
+    WFS declara EPSG:4326 pero emite UTM 21S (se reusa `leer_wfs_geojson`), y
+    trae un polígono `A_B` de 209.288 km² rotulado «RÍO CUAREIM» que
+    contaminaba el join hasta que se restringió la capa a `cod_pais=URU`.
+  - Pendiente: los valores absolutos no están validados contra caudales
+    medidos. La Tabla 1 sale de un balance hídrico, no de aforos directos, y
+    no hay serie pública de caudal para contrastarla.
+- [ ] Registro de inundaciones observadas, para cerrar el lazo observación →
+      activación. **Relevamiento 2026-08-21: no hay fuente uruguaya
+      estructurada y automatizable de extensión de inundación observada.**
+  - `curvas_cri` es el registro oficial retrospectivo (DINAGUA, Fuerza Aérea,
+    CECOED, intendencias, SINAE, CTM Salto Grande), con latencia de meses a
+    años.
+  - SINAE publica en catalogodatos.gub.uy solo incendios (focos MIRA y áreas
+    quemadas). Los evacuados y desplazados salen como texto de noticia durante
+    el evento; su listado no acepta filtro por palabra clave.
+  - INUMET expone avisos en JSON (`https://www.inumet.gub.uy/tiempo/avisos`:
+    `date`, `due_date`, `title`, `description`, `active`), pero es aviso
+    meteorológico sin geometría, no inundación observada.
+  - GDACS no reporta eventos de Uruguay: su umbral es escala de desastre mayor.
+  - **Vía resuelta (2026-08-21): Copernicus GFM por STAC, sin autenticación.**
+    El token de 5 h aplica solo a la REST API `api.gfm.eodc.eu/v2/`, que es
+    innecesaria. Verificado con `curl`: `https://stac.eodc.eu/api/v1/search`
+    `?collections=GFM&bbox=-58.5,-35.0,-53.0,-30.0&datetime=...` devuelve 200
+    sin cabecera de autorización (64 ítems en los últimos 7 días sobre
+    Uruguay, el más reciente del mismo día), y el COG referenciado acepta
+    range read anónimo (206, `image/tiff; application=geotiff`).
+  - Cobertura sobre Uruguay: 9 tiles Equi7 `SA020M`. Revisita mediana de 1 día
+    y 52 de los últimos 60 días con dato; latencia mediana de 4,2 h entre
+    sensado y publicación. Los tiles del oeste y norte —Salto, Paysandú,
+    Artigas, Río Negro— rondan 1–2 días; el peor es el de la costa atlántica
+    sur (Rocha), con mediana de 9 días.
+  - Constelación confirmada por el campo `parent` de los ítems: en 60 días,
+    250 de Sentinel-1C, 218 de 1D y 31 de 1A, y estos últimos todos anteriores
+    al 2026-06-28. S1D aparece por primera vez el 2026-06-11.
+  - Detalle de formato que condiciona la implementación: el asset
+    `ensemble_flood_extent` apunta a la variante Equi7, comprimida con **ZSTD**,
+    que el `zlib` de la stdlib no descomprime (llega en Python 3.14). Hay una
+    variante WGS84 ya reproyectada, en **LZW**, cuya URL está dentro del asset
+    `tilejson`: es la que conviene, y hay que leerla de ahí en vez de armarla.
+  - El COG trae overviews encadenados dentro de los primeros 64 KB. El tercer
+    nivel (~176 m) reduce los bloques a decodificar unas 40 veces y el
+    remuestreo es *nearest*, o sea que los valores siguen siendo `{0, 1, 255}`
+    sin promediar. Alcanza de sobra para una capa superpuesta al mapa de ríos.
+  - EODC además corre un **TiTiler público** en `titiler.services.eodc.eu` con
+    `access-control-allow-origin: *`, así que el navegador puede pedirle los
+    tiles directo y no hace falta procesar ráster en el cron. Dos trampas: el
+    `tilejson` devuelve las URLs con esquema `http://` y GitHub Pages las
+    bloquea por contenido mixto, y `data.eodc.eu` no manda cabeceras CORS
+    (responde 405 al preflight), o sea que leer el COG desde el navegador con
+    una librería cliente no funciona: solo vía TiTiler.
+  - El **WMS-T de GFM no existe hoy**: el único host referenciado en el bundle
+    JS del portal oficial (`geoserver.gfm.geoville.com`) presenta un
+    certificado autofirmado y, saltándolo, devuelve 404.
+  - **NASA como respaldo, no como primaria.** Los GeoTIFF `F1/F2/F3` se bajan
+    anónimos (verificado: 206); los `.hdf`/`.h5` redirigen a Earthdata (303).
+    El token de Earthdata dura 60 días, así que como secret exigiría rotación
+    bimestral. El producto VIIRS vigente es `VCDWD_L3`, colección 5200 v002;
+    MODIS sigue en paralelo como `MCDWD_L3` c61. El tile de Uruguay es
+    `h12v12` en ambos y es el único.
+  - El motivo de fondo para no elegir el óptico: medido sobre el recuadro de
+    Uruguay, MODIS F1 dio 58,7 % de píxeles sin dato el día 233 y **99,95 % el
+    día 230**; VIIRS dio 99,78 % el día 232. Un producto "diario" que casi
+    siempre devuelve "sin observación" rinde menos que un radar cada 1–2 días.
+  - Arquitectura propuesta: manifiesto chico commiteado por el cron (por tile:
+    id de ítem, fecha de adquisición, satélite y URL del COG) que el frontend
+    convierte en una capa ráster vía TiTiler, más un GeoJSON grillado generado
+    desde el overview de ~176 m para que el mapa degrade con dignidad si EODC
+    se cae. Hay que distinguir "sin agua" de "sin observación": el 255 es
+    información y va por celda.
+  - Riesgos anotados: el `v1` de la API de GFM ya está muerto y el WMS caído
+    sin que el portal se entere, así que conviene fallar ruidosamente si el
+    STAC devuelve cero ítems en vez de publicar un mapa vacío; y si migran la
+    variante WGS de LZW a ZSTD, el decodificador de stdlib se rompe.
+  - Cuidado con un detalle del STAC: `flooded_pixels` y `floodable_pixels`
+    parecen ser agregados **por escena y no por tile** (dos tiles distintos de
+    la misma escena traen valores idénticos). Usarlos para el aviso por cuenca
+    contaría de más.
+  - Sin verificar: la duración real del token de GFM (no hay cuenta), que un
+    token de Earthdata autentique efectivamente la descarga, y si el acceso
+    anónimo a los `.tif` de NASA es contractual o accidental —funciona hoy,
+    pero la portada de `nrt3` dice que hay que loguearse.
+- [ ] Umbrales de lluvia con humedad antecedente y tamaño de cuenca: hoy son
+      fijos (50 mm/24 h, 100 mm/72 h) y se aplican igual a la ventana móvil de
+      INUMET y al día pluviométrico 09–09 h de INIA.
+- [ ] Versionado citable del archivo histórico (DOI o release etiquetado). La
+      cita sugerida ya está en el README y en el "Acerca de"; falta el
+      identificador estable.
+
 ## Riesgos principales
 
 | Riesgo | Impacto | Mitigación |
