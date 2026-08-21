@@ -251,7 +251,8 @@ map.keyboard.disableRotation();
 map.addControl(new maplibregl.AttributionControl({
   compact: true,
   customAttribution:
-    "HydroSHEDS/HydroRIVERS · DINAGUA (Min. Ambiente, Uruguay)",
+    "HydroSHEDS/HydroRIVERS · DINAGUA e INUMET (Uruguay) · INIA · UTE · " +
+    "Salto Grande (CTM) · SOHMA (Armada) · INA (Argentina) · ANA (Brasil)",
 }), "bottom-right");
 const ICONO_CASA =
   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
@@ -293,6 +294,13 @@ document.getElementById("hoja-barra")!.addEventListener("click", () => {
   document.getElementById("hoja")!.classList.toggle("abierta");
 });
 
+const acerca = document.getElementById("acerca") as HTMLDialogElement;
+document.getElementById("btn-acerca")!.addEventListener("click", () => acerca.showModal());
+document.getElementById("acerca-cerrar")!.addEventListener("click", () => acerca.close());
+acerca.addEventListener("click", (e) => {
+  if (e.target === acerca) acerca.close();
+});
+
 function formatoCaudal(q: number): string {
   if (q >= 100) return `${Math.round(q).toLocaleString("es-UY")} m³/s`;
   if (q >= 1) return `${q.toFixed(1)} m³/s`;
@@ -304,10 +312,12 @@ function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
   const q = Number(f.properties.DIS_AV_CMS) || 0;
   const factor = f.properties.factor as number | undefined;
   const fx = factor && factor >= 20 ? "≥20" : factor?.toFixed(1);
+  const nacional = f.properties.q_medio_uy != null;
+  const referencia = nacional ? "climatología DINAGUA" : "modelo HydroRIVERS";
   const linea = factor
     ? `caudal actual ≈ ${formatoCaudal(q)} (${fx}× la media` +
       `, est. ${f.properties.estacion_factor})`
-    : `caudal medio ${formatoCaudal(q)} (estimado)`;
+    : `caudal medio ${formatoCaudal(q)} · ${referencia}`;
   tooltip.innerHTML = `<strong>${nombre}</strong><br><span class="q">${linea}</span>`;
   tooltip.style.display = "block";
   tooltip.style.left = `${x + 14}px`;
@@ -340,7 +350,9 @@ function popupEstacion(e: EstacionPopup): string {
     }
     filas.push(
       `<span class="q">alerta ${e.alerta} m · evacuación ` +
-      `${e.evacuacion ?? "—"} m (escala local)</span>`,
+      `${e.evacuacion ?? "—"} m</span>` +
+      `<span class="aclara">Escala local de la estación: no es altura sobre ` +
+      `el mar ni se compara con otras estaciones.</span>`,
     );
   }
   if (e.fuente) filas.push(`<span class="q">${e.fuente}</span>`);
@@ -371,7 +383,9 @@ function popupRepresa(clave: string, estado: Estado | null): string {
   if (clave === "salto") {
     const est = estado?.estaciones.find((e) => e.id === -1);
     if (est?.caudal != null) {
-      filas.push(`erogando ${formatoCaudal(est.caudal)} · hace ${redondearHoras(est.caudal_horas)}`);
+      filas.push(
+        `suelta al río ${formatoCaudal(est.caudal)} · hace ` +
+        `${redondearHoras(est.caudal_horas)}`);
       if (est.factor) {
         filas.push(`${est.factor >= 20 ? "≥20" : est.factor.toFixed(1)}× su caudal medio`);
       }
@@ -380,11 +394,15 @@ function popupRepresa(clave: string, estado: Estado | null): string {
     if (sg?.turbinado != null && sg.vertido != null) {
       filas.push(
         `<span class="q">turbinado ${formatoCaudal(sg.turbinado)} · ` +
-        `vertido ${formatoCaudal(sg.vertido)}</span>`);
+        `vertido ${formatoCaudal(sg.vertido)}</span>` +
+        `<span class="aclara">El turbinado pasa por las turbinas y genera ` +
+        `energía; el vertido pasa por el vertedero.</span>`);
     }
   } else if (clave === "bonete" || clave === "palmar") {
     const erogado = clave === "bonete" ? hoy?.erogado_bonete : hoy?.erogado_palmar;
-    if (erogado) filas.push(`eroga hoy ${formatoCaudal(erogado)} (previsión UTE)`);
+    if (erogado) {
+      filas.push(`suelta al río hoy ${formatoCaudal(erogado)} <span class="q">(erogado previsto, UTE)</span>`);
+    }
     const patron = clave === "bonete" ? /Rincón del Bonete/ : /Constitución/;
     const max = ute?.maximos?.find((m) => patron.test(m.lugar));
     if (max) {
@@ -481,8 +499,8 @@ function miniGrafico(serie: { nivel?: SeriePuntos; caudal?: SeriePuntos }): stri
   return (
     `<div class="serie"><span class="q">${variable} · ${lapso} · ${rango}</span>` +
     `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
-    `<polyline points="${linea}" fill="none" stroke="#4a7096" stroke-width="1.5"/>` +
-    `<circle cx="${x(tf).toFixed(1)}" cy="${y(vf).toFixed(1)}" r="2.2" fill="#1d7a68"/>` +
+    `<polyline points="${linea}" fill="none" stroke="#6ea8d8" stroke-width="1.5"/>` +
+    `<circle cx="${x(tf).toFixed(1)}" cy="${y(vf).toFixed(1)}" r="2.2" fill="#7ef0d8"/>` +
     `</svg></div>`
   );
 }
@@ -552,7 +570,7 @@ map.on("load", async () => {
 
   document.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
 
-  const estadoEl = document.querySelector("#titulo p")!;
+  const estadoEl = document.getElementById("titulo-estado")!;
   if (estado) {
     document.getElementById("envivo")!.style.display = "inline-flex";
     const tocados = aplicarFactores(fc, estado);
@@ -570,7 +588,7 @@ map.on("load", async () => {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.5, 12, 7],
         "circle-color": [
           "step", ["get", "frescura"],
-          "#5ad18a", 24, "#e8c95a", 48, "#5c7893",
+          "#5ad18a", 24, "#e8c95a", 48, "#6a86a1",
         ],
         "circle-stroke-color": "#0b141d",
         "circle-stroke-width": 1,

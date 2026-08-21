@@ -49,7 +49,106 @@
       letter-spacing: 0.06em;
     }
     #envivo i { width: 6px; height: 6px; border-radius: 50%; background: #5ad18a; }
-    #titulo p { margin: 4px 0 0; color: #5c7893; font-size: 11px; }
+    #titulo p { margin: 4px 0 0; color: #6a86a1; font-size: 11px; }
+
+    #descargo {
+      margin: 6px 0 0; font-size: 11px; line-height: 1.4; color: #cfa9a9;
+      display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+    }
+    #descargo b { color: #eec9c9; font-weight: 650; }
+    .enlace {
+      background: none; border: none; padding: 0; cursor: pointer;
+      font: inherit; color: #8fc6ec; text-decoration: underline;
+    }
+
+    #acerca {
+      max-width: 560px; width: calc(100% - 32px); max-height: 82vh;
+      margin: auto; padding: 0; color: #cfe0ee;
+      background: #0d1a25; border: 1px solid #2c4257; border-radius: 12px;
+      font: 13px/1.55 system-ui, -apple-system, sans-serif;
+      /* el user-agent le da overflow:auto al dialog. Limitar el cuerpo aparte
+         (max-height:82vh) lo desbordaba por su propio padding: dos barras. */
+      overflow: hidden;
+    }
+    /* el display va en [open]: sobre #acerca le ganaría a la regla
+       dialog:not([open]){display:none} del user-agent y quedaría siempre visible */
+    #acerca[open] { display: flex; flex-direction: column; }
+    #acerca::backdrop { background: rgba(4, 9, 14, 0.7); }
+    #acerca-cab {
+      flex: none; display: flex; align-items: flex-start; gap: 12px;
+      padding: 15px 20px 12px; border-bottom: 1px solid #1a2a3a;
+    }
+    #acerca-cab > div { flex: 1; min-width: 0; }
+    #acerca-cab h2 {
+      margin: 0; color: #eaf4fd;
+      font: 700 17px/1.2 "Bricolage Grotesque", system-ui, sans-serif;
+    }
+    #acerca-cab p { margin: 3px 0 0; font-size: 11.5px; color: #6a86a1; }
+    #acerca-cerrar {
+      flex: none; cursor: pointer;
+      background: #1a2a3a; border: 1px solid #2c4257; border-radius: 6px;
+      color: #cfe0ee; font: 15px/1 system-ui, sans-serif; padding: 7px 10px;
+    }
+    #acerca-cuerpo { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 20px 20px; }
+    #acerca p { margin: 0; }
+    #acerca a { color: #8fc6ec; }
+
+    #acerca .destacado {
+      display: flex; gap: 11px; padding: 12px 14px;
+      background: #1d1216; border: 1px solid #5a3236; border-radius: 8px;
+    }
+    #acerca .destacado > div { flex: 1; min-width: 0; }
+    #acerca .destacado svg { flex: none; margin-top: 2px; }
+    #acerca .destacado .titular { font-size: 13px; font-weight: 650; color: #ffbdbd; }
+    #acerca .destacado .sub { margin-top: 3px; font-size: 12px; color: #e8c0c0; }
+    #acerca .canales {
+      display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin-top: 12px;
+      align-items: baseline; font-size: 12px; line-height: 1.4; color: #e8c0c0;
+    }
+    #acerca .canales > span:nth-child(odd) { color: #b58a8a; }
+    #acerca .canales .tel { font-size: 17px; font-weight: 700; line-height: 1; color: #ffbdbd; }
+    #acerca .entrada { margin-top: 16px; font-size: 13.5px; line-height: 1.6; color: #dbe9f6; }
+
+    #acerca .rotulo {
+      display: flex; align-items: center; gap: 10px; margin-top: 24px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.11em;
+      color: #8fa8bd; text-transform: uppercase;
+    }
+    #acerca .rotulo::after { content: ""; flex: 1; height: 1px; background: #1a2a3a; }
+    #acerca .filas { margin-top: 8px; }
+    #acerca .filas > div { padding: 9px 0; border-top: 1px solid #16283a; }
+    #acerca .filas p { font-size: 12.5px; line-height: 1.5; color: #a8c0d4; text-wrap: pretty; }
+    #acerca .fuentes > div {
+      padding: 8px 0; font-size: 12.5px; line-height: 1.5; color: #a8c0d4; text-wrap: pretty;
+    }
+    #acerca .fuentes b { color: #eaf4fd; font-weight: 650; }
+    #acerca .marca { color: #6a86a1; }
+    #acerca .fuentes .global { padding-top: 12px; }
+    #acerca .global > span {
+      display: block; margin-bottom: 4px; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.11em; color: #6a86a1; text-transform: uppercase;
+    }
+    #acerca .claves > div { display: grid; grid-template-columns: 112px 1fr; gap: 14px; }
+    #acerca .clave { font-size: 12px; font-weight: 650; line-height: 1.4; color: #eaf4fd; }
+    #acerca .fuerte { color: #dbe9f6; font-weight: 650; }
+
+    #acerca .pie { margin-top: 22px; padding-top: 14px; border-top: 1px solid #1a2a3a; }
+    #acerca .pie > p { font-size: 12.5px; line-height: 1.55; color: #a8c0d4; text-wrap: pretty; }
+    #acerca .cita {
+      margin-top: 12px; padding: 10px 12px;
+      background: #0a151f; border: 1px solid #1e3247; border-radius: 7px;
+    }
+    #acerca .cita span {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.11em;
+      color: #6a86a1; text-transform: uppercase;
+    }
+    #acerca .cita p { margin-top: 4px; font-size: 11.5px; line-height: 1.5; color: #a8c0d4; }
+    /* propio del diálogo: a 640 px todavía mide 560 y las dos columnas entran */
+    @media (max-width: 480px) {
+      #acerca .claves > div { grid-template-columns: 1fr; gap: 2px; }
+      #acerca .canales { grid-template-columns: 1fr; gap: 2px; }
+      #acerca .canales > span:nth-child(n+3):nth-child(odd) { margin-top: 9px; }
+    }
 
     #creciente-toggle {
       display: flex; align-items: center; gap: 8px; cursor: pointer;
@@ -84,7 +183,7 @@
     details.seccion .cuerpo { margin-top: 8px; font-size: 12px; color: #8fa8bd; line-height: 1.5; display: flex; flex-direction: column; gap: 6px; }
 
     #creciente .grupo { margin: 12px 0 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; color: #8fa8bd; }
-    #creciente .grupo .suave { font-weight: 400; letter-spacing: 0; text-transform: none; color: #5c7893; }
+    #creciente .grupo .suave { font-weight: 400; letter-spacing: 0; text-transform: none; color: #6a86a1; }
     #creciente button {
       font: 12px system-ui, sans-serif; color: #cfe0ee; cursor: pointer;
       background: #1a2a3a; border: 1px solid #2c4257; border-radius: 5px;
@@ -126,15 +225,41 @@
       border-radius: 6px; padding: 6px 10px; white-space: nowrap;
     }
     #tooltip .q { color: #8fc6ec; }
+    /* sobre el blanco por defecto de los popups de MapLibre, los grises y el
+       rojo de alerta de la UI caen por debajo del AA de WCAG. El selector
+       lleva el ancestro porque el bundle de MapLibre gana por orden. */
+    .maplibregl-popup .maplibregl-popup-content {
+      background: #0d1a25; border: 1px solid #2c4257; border-radius: 8px;
+      color: #eaf4fd; padding: 10px 12px;
+      font: 12px/1.45 system-ui, -apple-system, sans-serif;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    }
+    .maplibregl-popup-content .q { color: #8fa8bd; }
+    .maplibregl-popup-content a { color: #8fc6ec; }
+    .maplibregl-popup.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+    .maplibregl-popup.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+    .maplibregl-popup.maplibregl-popup-anchor-top-right .maplibregl-popup-tip { border-bottom-color: #0d1a25; }
+    .maplibregl-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+    .maplibregl-popup.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+    .maplibregl-popup.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip { border-top-color: #0d1a25; }
+    .maplibregl-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: #0d1a25; }
+    .maplibregl-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: #0d1a25; }
     .maplibregl-popup-content .serie { margin-top: 6px; }
-    .maplibregl-popup-content .serie .q { color: #47617a; }
+    .maplibregl-popup-content .serie .q { color: #8fa8bd; }
     .maplibregl-popup-content .serie svg { display: block; margin-top: 3px; }
-    #fps { position: absolute; z-index: 10; top: 12px; right: 12px; font-size: 11px; color: #5c7893; padding: 4px 8px; }
+    .maplibregl-popup-content .aclara {
+      display: block; margin-top: 6px; color: #8fa8bd; font-size: 11px;
+    }
+    #fps { position: absolute; z-index: 10; top: 12px; right: 12px; font-size: 11px; color: #6a86a1; padding: 4px 8px; }
 
     @media (max-width: 640px) {
       #columna { left: 0; right: 0; top: auto; bottom: 0; width: auto; gap: 0; }
-      #titulo { position: fixed; top: 10px; left: 10px; padding: 6px 12px; }
-      #titulo p { display: none; }
+      #titulo { position: fixed; top: 10px; left: 10px; right: 10px; padding: 6px 12px; }
+      /* el título pasa a ocupar el ancho: los controles bajan debajo */
+      .maplibregl-ctrl-top-right { top: 102px !important; }
+      #titulo-estado { display: none; }
+      #acerca-cab { padding: 13px 16px 11px; }
+      #acerca-cuerpo { padding: 14px 16px 18px; }
       #hoja {
         gap: 0; background: rgba(9, 17, 26, 0.96);
         border-top: 1px solid #2c4257; border-radius: 14px 14px 0 0;
@@ -164,8 +289,10 @@
     <div id="titulo" class="panel">
       <h1>Cauce <span class="tagline">ríos del Uruguay</span>
         <span id="envivo"><i></i>EN VIVO</span></h1>
-      <p>Caudal medio de largo plazo. Ancho, brillo y velocidad proporcionales
-         al caudal (escala logarítmica).</p>
+      <p id="titulo-estado">Caudal medio de largo plazo. Ancho, brillo y velocidad
+         proporcionales al caudal (escala logarítmica).</p>
+      <p id="descargo"><b>No es un servicio oficial de alertas.</b>
+        <button type="button" class="enlace" id="btn-acerca">Acerca de, fuentes y a quién acudir</button></p>
     </div>
     <div id="hoja">
       <div id="hoja-barra">
@@ -237,12 +364,151 @@
           </div>
           <div class="fila" style="margin-top:8px"><span class="dot verde" style="width:9px;height:9px"></span><span class="etiqueta">estación con dato &lt; 24 h</span></div>
           <div class="fila"><span class="dot ambar" style="width:9px;height:9px"></span><span class="etiqueta">24–48 h</span></div>
-          <div class="fila"><span class="dot" style="width:9px;height:9px;background:#5c7893"></span><span class="etiqueta">&gt; 48 h / sin dato</span></div>
+          <div class="fila"><span class="dot" style="width:9px;height:9px;background:#6a86a1"></span><span class="etiqueta">&gt; 48 h / sin dato</span></div>
           <div class="fila"><span style="width:9px;height:9px;flex:none;background:#16324a;border:1.5px solid #cfe0ee"></span><span class="etiqueta">represa</span></div>
         </div>
       </div>
     </div>
   </div>
+  <dialog id="acerca">
+    <div id="acerca-cab">
+      <div>
+        <h2>Acerca de Cauce</h2>
+        <p>ríos del Uruguay · proyecto abierto e independiente</p>
+      </div>
+      <button type="button" id="acerca-cerrar" title="Cerrar">✕</button>
+    </div>
+    <div id="acerca-cuerpo">
+      <div class="destacado">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9a9a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.3 3.6 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/>
+          <path d="M12 9.5v4"/><path d="M12 17.2h.01"/>
+        </svg>
+        <div>
+          <p class="titular">No es un servicio oficial de alertas.</p>
+          <p class="sub">Nadie monitorea este sitio ni valida sus avisos.</p>
+          <div class="canales">
+            <span>Emergencia</span>
+            <span class="tel">911</span>
+            <span>Avisos y advertencias</span>
+            <span><a href="https://www.inumet.gub.uy/" target="_blank" rel="noopener">INUMET</a></span>
+            <span>Respuesta ante inundaciones</span>
+            <span><a href="https://www.gub.uy/sistema-nacional-emergencias/" target="_blank" rel="noopener">SINAE</a>,
+              a través del CECOED de cada departamento</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="entrada">Cauce reúne en un mapa los datos de agua que ocho
+        organismos publican por separado: niveles y caudales de estaciones,
+        represas, lluvia y las manchas oficiales de inundación.</p>
+
+      <div class="rotulo">Fuentes de datos</div>
+      <div class="filas fuentes">
+        <div><b>DINAGUA</b> <span class="marca">Ministerio de Ambiente</span> —
+          estaciones, red de cursos, manchas de inundación, drenaje urbano y
+          amenazas por localidad, y el caudal medio de referencia de cada tramo
+          (<i>Regionalización de estadísticas de caudales</i>, 2025, período
+          1980–2010).</div>
+        <div><b>INUMET</b> — precipitación horaria.</div>
+        <div><b>INIA</b> <span class="marca">GRAS</span> — precipitación diaria
+          de 09 a 09 h.</div>
+        <div><b>Salto Grande</b> <span class="marca">CTM, binacional</span> —
+          turbinado y vertido.</div>
+        <div><b>UTE</b> — previsión de niveles y erogados del río Negro.</div>
+        <div><b>INA</b> y Prefectura Naval <span class="marca">Argentina</span> —
+          alturas del río Uruguay.</div>
+        <div><b>ANA</b> <span class="marca">Brasil</span> — niveles y lluvia en
+          cuencas compartidas.</div>
+        <div><b>SOHMA</b> <span class="marca">Armada Nacional</span> —
+          mareógrafos del Río de la Plata.</div>
+        <div class="global">
+          <span>Base global</span>
+          <p><b>HydroSHEDS / HydroRIVERS</b> — geometría de la red, y el caudal
+            medio donde la climatología nacional no llega: los ríos cuya cuenca
+            entra al país ya formada desde Brasil o Argentina.</p>
+        </div>
+      </div>
+
+      <div class="rotulo">Cómo leer los datos, y qué no dicen</div>
+      <div class="filas claves">
+        <div>
+          <span class="clave">Manchas</span>
+          <p>Las manchas rojas se encienden cuando el nivel medido supera el
+            umbral de la mancha. Ese umbral es <b class="fuerte">aproximado,
+            ±1 m</b>: viene de convertir la cota del estudio al cero de la
+            estación. No está validado contra eventos históricos.</p>
+        </div>
+        <div>
+          <span class="clave">«× su media»</span>
+          <p>Es una <b class="fuerte">escala visual</b>, no una estimación
+            hidrológica: un caudal medido escala el curso entero, sin considerar
+            tiempo de tránsito ni afluentes. La media de referencia es la
+            climatología de DINAGUA por subcuenca, no la medida en esa
+            estación.</p>
+        </div>
+        <div>
+          <span class="clave">Lluvia</span>
+          <p>Los umbrales de lluvia (50 mm en 24 h, 100 mm en 72 h) son fijos:
+            no consideran humedad previa ni tamaño de cuenca. Lluvia abundante
+            no implica inundación.</p>
+        </div>
+        <div>
+          <span class="clave">Cobertura</span>
+          <p>Solo hay manchas donde existe estudio oficial. <b class="fuerte">Fuera
+            de esas ciudades, la ausencia de mancha no implica ausencia de
+            riesgo.</b></p>
+        </div>
+        <div>
+          <span class="clave">Sensores</span>
+          <p>Cada observación se muestra tal como la publica su organismo, con
+            su hora. No hay control de calidad sobre los sensores.</p>
+        </div>
+      </div>
+
+      <div class="rotulo">Glosario</div>
+      <div class="filas claves">
+        <div>
+          <span class="clave">Erogar</span>
+          <p>Soltar agua al río, aguas abajo de la represa.</p>
+        </div>
+        <div>
+          <span class="clave">Turbinado y vertido</span>
+          <p>El turbinado pasa por las turbinas y genera energía; el vertido
+            pasa por el vertedero. La suma es lo que la represa suelta al río.</p>
+        </div>
+        <div>
+          <span class="clave">Escala local</span>
+          <p>Cada estación mide sobre su propio cero. Los metros no son altura
+            sobre el mar ni se comparan entre estaciones.</p>
+        </div>
+        <div>
+          <span class="clave">Cero Ex Wharton</span>
+          <p>Nivel de referencia de los mareógrafos del SOHMA en el Río de la Plata.</p>
+        </div>
+        <div>
+          <span class="clave">Período de retorno</span>
+          <p>«10 años» significa ≈ 10 % de probabilidad en cualquier año, no una
+            vez cada diez años.</p>
+        </div>
+        <div>
+          <span class="clave">Día pluviométrico</span>
+          <p>INIA acumula la lluvia de 09 a 09 h, no de las últimas 24 horas.</p>
+        </div>
+      </div>
+
+      <div class="pie">
+        <p>Código bajo licencia MIT y datos con la licencia de cada fuente:
+          <a href="https://github.com/nicoseijas/cauce" target="_blank" rel="noopener">github.com/nicoseijas/cauce</a>.
+          El repositorio conserva un archivo histórico versionado de cada
+          actualización.</p>
+        <div class="cita">
+          <span>Cita sugerida</span>
+          <p>Seijas, N. <i>Cauce — ríos del Uruguay</i>. https://nicoseijas.github.io/cauce/</p>
+        </div>
+      </div>
+    </div>
+  </dialog>
   <div id="tooltip"></div>
   <div id="fps" class="panel"></div>
   <script type="module" src="/src/main.ts"></script>

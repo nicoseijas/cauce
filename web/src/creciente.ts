@@ -28,10 +28,16 @@ function calcularAvisosLluvia(estado?: Estado): AvisoLluvia[] {
   const avisos: AvisoLluvia[] = [];
   for (const e of estado.lluvia?.estaciones ?? []) {
     if (e.mm24 >= AVISO_MM24 || e.mm72 >= AVISO_MM72) {
+      const fuente = e.fuente ?? "INUMET";
+      // INIA publica el día pluviométrico cerrado (09 a 09 h): no es la
+      // ventana móvil de 24 h de INUMET y puede tener hasta ~30 h de atraso
+      const ventana = fuente === "INIA" && e.fecha
+        ? `${mm(e.mm24)} mm el ${e.fecha.slice(8, 10)}/${e.fecha.slice(5, 7)} (09–09 h)`
+        : `${mm(e.mm24)} mm/24 h`;
       avisos.push({
         clave: e.nombre,
         lugar: e.nombre,
-        detalle: `${mm(e.mm24)} mm/24 h · ${mm(e.mm72)} mm/72 h (INUMET)`,
+        detalle: `${ventana} · ${mm(e.mm72)} mm/72 h (${fuente})`,
       });
     }
   }
@@ -48,7 +54,7 @@ function calcularAvisosLluvia(estado?: Estado): AvisoLluvia[] {
 }
 
 function nombrePeriodo(p: number): string {
-  return p >= 9999 ? "CMP" : `${p} años`;
+  return p >= 9999 ? "creciente extrema" : `${p} años`;
 }
 
 function filtroActivas(): ExpressionSpecification {
@@ -109,7 +115,7 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
     lineas.push(
       `<div class="ahora-det"><span class="dot ambar"></span><span>` +
       `${crecidas.length} río${crecidas.length > 1 ? "s" : ""} en crecida: ` +
-      `${top.join(" · ")}${resto} <span style="color:#5c7893">(× su media)</span></span></div>`);
+      `${top.join(" · ")}${resto} <span style="color:#6a86a1">(× su media)</span></span></div>`);
   }
 
   if (avisosLluvia.length) {
@@ -120,7 +126,7 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
       `Lluvia abundante: ` +
       avisosLluvia.map((a) => `${a.lugar} ${a.detalle}`).join(" · ") +
       ` — atención en su cuenca ` +
-      `<span style="color:#5c7893">(no implica inundación)</span></span></div>`);
+      `<span style="color:#6a86a1">(no implica inundación)</span></span></div>`);
   }
 
   const proximos = Object.values(activacion)
@@ -134,7 +140,7 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
       `${nombrePeriodo(a.proximo!.periodo)}</span></div>`);
   }
   if (!activas.length && !proximos.length && !crecidas.length && !avisosLluvia.length) {
-    lineas.push(`<div class="ahora-det"><span class="dot" style="background:#5c7893"></span>` +
+    lineas.push(`<div class="ahora-det"><span class="dot" style="background:#6a86a1"></span>` +
       `<span>Sin niveles frescos para evaluar activación.</span></div>`);
   }
   return { html: lineas.join(""), nivel, corto };
@@ -156,7 +162,9 @@ function llenarPrevision(): void {
     : "UTE";
   const partes: string[] = [];
   if (hoy.erogado_palmar) {
-    partes.push(`<div>Palmar eroga hoy ${hoy.erogado_palmar.toLocaleString("es-UY")} m³/s</div>`);
+    partes.push(
+      `<div>Palmar suelta al río hoy ` +
+      `${hoy.erogado_palmar.toLocaleString("es-UY")} m³/s</div>`);
   }
   // se conserva el paréntesis con la escala de referencia de cada nivel
   const ciudades = uteRioNegro.maximos.filter((m) =>
@@ -165,7 +173,7 @@ function llenarPrevision(): void {
     const lugar = m.lugar.replace(/^Ciudad( de)?\s*/, "");
     partes.push(`<div>${lugar}: máx previsto ${coma(m.nivel)} m el ${m.fecha.slice(0, 5)}</div>`);
   }
-  partes.push(`<div style="color:#5c7893">${act}</div>`);
+  partes.push(`<div style="color:#6a86a1">${act}</div>`);
   document.getElementById("prevision-detalle")!.innerHTML = partes.join("");
   det.style.display = "block";
 }
@@ -254,7 +262,7 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
     new maplibregl.Popup({ closeButton: false, maxWidth: "280px" })
       .setLngLat(lngLat).setHTML(html).addTo(map);
 
-  map.on("click", "inund-tr-fill", (e) => {
+  const popupMancha = (e: maplibregl.MapLayerMouseEvent) => {
     const p = e.features?.[0]?.properties;
     if (!p) return;
     const a = activacion[p.localidad_cod as string];
@@ -262,13 +270,25 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
     const cabecera = activa
       ? `<span class="alerta">⚠ ACTIVA AHORA</span> — nivel ${a.nivel.toFixed(2)} m en ${a.estacion}<br>`
       : "";
+    const incertidumbre = activa
+      ? `<span class="aclara">Umbral aproximado (±1 m) y sin validar contra ` +
+        `eventos históricos. No es un aviso oficial.</span>`
+      : "";
     popup(
       cabecera +
       `<strong>Mancha de inundación · ${p.tipo_curva}</strong><br>` +
       `${p.curso ?? ""}${p.cota_oficial ? ` · cota ${p.cota_oficial} m` : ""}<br>` +
-      `<span style="color:#8fa8bd">${String(p.fuentes ?? "").slice(0, 120)}</span>`,
+      `<span style="color:#8fa8bd">${String(p.fuentes ?? "").slice(0, 120)}</span>` +
+      incertidumbre,
       e.lngLat,
     );
+  };
+  map.on("click", "inund-tr-fill", popupMancha);
+  // la mancha activa se dibuja aunque el escenario esté oculto, y entonces
+  // inund-tr-fill no tiene features bajo el cursor
+  map.on("click", "inund-activa", (e) => {
+    if (map.queryRenderedFeatures(e.point, { layers: ["inund-tr-fill"] }).length) return;
+    popupMancha(e);
   });
   map.on("click", "inund-cri-fill", (e) => {
     const p = e.features?.[0]?.properties;
