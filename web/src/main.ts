@@ -31,7 +31,7 @@ const OPACIDAD_GLOW: ExpressionSpecification = [
   3.5, 0, 5.5, 0.10, 8, 0.28,
 ];
 
-const VISTA_INICIAL = { center: [-56.0, -32.7] as [number, number], zoom: 6.3 };
+const VISTA_INICIAL = { center: [-56.0, -32.7] as [number, number], zoom: 8 };
 
 const map = new maplibregl.Map({
   container: "map",
