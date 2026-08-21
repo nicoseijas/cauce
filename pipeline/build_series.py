@@ -26,7 +26,13 @@ def epoch(fecha: str | None) -> int | None:
     try:
         dt = datetime.fromisoformat(fecha.replace("Z", "+00:00"))
     except ValueError:
-        return None
+        # Salto Grande publica "dd/mm/aaaa HH:MM" en hora local (UTC-3)
+        try:
+            dt = datetime.strptime(fecha, "%d/%m/%Y %H:%M").replace(
+                tzinfo=timezone(timedelta(hours=-3))
+            )
+        except ValueError:
+            return None
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return int(dt.timestamp())

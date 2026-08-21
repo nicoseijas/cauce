@@ -10,6 +10,7 @@ import {
   cargarEstado,
   cargarSeries,
   estacionesComoGeoJSON,
+  type Estado,
   type EstacionEstado,
   type SeriePuntos,
 } from "./estado";
@@ -352,6 +353,106 @@ function redondearHoras(h: number | null): string {
   return `${Math.round(h / 24)} días`;
 }
 
+const REPRESAS = [
+  { clave: "salto", nombre: "Salto Grande", rio: "Río Uruguay", operador: "CTM (binacional)", lat: -31.2758, lon: -57.9394 },
+  { clave: "bonete", nombre: "Rincón del Bonete", rio: "Río Negro", operador: "UTE", lat: -32.8308, lon: -56.4211 },
+  { clave: "baygorria", nombre: "Baygorria", rio: "Río Negro", operador: "UTE", lat: -32.8729, lon: -56.8056 },
+  { clave: "palmar", nombre: "Palmar (Constitución)", rio: "Río Negro", operador: "UTE", lat: -33.0556, lon: -57.4507 },
+] as const;
+
+function popupRepresa(clave: string, estado: Estado | null): string {
+  const r = REPRESAS.find((x) => x.clave === clave)!;
+  const filas = [
+    `<strong>${r.nombre}</strong>`,
+    `<span class="q">${r.rio} · represa · ${r.operador}</span>`,
+  ];
+  const ute = estado?.ute_rio_negro;
+  const hoy = ute?.dias?.[0];
+  if (clave === "salto") {
+    const est = estado?.estaciones.find((e) => e.id === -1);
+    if (est?.caudal != null) {
+      filas.push(`erogando ${formatoCaudal(est.caudal)} · hace ${redondearHoras(est.caudal_horas)}`);
+      if (est.factor) {
+        filas.push(`${est.factor >= 20 ? "≥20" : est.factor.toFixed(1)}× su caudal medio`);
+      }
+    }
+    const sg = estado?.salto_grande;
+    if (sg?.turbinado != null && sg.vertido != null) {
+      filas.push(
+        `<span class="q">turbinado ${formatoCaudal(sg.turbinado)} · ` +
+        `vertido ${formatoCaudal(sg.vertido)}</span>`);
+    }
+  } else if (clave === "bonete" || clave === "palmar") {
+    const erogado = clave === "bonete" ? hoy?.erogado_bonete : hoy?.erogado_palmar;
+    if (erogado) filas.push(`eroga hoy ${formatoCaudal(erogado)} (previsión UTE)`);
+    const patron = clave === "bonete" ? /Rincón del Bonete/ : /Constitución/;
+    const max = ute?.maximos?.find((m) => patron.test(m.lugar));
+    if (max) {
+      filas.push(
+        `<span class="q">embalse: máx previsto ${max.nivel.toFixed(2)} m ` +
+        `el ${max.fecha.slice(0, 5)}</span>`);
+    }
+    if (!erogado && !max) filas.push(`<span class="q">sin datos UTE recientes</span>`);
+  } else {
+    filas.push(`<span class="q">sin datos operativos públicos</span>`);
+  }
+  return filas.join("<br>");
+}
+
+function crearCapaRepresas(map: maplibregl.Map, estado: Estado | null): void {
+  const c = document.createElement("canvas");
+  c.width = c.height = 32;
+  const g = c.getContext("2d")!;
+  g.fillStyle = "#16324a";
+  g.strokeStyle = "#cfe0ee";
+  g.lineWidth = 4;
+  g.fillRect(6, 6, 20, 20);
+  g.strokeRect(6, 6, 20, 20);
+  map.addImage("icono-represa", g.getImageData(0, 0, 32, 32), { pixelRatio: 2 });
+
+  map.addSource("represas", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: REPRESAS.map((r) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [r.lon, r.lat] },
+        properties: { clave: r.clave },
+      })),
+    } as GeoJSON.GeoJSON,
+  });
+  map.addLayer({
+    id: "represas",
+    type: "symbol",
+    source: "represas",
+    layout: {
+      "icon-image": "icono-represa",
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 5, 0.75, 12, 1.4],
+      "icon-allow-overlap": true,
+    },
+  });
+  map.on("click", "represas", async (ev) => {
+    const clave = String(ev.features?.[0]?.properties.clave ?? "");
+    if (!clave) return;
+    const popup = new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
+      .setLngLat(ev.lngLat)
+      .setHTML(popupRepresa(clave, estado))
+      .addTo(map);
+    if (clave !== "salto") return;
+    const series = await cargarSeries(`${BASE}data/series.json`);
+    const serie = series?.estaciones["-1"];
+    if (!serie || !popup.isOpen()) return;
+    const grafico = miniGrafico(serie);
+    if (grafico) popup.setHTML(popupRepresa(clave, estado) + grafico);
+  });
+  map.on("mouseenter", "represas", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "represas", () => {
+    map.getCanvas().style.cursor = "";
+  });
+}
+
 function miniGrafico(serie: { nivel?: SeriePuntos; caudal?: SeriePuntos }): string {
   const puntos = serie.nivel ?? serie.caudal;
   if (!puntos || puntos.length < 3) return "";
@@ -477,6 +578,8 @@ map.on("load", async () => {
       },
     });
     map.on("click", "estaciones", async (ev) => {
+      // si hay una represa bajo el cursor, gana su popup
+      if (map.queryRenderedFeatures(ev.point, { layers: ["represas"] }).length) return;
       const f = ev.features?.[0];
       if (!f) return;
       const props = f.properties as unknown as EstacionPopup;
@@ -505,6 +608,7 @@ map.on("load", async () => {
 
   const flow = new FlowLayer(fc);
   map.addLayer(flow, "rios-hover");
+  crearCapaRepresas(map, estado);
   setupCreciente(map, BASE, estado ?? undefined);
   if (estado) setupVistaAnomalia(map, flow);
 

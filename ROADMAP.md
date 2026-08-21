@@ -193,8 +193,11 @@ hay dato de estación fresco, cuál está activa hoy.
       (`pipeline/build_series.py` consolida los snapshots en `series.json`,
       ventana de 45 días; el sparkline aparece con ≥3 observaciones).
       Pendiente: sumar los niveles CKAN 2017–2019 donde existan.
-- [ ] Capa de represas/embalses (Bonete, Baygorria, Palmar, Salto Grande) con
-      datos operativos disponibles.
+- [x] Capa de represas/embalses (Bonete, Baygorria, Palmar, Salto Grande):
+      marcador propio con popup operativo — Salto Grande con erogado en vivo,
+      desglose turbinado/vertido (nuevo en `estado_actual.json`) y
+      mini-serie; Bonete/Palmar con erogado y cota máxima prevista (UTE);
+      Baygorria declarado sin datos públicos.
 
 ## Fase 5 — Pulido y alcance extendido (esfuerzo: abierto)
 

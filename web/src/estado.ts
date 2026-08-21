@@ -67,6 +67,13 @@ export type UteRioNegro = {
   maximos: { lugar: string; nivel: number; fecha: string }[];
 };
 
+export type SaltoGrande = {
+  turbinado: number | null;
+  vertido: number | null;
+  total: number;
+  fecha_local: string | null;
+};
+
 export type Estado = {
   generado: string;
   fuentes: Record<string, string>;
@@ -74,6 +81,7 @@ export type Estado = {
   factores_curso: Record<string, { factor: number; estacion: string }>;
   activacion?: Record<string, ActivacionLocalidad>;
   lluvia?: { hasta: string; estaciones: LluviaEstacion[] } | null;
+  salto_grande?: SaltoGrande | null;
   ina?: { estaciones: EstacionINA[] } | null;
   ute_rio_negro?: UteRioNegro | null;
   ana?: { estaciones: EstacionANA[] } | null;
@@ -167,7 +175,9 @@ export function frescuraHoras(e: EstacionEstado): number | null {
 }
 
 export function estacionesComoGeoJSON(estado: Estado) {
-  const propias = estado.estaciones.map((e) => ({
+  // la pseudo-estación Salto Grande (id -1) se muestra como represa, no
+  // como estación
+  const propias = estado.estaciones.filter((e) => e.id !== -1).map((e) => ({
     type: "Feature",
     geometry: { type: "Point", coordinates: [e.lon, e.lat] },
     properties: { ...e, frescura: frescuraHoras(e) ?? 9999 },
