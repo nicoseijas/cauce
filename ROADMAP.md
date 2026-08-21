@@ -13,11 +13,10 @@ cerradas.
 - [x] Descargar HydroRIVERS Sudamérica y recortar a Uruguay
       (`pipeline/build_red.py`: 4.569 tramos con `UPLAND_SKM >= 100`,
       1,7 MB GeoJSON).
-- [x] Adaptar el scraper de `datauy` como `pipeline/wfs.py` +
-      `descargar_capas.py`; descargadas: `shp_cursos` (13.678),
-      `V_Catalogo_publica` (100 estaciones), `curvas_tr`, `curvas_cri`,
-      `localidades_amenazas`, `problemas_drenaje`; cuencas 1/2 y
-      departamentos copiados de `datauy`.
+- [x] Scraper WFS propio (`pipeline/wfs.py` + `descargar_capas.py`);
+      descargadas: `shp_cursos` (13.678), `V_Catalogo_publica`
+      (100 estaciones), `curvas_tr`, `curvas_cri`, `localidades_amenazas`,
+      `problemas_drenaje`, cuencas nivel 1/2 y departamentos.
 - [x] Join estación ↔ tramo verificado (`pipeline/verificar_join.py`):
       66/83 estaciones con dist < 1 km y ratio de áreas 0,5–2 (la mayoría
       con ratio 1,00). Fallan: estaciones de estuario (Nueva Palmira, Fray

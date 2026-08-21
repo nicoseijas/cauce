@@ -24,8 +24,8 @@ modelo del mapa de referencia (Netlify) y elimina costos de operación.
 
 ## Pipeline de datos (Python)
 
-Reutilizar `D:\nico\datauy\scraper` como punto de partida (ya resuelve WFS
-1.1.0, paginación por rangos de ID, registros corruptos y TLS roto).
+El módulo de ingesta (`pipeline/wfs.py`) resuelve WFS 1.1.0, paginación por
+rangos de ID, registros corruptos y TLS roto.
 
 ### `build_red.py` — corre manualmente o por release
 

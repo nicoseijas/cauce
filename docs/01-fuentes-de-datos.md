@@ -15,7 +15,7 @@ scraper existente usa `verify=False`).
   (también responde en `/dinagua-gs/dinagua/ows`).
 - Sin autenticación, salida `application/json` (GeoJSON).
 - Usar WFS 1.1.0 para las vistas sin clave primaria (2.0.0 falla); paginar por
-  rangos de `id` con `CQL_FILTER` (ya resuelto en el scraper de `datauy`).
+  rangos de `id` con `CQL_FILTER` (resuelto en `pipeline/wfs.py`).
 
 ### Capas clave
 
@@ -23,7 +23,7 @@ scraper existente usa `verify=False`).
 |---|---|---|
 | `dinagua:V_Catalogo_publica` | **~100 estaciones hidrométricas** con `Nombre`, `Tipo` (hidrométrica/limnimétrica), `Curso`, `LAT`/`LONG`, área de cuenca, cota cero, y `ultimo_valor`/`ultima_fecha` (nivel), `ultimo_caudal`/`ultima_caudal_fecha` (caudal m³/s), `diasnivel`/`diascaudal` (antigüedad) | Funciona. **Es la única vía programática a datos actuales de caudal/nivel de Uruguay** |
 | `dinagua:shp_cursos` | Red de cursos de agua: **13.678 tramos** MultiLineString con `nombre_2`, `long` (km), `clase` (jerarquía), `codigo5` | Funciona (verificado con GetFeature). Sin atributos de caudal. CRS proyectado (confirmar EPSG al descargar) |
-| `dinagua:shp_cuencas_nivel1..5` | Cuencas hidrográficas en 5 niveles | Funciona; niveles 1 y 2 ya descargados en `datauy/scraper/output` |
+| `dinagua:shp_cuencas_nivel1..5` | Cuencas hidrográficas en 5 niveles | Funciona; niveles 1 y 2 descargados en `data/raw/` |
 | `dinagua:sdh_estaciones` | Misma info de estaciones con `id_cuenca_nivel5` | **Rota**: el servidor falla con "No code EPSG:94309" incluso pidiendo solo atributos. Usar `V_Catalogo_publica` |
 | `dinagua:shp_espejos_de_agua`, `shp_esteros_banados` | Lagos, embalses, bañados | No probadas; mismas convenciones |
 | `V_Pozos_publica`, `V_Tomas_publica`, `V_Embalses_publica`, `V_Usos_*_publica` | Aprovechamientos de agua (permisos) | Funcionan; no necesarias para el mapa de caudales |

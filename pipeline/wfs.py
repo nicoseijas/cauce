@@ -1,4 +1,4 @@
-"""Cliente WFS del GeoServer DINAGUA (adaptado de datauy/scraper).
+"""Cliente WFS del GeoServer DINAGUA.
 
 Convenciones del servidor:
 - WFS 1.1.0: la 2.0.0 falla en vistas de PostgreSQL sin clave primaria.

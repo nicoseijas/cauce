@@ -10,9 +10,9 @@ cuenca del río Negro.
 
 ## Estado
 
-Fases 0–4 del [ROADMAP](ROADMAP.md) completas: mapa animado con datos en
-vivo (cron cada 2 h), modo creciente y vista de anomalía. Pendiente de
-publicación en GitHub Pages.
+En vivo en <https://nicoseijas.github.io/cauce/>. Fases 0–4 del
+[ROADMAP](ROADMAP.md) completas: mapa animado con datos en vivo (cron cada
+2 h), modo creciente y vista de anomalía.
 
 ## Desarrollo
 
@@ -75,10 +75,3 @@ atribución:
 | INUMET | Precipitación | odc-uy |
 | INA (Argentina) | Alturas/caudales río Uruguay | pública, sin licencia declarada |
 | Salto Grande (CTM) | Datos operativos de la represa | sin licencia declarada |
-
-## Activos existentes
-
-- `D:\nico\datauy\scraper` — scraper WFS ya funcional contra el GeoServer de
-  DINAGUA, con paginación por rangos de ID y manejo de registros corruptos.
-  Es la base del módulo de ingesta. Ya tiene descargadas cuencas nivel 1/2 y
-  departamentos en GeoJSON.
