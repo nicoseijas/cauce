@@ -1,0 +1,1871 @@
+{
+  "profile": "data-package",
+  "name": "cauce-datos",
+  "title": "Cauce — productos de datos hídricos de Uruguay",
+  "description": "Capas cartográficas, estado hidrométrico y series derivadas que alimentan Cauce. No constituyen un servicio oficial de alertas.",
+  "homepage": "https://nicoseijas.github.io/cauce/",
+  "repository": "https://github.com/nicoseijas/cauce",
+  "version": "3",
+  "keywords": [
+    "Uruguay",
+    "hidrología",
+    "ríos",
+    "inundación",
+    "GeoJSON"
+  ],
+  "created": "2026-08-22T01:58:19Z",
+  "metadata_schema_version": 1,
+  "licenses": [
+    {
+      "name": "mixed",
+      "title": "Licencias mixtas; consultar sources y cada recurso",
+      "path": "https://github.com/nicoseijas/cauce/blob/main/README.md#licencia-y-datos"
+    }
+  ],
+  "contributors": [
+    {
+      "title": "Nicolás Seijas",
+      "role": "author"
+    }
+  ],
+  "sources": [
+    {
+      "id": "ana",
+      "title": "Telemetría hidrometeorológica",
+      "authority": "Agência Nacional de Águas e Saneamento Básico, Brasil",
+      "url": "https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos",
+      "documentation": "https://telemetriaws1.ana.gov.br/Mapa.aspx",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "notes": "Servicio SOAP legado. ANA anunció soporte solo hasta el 2026-06-30 y recomienda migrar a su API autenticada; el endpoint legado aún respondió al snapshot 2026-08-22, pero su continuidad no está garantizada."
+    },
+    {
+      "id": "caru",
+      "title": "Alturas de puertos del río Uruguay",
+      "authority": "Comisión Administradora del Río Uruguay",
+      "url": "http://190.0.152.194:8080/alturas/web/user/alturas",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "access": "Tabla HTML sobre HTTP sin cifrar",
+      "notes": "Fuente candidata no implementada; el estado la declara no_implementada y no la usa en resultados."
+    },
+    {
+      "id": "cauce",
+      "title": "Snapshots y transformaciones de Cauce",
+      "authority": "Proyecto Cauce",
+      "url": "https://github.com/nicoseijas/cauce",
+      "license": "Código MIT; datos sujetos a las licencias de sus fuentes"
+    },
+    {
+      "id": "dinagua_climatologia",
+      "title": "Regionalización de estadísticas de caudales",
+      "authority": "DINAGUA, Ministerio de Ambiente, Uruguay",
+      "url": "https://www.gub.uy/ministerio-ambiente/politicas-y-gestion/publicaciones-hidrologia",
+      "license": "Datos abiertos gub.uy",
+      "temporal_coverage": "1980-2010",
+      "edition": "actualización octubre de 2025"
+    },
+    {
+      "id": "dinagua_niveles_historicos",
+      "title": "Mediciones históricas anuales de nivel 2017-2019",
+      "authority": "DINAGUA, Ministerio de Ambiente, Uruguay",
+      "url": "https://catalogodatos.gub.uy/",
+      "license": "Licencia de Datos Abiertos de Uruguay (odc-uy)",
+      "temporal_coverage": "2017-2019",
+      "notes": "El informe de validación conserva URL, tamaño y SHA-256 de cada CSV anual; las horas de las series no publican zona horaria."
+    },
+    {
+      "id": "dinagua_wfs",
+      "title": "DINAGUA — GeoServer WFS",
+      "authority": "Ministerio de Ambiente, Uruguay",
+      "url": "https://www.ambiente.gub.uy/dinagua-gs/wfs",
+      "license": "Datos abiertos gub.uy; confirmar términos específicos de las capas WFS",
+      "access": "WFS 1.1.0, sin autenticación",
+      "notes": "Varias capas declaran EPSG:4326 pero entregan coordenadas UTM 21S; el pipeline verifica magnitud y corrige a EPSG:32721 antes de reproyectar."
+    },
+    {
+      "id": "hydrorivers",
+      "title": "HydroRIVERS v1.0 — South America",
+      "authority": "HydroSHEDS",
+      "url": "https://data.hydrosheds.org/file/HydroRIVERS/HydroRIVERS_v10_sa_shp.zip",
+      "license": "HydroSHEDS License Agreement; libre para uso científico, educativo y comercial, con condiciones de atribución y redistribución",
+      "license_url": "https://data.hydrosheds.org/file/technical-documentation/HydroSHEDS_TechDoc_v1_4.pdf",
+      "notes": "Geometría global y atributos hidrográficos; resolución nativa aproximada de 450 m. Licencia contrastada con la documentación oficial el 2026-08-21."
+    },
+    {
+      "id": "ina",
+      "title": "API de datos hidrológicos",
+      "authority": "INA / Prefectura Naval, Argentina",
+      "url": "https://alerta.ina.gob.ar/pub/datos/",
+      "license": "Pública, sin licencia de redistribución declarada"
+    },
+    {
+      "id": "inia",
+      "title": "INIA GRAS — precipitación y temperaturas extremas",
+      "authority": "INIA, Uruguay",
+      "url": "https://catalogodatos.gub.uy/api/3/action/package_show",
+      "license": "odc-uy",
+      "temporal_resolution": "día pluviométrico 09:00-09:00"
+    },
+    {
+      "id": "inumet",
+      "title": "Precipitación acumulada horaria",
+      "authority": "INUMET, Uruguay",
+      "url": "https://catalogodatos.gub.uy/dataset/fd896b11-4c04-4807-bae4-5373d65beea2/resource/cc785e9e-d9c8-4706-b013-9a6a5b0f7d01/download/inumet_precipitacion_acumulada_horaria.csv",
+      "license": "Licencia de Datos Abiertos de Uruguay (odc-uy)",
+      "temporal_resolution": "horaria; publicación diaria",
+      "notes": "El catálogo oficial declara cobertura 2019-2026 y actualización diaria; metadatos contrastados el 2026-08-21."
+    },
+    {
+      "id": "natural_earth",
+      "title": "Natural Earth 1:10m",
+      "authority": "Natural Earth",
+      "url": "https://www.naturalearthdata.com/",
+      "license": "Dominio público",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "notes": "Términos contrastados con el sitio oficial el 2026-08-21."
+    },
+    {
+      "id": "salto_grande",
+      "title": "Datos horarios de Salto Grande",
+      "authority": "Comisión Técnica Mixta de Salto Grande",
+      "url": "https://www.saltogrande.org/datos_horarios.php",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "temporal_resolution": "horaria"
+    },
+    {
+      "id": "sohma",
+      "title": "Mareógrafos de la Armada Nacional",
+      "authority": "SOHMA, Uruguay",
+      "url": "https://meteo.armada.mil.uy/",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "temporal_resolution": "5 minutos"
+    },
+    {
+      "id": "ute",
+      "title": "Previsión de niveles y caudales del río Negro",
+      "authority": "UTE, Uruguay",
+      "url": "https://apps.ute.com.uy/sge/portal/GestionEmbalseWeb/Paginas/GdeE/Previsiones/CUPubNivCau.aspx",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "temporal_resolution": "diaria; horizonte 7 días"
+    }
+  ],
+  "spatial_conventions": {
+    "horizontal_storage_crs": "OGC:CRS84",
+    "axis_order": [
+      "longitude",
+      "latitude"
+    ],
+    "processing_crs": "EPSG:32721 (WGS 84 / UTM zone 21S), cuando se declara por recurso",
+    "vertical_reference": "Mixta y dependiente de la estación/estudio; no comparar niveles entre estaciones sin transformación documentada."
+  },
+  "reproducibility": {
+    "catalog_source": "data/referencia/catalogo_base.json",
+    "catalog_builder": "pipeline/build_catalogo.py",
+    "python_lock": "requirements.lock",
+    "web_lock": "web/package-lock.json",
+    "integrity": "checksums.sha256"
+  },
+  "resources": [
+    {
+      "name": "activacion",
+      "path": "activacion.json",
+      "profile": "data-resource",
+      "format": "json",
+      "mediatype": "application/json",
+      "bytes": 37960,
+      "hash": "sha256:ba7325807689078b37d000204506c7ca43b91986f6ae1d6d6e16757e98e8ccef",
+      "title": "Configuraciones candidatas de activación de escenarios",
+      "description": "Relaciones estación-localidad y umbrales candidatos. Ninguna relación se habilita automáticamente sin datum y relación hidráulica validados.",
+      "sources": [
+        "dinagua_wfs",
+        "cauce"
+      ],
+      "pipeline": "pipeline/analizar_datum.py",
+      "classification": [
+        "oficial",
+        "estimado"
+      ],
+      "update_frequency": "cuando cambian capas o validaciones",
+      "vertical_reference": "Cotas oficiales DINAGUA referidas a Wharton según atributos; compatibilidad declarada por umbral.",
+      "limitations": [
+        "No representa inundación observada ni pronosticada.",
+        "auto_habilitada=false salvo validación explícita."
+      ],
+      "schema": {
+        "fields": [
+          {
+            "name": "CA-ACS",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "CA-JBY",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "CA-SLA",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "CO-CLO",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "CO-JLL",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "CO-NPA",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "DU-CEN",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "FD-2DA",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "FD-FDA",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "PA-PSD",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "RN-FBS",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "RN-LAR",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "SA-CON",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "SA-STO",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "SO-DOL",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "SO-MER",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "TA-PTS",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "TA-SGP",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "TT-GEM",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          }
+        ]
+      },
+      "record_count": 19
+    },
+    {
+      "name": "amenazas",
+      "path": "amenazas.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 92360,
+      "hash": "sha256:1f829e6117ec9196b2ce5bdec04493b917ecd69d6cae08a7378800ae2ffc456d",
+      "title": "Localidades con tipos de amenaza",
+      "description": "Índice oficial por localidad de amenazas ribereñas, pluviales, costeras, de presas y accesibilidad.",
+      "sources": [
+        "dinagua_wfs"
+      ],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": [
+        "oficial"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721 cuando corresponde",
+      "coordinate_precision_degrees": 1e-05,
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "Es un índice puntual de amenaza, no una mancha ni un estado actual."
+      ],
+      "record_count": 324,
+      "geometry_counts": {
+        "Point": 324
+      },
+      "null_geometry_count": 0,
+      "position_count": 324,
+      "schema": {
+        "fields": [
+          {
+            "name": "accesibilidad",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "canadas",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "costas",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "departamento",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "drenaje",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "localidad",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "presas",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "ribera",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "total_tipos_amenaza",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.40345,
+          -34.9431,
+          -53.26233,
+          -30.21291
+        ]
+      }
+    },
+    {
+      "name": "capitales",
+      "path": "capitales.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 3262,
+      "hash": "sha256:ecf9ab09235c220d3467cced9d4f0dc92eae10032c527db355f6b3b529dfae4d",
+      "title": "Capitales departamentales",
+      "description": "Puntos de referencia cartográfica para capitales de Uruguay.",
+      "sources": [
+        "natural_earth"
+      ],
+      "pipeline": "pipeline/build_lugares.py",
+      "classification": [
+        "contexto"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "coordinate_precision_degrees": 0.001,
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "Escala cartográfica 1:10 millones; no usar para análisis de precisión."
+      ],
+      "record_count": 19,
+      "geometry_counts": {
+        "Point": 19
+      },
+      "null_geometry_count": 0,
+      "position_count": 19,
+      "schema": {
+        "fields": [
+          {
+            "name": "capital_pais",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "nombre",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "pob",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.304,
+          -34.91,
+          -54.18,
+          -30.416
+        ]
+      }
+    },
+    {
+      "name": "cuencas-lluvia",
+      "path": "cuencas_lluvia.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 152813,
+      "hash": "sha256:ed01f91625936038ccad8457ac814f69f20610ceffe9350e5630ea311354f9fa",
+      "title": "Subcuencas con cobertura de pluviómetros",
+      "description": "Subcuencas DINAGUA nivel 2 que contienen estaciones de lluvia usadas por Cauce.",
+      "sources": [
+        "dinagua_wfs",
+        "inumet",
+        "inia",
+        "ana",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_cuencas_lluvia.py",
+      "classification": [
+        "oficial",
+        "derivado"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada a 0.003 grados",
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "La cobertura es puntual; el aviso de lluvia no implica inundación ni uniformidad espacial en toda la cuenca."
+      ],
+      "record_count": 11,
+      "geometry_counts": {
+        "Polygon": 11
+      },
+      "null_geometry_count": 0,
+      "position_count": 3710,
+      "schema": {
+        "fields": [
+          {
+            "name": "area_km2",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "cuenca",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "estaciones",
+            "type": "array",
+            "nullable": false,
+            "observed_types": [
+              "array"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.3927547,
+          -34.9177537,
+          -53.1739144,
+          -29.854564
+        ]
+      }
+    },
+    {
+      "name": "departamentos-nombres",
+      "path": "departamentos_nombres.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 2644,
+      "hash": "sha256:fd25964c9f877cb45351a684f18f91df29e1f37ae66e671377333d3979960e44",
+      "title": "Puntos de etiqueta de departamentos",
+      "description": "Puntos representativos derivados de límites departamentales.",
+      "sources": [
+        "dinagua_wfs",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_lugares.py",
+      "classification": [
+        "derivado",
+        "contexto"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "coordinate_precision_degrees": 0.001,
+      "vertical_reference": "no aplica",
+      "record_count": 19,
+      "geometry_counts": {
+        "Point": 19
+      },
+      "null_geometry_count": 0,
+      "position_count": 19,
+      "schema": {
+        "fields": [
+          {
+            "name": "nombre",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -57.849,
+          -34.819,
+          -54.005,
+          -30.588
+        ]
+      }
+    },
+    {
+      "name": "departamentos-uy",
+      "path": "departamentos_uy.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 200358,
+      "hash": "sha256:994342364680e63854ab196d9d44bab7c74ef09a0cdcb07237fb48a0f3a7e004",
+      "title": "Límites departamentales de Uruguay",
+      "description": "Límites usados para recorte y contexto cartográfico.",
+      "sources": [
+        "dinagua_wfs"
+      ],
+      "pipeline": "pipeline/build_red.py",
+      "classification": [
+        "oficial",
+        "contexto"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "Producto de visualización; verificar la fuente oficial antes de usos jurídicos o catastrales."
+      ],
+      "record_count": 19,
+      "geometry_counts": {
+        "Polygon": 19
+      },
+      "null_geometry_count": 0,
+      "position_count": 8342,
+      "schema": {
+        "fields": []
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.4393,
+          -34.974,
+          -53.1813,
+          -30.0856
+        ]
+      }
+    },
+    {
+      "name": "drenaje",
+      "path": "drenaje.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 1051889,
+      "hash": "sha256:3aa1569c794ef6579d44b371850f9e0f7521f4598d2301abd682120e146307ab",
+      "title": "Conflictos de drenaje urbano",
+      "description": "Polígonos oficiales de problemas de drenaje pluvial urbano.",
+      "sources": [
+        "dinagua_wfs"
+      ],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": [
+        "oficial",
+        "pluvial_urbano"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada con tolerancia de 8 m",
+      "coordinate_precision_degrees": 1e-05,
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "No representa una inundación fluvial ni el estado actual."
+      ],
+      "record_count": 1923,
+      "geometry_counts": {
+        "GeometryCollection": 2,
+        "MultiPolygon": 17,
+        "Polygon": 1904
+      },
+      "null_geometry_count": 0,
+      "position_count": 17630,
+      "schema": {
+        "fields": [
+          {
+            "name": "departamento",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "descripcion_conflicto",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "localidad",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "tipo_conflicto",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.40235,
+          -34.95021,
+          -53.25489,
+          -30.24154
+        ]
+      }
+    },
+    {
+      "name": "estaciones",
+      "path": "estaciones.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 41189,
+      "hash": "sha256:9fbbb6c5dd7b9d6ab360f237f1b88023caa10864bc9315dc56a88e5a0d7d13b8",
+      "title": "Catálogo estático de estaciones y emparejamiento con la red",
+      "description": "Estaciones DINAGUA y pseudoestación Salto Grande con tramo cercano, área, caudal medio y diagnóstico del join.",
+      "sources": [
+        "dinagua_wfs",
+        "hydrorivers",
+        "dinagua_climatologia",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_estaciones.py",
+      "classification": [
+        "oficial",
+        "derivado"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "coordinate_precision_degrees": 1e-05,
+      "vertical_reference": "Campo cota_cero en metros sobre referencia Wharton según DINAGUA; cada regla tiene cero local y no se compara directamente con otra estación.",
+      "limitations": [
+        "El emparejamiento estación-tramo es espacial y se declara con dist_m/join_ok.",
+        "q_medio puede provenir de DINAGUA o HydroRIVERS según q_medio_fuente."
+      ],
+      "record_count": 101,
+      "geometry_counts": {
+        "Point": 101
+      },
+      "null_geometry_count": 0,
+      "position_count": 101,
+      "schema": {
+        "fields": [
+          {
+            "name": "HYRIV_ID",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "area_km2",
+            "type": "number",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "number"
+            ]
+          },
+          {
+            "name": "codigo",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "codigo5",
+            "type": "integer",
+            "nullable": true,
+            "observed_types": [
+              "integer",
+              "null"
+            ]
+          },
+          {
+            "name": "cota_cero",
+            "type": "number",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "number"
+            ]
+          },
+          {
+            "name": "curso",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "dist_m",
+            "type": "number",
+            "nullable": false,
+            "observed_types": [
+              "number"
+            ]
+          },
+          {
+            "name": "id",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "join_ok",
+            "type": "boolean",
+            "nullable": false,
+            "observed_types": [
+              "boolean"
+            ]
+          },
+          {
+            "name": "nombre",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "q_medio",
+            "type": "number",
+            "nullable": false,
+            "observed_types": [
+              "number"
+            ]
+          },
+          {
+            "name": "q_medio_fuente",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "tipo",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.42112,
+          -34.96446,
+          -53.2561,
+          -30.41661
+        ]
+      }
+    },
+    {
+      "name": "estado-actual",
+      "path": "estado_actual.json",
+      "profile": "data-resource",
+      "format": "json",
+      "mediatype": "application/json",
+      "bytes": 126625,
+      "hash": "sha256:179fd56ae81c3f2c682f5208e3622ea50bef6d4b3c2912a412d822bf57b5c772",
+      "title": "Estado hídrico consolidado",
+      "description": "Últimas observaciones, pronóstico UTE, estimaciones visuales, frescura, QC y cobertura de activación.",
+      "sources": [
+        "dinagua_wfs",
+        "inumet",
+        "inia",
+        "salto_grande",
+        "ute",
+        "ina",
+        "ana",
+        "caru",
+        "sohma",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_estado.py",
+      "classification": [
+        "observado",
+        "oficial",
+        "pronosticado",
+        "estimado"
+      ],
+      "update_frequency": "cada 2 horas",
+      "horizontal_crs": "OGC:CRS84 para coordenadas de estaciones",
+      "vertical_reference": "Mixta: ceros locales de cada estación; SOHMA y campos DINAGUA indican Ex Wharton/Wharton donde corresponde. Nunca comparar metros entre estaciones sin transformación documentada.",
+      "json_schema": "schema/estado-v3.schema.json",
+      "limitations": [
+        "Estado global vencido después de 6 h.",
+        "El intervalo temporal bruto incluye mediciones vencidas o rechazadas; usable_temporal contiene solo insumos aptos para derivados en ese snapshot.",
+        "Factores de curso son escalas visuales estimadas, no caudales medidos en todo el curso.",
+        "Pronóstico UTE sin probabilidad ni incertidumbre publicadas.",
+        "Las coordenadas de los mareógrafos SOHMA son aproximadas porque la página fuente no las publica.",
+        "La fuente ANA usa un servicio legado cuya fecha de soporte anunciada ya venció."
+      ],
+      "schema": {
+        "fields": [
+          {
+            "name": "activacion",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "activacion_cobertura",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "ana",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "control_calidad",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "estaciones",
+            "type": "array",
+            "nullable": false,
+            "observed_types": [
+              "array"
+            ]
+          },
+          {
+            "name": "factores_curso",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "fuentes",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "fuentes_detalle",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "generado",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "ina",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "lluvia",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "salto_grande",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "sohma",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "ute_rio_negro",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          }
+        ]
+      },
+      "record_count": 112,
+      "schema_version": 3,
+      "qc_version": "1.0.0",
+      "temporal": {
+        "start": "1969-04-30T07:00:00Z",
+        "end": "2026-08-31T17:00:00Z",
+        "scope": "fechas de medición publicadas, incluidas vencidas o rechazadas"
+      },
+      "usable_temporal": {
+        "start": "2026-08-20T06:00:00Z",
+        "end": "2026-08-22T01:50:00Z",
+        "scope": "mediciones aptas para derivados según QC al generar el snapshot"
+      },
+      "forecast_temporal": {
+        "start": "2026-08-21T00:00:00Z",
+        "end": "2026-08-28T00:00:00Z",
+        "horizon_days": 7,
+        "probability": null,
+        "uncertainty": "no publicada por UTE"
+      }
+    },
+    {
+      "name": "inundacion-cri",
+      "path": "inundacion_cri.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 537059,
+      "hash": "sha256:1664d257d1262df3d2271ee61b12fa9477c9e5a40f13b327967d92d1eb891221",
+      "title": "Inundaciones registradas",
+      "description": "Polígonos oficiales de eventos históricos de inundación con fecha y fuente del levantamiento.",
+      "sources": [
+        "dinagua_wfs"
+      ],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": [
+        "oficial",
+        "observado_historico",
+        "fluvial"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada con tolerancia de 8 m",
+      "coordinate_precision_degrees": 1e-05,
+      "vertical_reference": "Atributos cota_local y cota_oficial conservados de DINAGUA; referencia vertical dependiente del estudio.",
+      "limitations": [
+        "El registro no es exhaustivo y no constituye un inventario de días sin inundación."
+      ],
+      "record_count": 82,
+      "geometry_counts": {
+        "GeometryCollection": 2,
+        "MultiPolygon": 16,
+        "Polygon": 64
+      },
+      "null_geometry_count": 0,
+      "position_count": 19704,
+      "schema": {
+        "fields": [
+          {
+            "name": "cota_local",
+            "type": "number",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "number"
+            ]
+          },
+          {
+            "name": "cota_oficial",
+            "type": "number",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "number"
+            ]
+          },
+          {
+            "name": "curso",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "fecha_evento",
+            "type": "string",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "string"
+            ]
+          },
+          {
+            "name": "fuentes",
+            "type": "string",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "string"
+            ]
+          },
+          {
+            "name": "nombre",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.39448,
+          -34.88575,
+          -53.35539,
+          -30.23888
+        ]
+      },
+      "temporal": {
+        "start": "1941-01-01",
+        "end": "2025-07-03"
+      }
+    },
+    {
+      "name": "inundacion-tr",
+      "path": "inundacion_tr.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 2143328,
+      "hash": "sha256:9e6efa8367b2e00b6e9cba79094729a49cdd645fd2a6b54d9d4f861681003a10",
+      "title": "Escenarios oficiales por período de retorno",
+      "description": "Manchas precalculadas de DINAGUA para períodos de retorno y creciente máxima probable.",
+      "sources": [
+        "dinagua_wfs"
+      ],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": [
+        "oficial",
+        "escenario",
+        "fluvial"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada con tolerancia de 8 m",
+      "coordinate_precision_degrees": 1e-05,
+      "vertical_reference": "Atributos cota_local y cota_oficial conservados de DINAGUA; referencia vertical dependiente del estudio.",
+      "limitations": [
+        "No es observación ni pronóstico.",
+        "Cobertura limitada a localidades estudiadas.",
+        "La probabilidad anual no indica periodicidad determinista."
+      ],
+      "record_count": 238,
+      "geometry_counts": {
+        "GeometryCollection": 36,
+        "MultiPolygon": 55,
+        "Polygon": 147
+      },
+      "null_geometry_count": 0,
+      "position_count": 79201,
+      "schema": {
+        "fields": [
+          {
+            "name": "cota_local",
+            "type": "number",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "number"
+            ]
+          },
+          {
+            "name": "cota_oficial",
+            "type": "number",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "number"
+            ]
+          },
+          {
+            "name": "curso",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "fuentes",
+            "type": "string",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "string"
+            ]
+          },
+          {
+            "name": "localidad_cod",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "nombre",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "periodo",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "tipo_curva",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.43226,
+          -35.00332,
+          -53.37055,
+          -30.25193
+        ]
+      }
+    },
+    {
+      "name": "red-nombres",
+      "path": "red_nombres.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 260524,
+      "hash": "sha256:b5c80b334106593d17c4559dde003fcba4176b0d38d3d3592eee2e0d4fc2ab05",
+      "title": "Geometrías para etiquetas de cursos",
+      "description": "Selección simplificada de cursos con nombre para rotulación cartográfica.",
+      "sources": [
+        "hydrorivers",
+        "dinagua_wfs",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_red.py",
+      "classification": [
+        "derivado",
+        "contexto"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "spatial_resolution": "simplificación de 0.008 grados para etiquetas",
+      "coordinate_precision_degrees": 1e-05,
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "Geometría de rotulación; no usar para análisis de red o distancia."
+      ],
+      "record_count": 811,
+      "geometry_counts": {
+        "LineString": 538,
+        "MultiLineString": 273
+      },
+      "null_geometry_count": 0,
+      "position_count": 5088,
+      "schema": {
+        "fields": [
+          {
+            "name": "DIS_AV_CMS",
+            "type": "number",
+            "nullable": false,
+            "observed_types": [
+              "number"
+            ]
+          },
+          {
+            "name": "nombre",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.41875,
+          -34.91042,
+          -53.11042,
+          -29.78958
+        ]
+      }
+    },
+    {
+      "name": "red-uy",
+      "path": "red_uy.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 2616857,
+      "hash": "sha256:bd035852ac57c4433afaa68903406ed54070f0b674df00f315e6df69e2f89a41",
+      "title": "Red hidrográfica animada",
+      "description": "Tramos HydroRIVERS recortados, suavizados y enriquecidos con nombres DINAGUA y climatología nacional.",
+      "sources": [
+        "hydrorivers",
+        "dinagua_wfs",
+        "dinagua_climatologia",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_red.py + pipeline/build_climatologia.py",
+      "classification": [
+        "oficial",
+        "modelo_global",
+        "derivado"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "HydroRIVERS ~450 m; dos iteraciones Chaikin y simplificación de 0.0001 grados",
+      "coordinate_precision_degrees": 1e-05,
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "Geometría suavizada para visualización; no apta para hidráulica, navegación ni delimitación legal.",
+        "q_medio_uy cubre solo aportes representados por la climatología territorial de Uruguay; el resto conserva HydroRIVERS."
+      ],
+      "record_count": 4585,
+      "geometry_counts": {
+        "LineString": 4585
+      },
+      "null_geometry_count": 0,
+      "position_count": 62756,
+      "schema": {
+        "fields": [
+          {
+            "name": "DIS_AV_CMS",
+            "type": "number",
+            "nullable": false,
+            "observed_types": [
+              "number"
+            ]
+          },
+          {
+            "name": "HYRIV_ID",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "LENGTH_KM",
+            "type": "number",
+            "nullable": false,
+            "observed_types": [
+              "number"
+            ]
+          },
+          {
+            "name": "MAIN_RIV",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "NEXT_DOWN",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "ORD_STRA",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          },
+          {
+            "name": "UPLAND_SKM",
+            "type": "number",
+            "nullable": false,
+            "observed_types": [
+              "number"
+            ]
+          },
+          {
+            "name": "codigo5",
+            "type": "integer",
+            "nullable": true,
+            "observed_types": [
+              "integer",
+              "null"
+            ]
+          },
+          {
+            "name": "nombre",
+            "type": "string",
+            "nullable": true,
+            "observed_types": [
+              "null",
+              "string"
+            ]
+          },
+          {
+            "name": "q_medio_uy",
+            "type": "number",
+            "nullable": true,
+            "observed_types": [
+              "number"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -58.76875,
+          -34.91042,
+          -52.97708,
+          -29.78958
+        ]
+      }
+    },
+    {
+      "name": "series",
+      "path": "series.json",
+      "profile": "data-resource",
+      "format": "json",
+      "mediatype": "application/json",
+      "bytes": 4669,
+      "hash": "sha256:4fb175ccf1a8e5e6c8470c3e1d279cc8ec3d56e0717032b8f1a8b3320251f2b7",
+      "title": "Series recientes reconstruidas desde snapshots",
+      "description": "Niveles y caudales deduplicados por fecha de observación a partir del archivo histórico de Cauce.",
+      "sources": [
+        "cauce",
+        "dinagua_wfs",
+        "salto_grande",
+        "ina",
+        "ana",
+        "sohma",
+        "ute"
+      ],
+      "pipeline": "pipeline/build_series.py",
+      "classification": [
+        "observado",
+        "pronosticado",
+        "derivado"
+      ],
+      "update_frequency": "cada 2 horas",
+      "temporal_resolution": "irregular según fuente; ventana móvil de 45 días",
+      "vertical_reference": "Mixta por estación; conservar id y fuente antes de interpretar niveles.",
+      "limitations": [
+        "El archivo histórico propio comienza en agosto de 2026.",
+        "Observaciones dudosas/rechazadas por QC se excluyen de la serie, pero permanecen en los snapshots."
+      ],
+      "schema": {
+        "fields": [
+          {
+            "name": "control_calidad",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "estaciones",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "generado",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "ventana_dias",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          }
+        ]
+      },
+      "record_count": 39,
+      "window_days": 45,
+      "qc_version": "1.0.0",
+      "temporal": {
+        "start": "2026-08-19T06:00:00Z",
+        "end": "2026-08-22T01:50:00Z"
+      }
+    },
+    {
+      "name": "validacion-activacion",
+      "path": "validacion_activacion.json",
+      "profile": "data-resource",
+      "format": "json",
+      "mediatype": "application/json",
+      "bytes": 91277,
+      "hash": "sha256:5d7c13df8c0548e23eb043908b59aa47a11ef5cfa7c8534813996e456aca6a41",
+      "title": "Evidencia retrospectiva de activaciones candidatas",
+      "description": "Evaluación reproducible por evento completo, localidad y cuenca de umbrales candidatos frente a niveles históricos 2017-2019.",
+      "sources": [
+        "dinagua_wfs",
+        "dinagua_niveles_historicos",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_validacion_activacion.py",
+      "classification": [
+        "oficial",
+        "observado_historico",
+        "estimado_retrospectivo_no_operativo"
+      ],
+      "update_frequency": "manual; al incorporar eventos o series históricas",
+      "horizontal_crs": "Partición espacial en EPSG:32721; la capa fuente de cuencas declara erróneamente EPSG:4326 y se corrige por magnitud.",
+      "vertical_reference": "Escala local de cada estación; no se aplica corrección de datum.",
+      "temporal_resolution": "irregular; evaluación en ventanas de ±7 días por evento",
+      "json_schema": "schema/validacion-activacion-v1.schema.json",
+      "limitations": [
+        "No es validación operativa ni pronóstico.",
+        "CRI no registra exhaustivamente eventos positivos o negativos.",
+        "Una coincidencia no valida datum ni causalidad hidráulica.",
+        "Cobertura histórica pública limitada a 2017-2019."
+      ],
+      "schema": {
+        "fields": [
+          {
+            "name": "clasificacion",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "decision_operativa",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "estaciones",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "fuentes_series",
+            "type": "array",
+            "nullable": false,
+            "observed_types": [
+              "array"
+            ]
+          },
+          {
+            "name": "generado_desde_datos",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "localidades",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "metodo",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "particiones_por_cuenca",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "resumen",
+            "type": "object",
+            "nullable": false,
+            "observed_types": [
+              "object"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          }
+        ]
+      },
+      "record_count": 19,
+      "schema_version": 1,
+      "validation_summary": {
+        "localidades_candidatas": 19,
+        "localidades_con_estacion_superficial": 17,
+        "localidades_con_curso_compatible": 14,
+        "tipos_inundacion": {
+          "costera_estuarina": 2,
+          "fluvial": 15,
+          "mixta_no_separada": 1,
+          "pluvial_urbana": 1
+        },
+        "bloqueos_candidatos": {
+          "curso_estacion_no_coincide": 3,
+          "datum_vertical_no_validado": 19,
+          "mecanismos_costero_y_pluvial_no_separados": 1,
+          "relacion_hidraulica_no_validada_por_eventos_completos": 19,
+          "requiere_modelo_pluvial_urbano": 1,
+          "requiere_nivel_costero_y_forzantes_estuarinas": 2,
+          "sin_estacion_superficial_compatible": 2,
+          "umbrales_indistinguibles_dada_incertidumbre": 16
+        },
+        "eventos_registrados": 10,
+        "eventos_con_cobertura": 5,
+        "hidrogramas_completos": 5,
+        "coincidencias_umbral": 4,
+        "fallos_omision": 1,
+        "localidades_habilitables": 0
+      },
+      "temporal": {
+        "start": "2017-01-01",
+        "end": "2019-12-31",
+        "scope": "años de las series históricas evaluadas; no representa vigencia operativa"
+      }
+    },
+    {
+      "name": "vecinos",
+      "path": "vecinos.geojson",
+      "profile": "data-resource",
+      "format": "geojson",
+      "mediatype": "application/geo+json",
+      "bytes": 19438,
+      "hash": "sha256:c18742d851351ab509c7922bce6ecba11f34933a49ea20059e8a91695f7595c4",
+      "title": "Países vecinos",
+      "description": "Contexto cartográfico simplificado de Argentina, Brasil y Paraguay.",
+      "sources": [
+        "natural_earth"
+      ],
+      "pipeline": "pipeline/build_contexto.py",
+      "classification": [
+        "contexto"
+      ],
+      "horizontal_crs": "OGC:CRS84",
+      "spatial_resolution": "Natural Earth 1:10m; simplificación de 0.01 grados",
+      "coordinate_precision_degrees": 0.001,
+      "vertical_reference": "no aplica",
+      "limitations": [
+        "No usar como límite jurídico."
+      ],
+      "record_count": 2,
+      "geometry_counts": {
+        "MultiPolygon": 1,
+        "Polygon": 1
+      },
+      "null_geometry_count": 0,
+      "position_count": 876,
+      "schema": {
+        "fields": [
+          {
+            "name": "pais",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "spatial": {
+        "crs": "OGC:CRS84",
+        "axis_order": [
+          "longitude",
+          "latitude"
+        ],
+        "bbox": [
+          -63.5,
+          -38.5,
+          -48.361,
+          -25.5
+        ]
+      }
+    }
+  ]
+}

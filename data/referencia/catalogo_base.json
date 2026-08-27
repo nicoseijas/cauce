@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "metadata_updated": "2026-08-21T00:00:00Z",
+  "package": {
+    "name": "cauce-datos",
+    "title": "Cauce — productos de datos hídricos de Uruguay",
+    "description": "Capas cartográficas, estado hidrométrico y series derivadas que alimentan Cauce. No constituyen un servicio oficial de alertas.",
+    "homepage": "https://nicoseijas.github.io/cauce/",
+    "repository": "https://github.com/nicoseijas/cauce",
+    "version": "3",
+    "keywords": ["Uruguay", "hidrología", "ríos", "inundación", "GeoJSON"]
+  },
+  "sources": {
+    "dinagua_wfs": {
+      "title": "DINAGUA — GeoServer WFS",
+      "authority": "Ministerio de Ambiente, Uruguay",
+      "url": "https://www.ambiente.gub.uy/dinagua-gs/wfs",
+      "license": "Datos abiertos gub.uy; confirmar términos específicos de las capas WFS",
+      "access": "WFS 1.1.0, sin autenticación",
+      "notes": "Varias capas declaran EPSG:4326 pero entregan coordenadas UTM 21S; el pipeline verifica magnitud y corrige a EPSG:32721 antes de reproyectar."
+    },
+    "dinagua_niveles_historicos": {
+      "title": "Mediciones históricas anuales de nivel 2017-2019",
+      "authority": "DINAGUA, Ministerio de Ambiente, Uruguay",
+      "url": "https://catalogodatos.gub.uy/",
+      "license": "Licencia de Datos Abiertos de Uruguay (odc-uy)",
+      "temporal_coverage": "2017-2019",
+      "notes": "El informe de validación conserva URL, tamaño y SHA-256 de cada CSV anual; las horas de las series no publican zona horaria."
+    },
+    "dinagua_climatologia": {
+      "title": "Regionalización de estadísticas de caudales",
+      "authority": "DINAGUA, Ministerio de Ambiente, Uruguay",
+      "url": "https://www.gub.uy/ministerio-ambiente/politicas-y-gestion/publicaciones-hidrologia",
+      "license": "Datos abiertos gub.uy",
+      "temporal_coverage": "1980-2010",
+      "edition": "actualización octubre de 2025"
+    },
+    "hydrorivers": {
+      "title": "HydroRIVERS v1.0 — South America",
+      "authority": "HydroSHEDS",
+      "url": "https://data.hydrosheds.org/file/HydroRIVERS/HydroRIVERS_v10_sa_shp.zip",
+      "license": "HydroSHEDS License Agreement; libre para uso científico, educativo y comercial, con condiciones de atribución y redistribución",
+      "license_url": "https://data.hydrosheds.org/file/technical-documentation/HydroSHEDS_TechDoc_v1_4.pdf",
+      "notes": "Geometría global y atributos hidrográficos; resolución nativa aproximada de 450 m. Licencia contrastada con la documentación oficial el 2026-08-21."
+    },
+    "natural_earth": {
+      "title": "Natural Earth 1:10m",
+      "authority": "Natural Earth",
+      "url": "https://www.naturalearthdata.com/",
+      "license": "Dominio público",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "notes": "Términos contrastados con el sitio oficial el 2026-08-21."
+    },
+    "inumet": {
+      "title": "Precipitación acumulada horaria",
+      "authority": "INUMET, Uruguay",
+      "url": "https://catalogodatos.gub.uy/dataset/fd896b11-4c04-4807-bae4-5373d65beea2/resource/cc785e9e-d9c8-4706-b013-9a6a5b0f7d01/download/inumet_precipitacion_acumulada_horaria.csv",
+      "license": "Licencia de Datos Abiertos de Uruguay (odc-uy)",
+      "temporal_resolution": "horaria; publicación diaria",
+      "notes": "El catálogo oficial declara cobertura 2019-2026 y actualización diaria; metadatos contrastados el 2026-08-21."
+    },
+    "inia": {
+      "title": "INIA GRAS — precipitación y temperaturas extremas",
+      "authority": "INIA, Uruguay",
+      "url": "https://catalogodatos.gub.uy/api/3/action/package_show",
+      "license": "odc-uy",
+      "temporal_resolution": "día pluviométrico 09:00-09:00"
+    },
+    "salto_grande": {
+      "title": "Datos horarios de Salto Grande",
+      "authority": "Comisión Técnica Mixta de Salto Grande",
+      "url": "https://www.saltogrande.org/datos_horarios.php",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "temporal_resolution": "horaria"
+    },
+    "ute": {
+      "title": "Previsión de niveles y caudales del río Negro",
+      "authority": "UTE, Uruguay",
+      "url": "https://apps.ute.com.uy/sge/portal/GestionEmbalseWeb/Paginas/GdeE/Previsiones/CUPubNivCau.aspx",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "temporal_resolution": "diaria; horizonte 7 días"
+    },
+    "ina": {
+      "title": "API de datos hidrológicos",
+      "authority": "INA / Prefectura Naval, Argentina",
+      "url": "https://alerta.ina.gob.ar/pub/datos/",
+      "license": "Pública, sin licencia de redistribución declarada"
+    },
+    "ana": {
+      "title": "Telemetría hidrometeorológica",
+      "authority": "Agência Nacional de Águas e Saneamento Básico, Brasil",
+      "url": "https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos",
+      "documentation": "https://telemetriaws1.ana.gov.br/Mapa.aspx",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "notes": "Servicio SOAP legado. ANA anunció soporte solo hasta el 2026-06-30 y recomienda migrar a su API autenticada; el endpoint legado aún respondió al snapshot 2026-08-22, pero su continuidad no está garantizada."
+    },
+    "caru": {
+      "title": "Alturas de puertos del río Uruguay",
+      "authority": "Comisión Administradora del Río Uruguay",
+      "url": "http://190.0.152.194:8080/alturas/web/user/alturas",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "access": "Tabla HTML sobre HTTP sin cifrar",
+      "notes": "Fuente candidata no implementada; el estado la declara no_implementada y no la usa en resultados."
+    },
+    "sohma": {
+      "title": "Mareógrafos de la Armada Nacional",
+      "authority": "SOHMA, Uruguay",
+      "url": "https://meteo.armada.mil.uy/",
+      "license": "Pública, sin licencia de redistribución declarada",
+      "temporal_resolution": "5 minutos"
+    },
+    "cauce": {
+      "title": "Snapshots y transformaciones de Cauce",
+      "authority": "Proyecto Cauce",
+      "url": "https://github.com/nicoseijas/cauce",
+      "license": "Código MIT; datos sujetos a las licencias de sus fuentes"
+    }
+  },
+  "resources": {
+    "activacion.json": {
+      "title": "Configuraciones candidatas de activación de escenarios",
+      "description": "Relaciones estación-localidad y umbrales candidatos. Ninguna relación se habilita automáticamente sin datum y relación hidráulica validados.",
+      "sources": ["dinagua_wfs", "cauce"],
+      "pipeline": "pipeline/analizar_datum.py",
+      "classification": ["oficial", "estimado"],
+      "update_frequency": "cuando cambian capas o validaciones",
+      "vertical_reference": "Cotas oficiales DINAGUA referidas a Wharton según atributos; compatibilidad declarada por umbral.",
+      "limitations": ["No representa inundación observada ni pronosticada.", "auto_habilitada=false salvo validación explícita."]
+    },
+    "amenazas.geojson": {
+      "title": "Localidades con tipos de amenaza",
+      "description": "Índice oficial por localidad de amenazas ribereñas, pluviales, costeras, de presas y accesibilidad.",
+      "sources": ["dinagua_wfs"],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": ["oficial"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721 cuando corresponde",
+      "coordinate_precision_degrees": 0.00001,
+      "vertical_reference": "no aplica",
+      "limitations": ["Es un índice puntual de amenaza, no una mancha ni un estado actual."]
+    },
+    "capitales.geojson": {
+      "title": "Capitales departamentales",
+      "description": "Puntos de referencia cartográfica para capitales de Uruguay.",
+      "sources": ["natural_earth"],
+      "pipeline": "pipeline/build_lugares.py",
+      "classification": ["contexto"],
+      "horizontal_crs": "OGC:CRS84",
+      "coordinate_precision_degrees": 0.001,
+      "vertical_reference": "no aplica",
+      "limitations": ["Escala cartográfica 1:10 millones; no usar para análisis de precisión."]
+    },
+    "cuencas_lluvia.geojson": {
+      "title": "Subcuencas con cobertura de pluviómetros",
+      "description": "Subcuencas DINAGUA nivel 2 que contienen estaciones de lluvia usadas por Cauce.",
+      "sources": ["dinagua_wfs", "inumet", "inia", "ana", "cauce"],
+      "pipeline": "pipeline/build_cuencas_lluvia.py",
+      "classification": ["oficial", "derivado"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada a 0.003 grados",
+      "vertical_reference": "no aplica",
+      "limitations": ["La cobertura es puntual; el aviso de lluvia no implica inundación ni uniformidad espacial en toda la cuenca."]
+    },
+    "departamentos_nombres.geojson": {
+      "title": "Puntos de etiqueta de departamentos",
+      "description": "Puntos representativos derivados de límites departamentales.",
+      "sources": ["dinagua_wfs", "cauce"],
+      "pipeline": "pipeline/build_lugares.py",
+      "classification": ["derivado", "contexto"],
+      "horizontal_crs": "OGC:CRS84",
+      "coordinate_precision_degrees": 0.001,
+      "vertical_reference": "no aplica"
+    },
+    "departamentos_uy.geojson": {
+      "title": "Límites departamentales de Uruguay",
+      "description": "Límites usados para recorte y contexto cartográfico.",
+      "sources": ["dinagua_wfs"],
+      "pipeline": "pipeline/build_red.py",
+      "classification": ["oficial", "contexto"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "vertical_reference": "no aplica",
+      "limitations": ["Producto de visualización; verificar la fuente oficial antes de usos jurídicos o catastrales."]
+    },
+    "drenaje.geojson": {
+      "title": "Conflictos de drenaje urbano",
+      "description": "Polígonos oficiales de problemas de drenaje pluvial urbano.",
+      "sources": ["dinagua_wfs"],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": ["oficial", "pluvial_urbano"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada con tolerancia de 8 m",
+      "coordinate_precision_degrees": 0.00001,
+      "vertical_reference": "no aplica",
+      "limitations": ["No representa una inundación fluvial ni el estado actual."]
+    },
+    "estaciones.geojson": {
+      "title": "Catálogo estático de estaciones y emparejamiento con la red",
+      "description": "Estaciones DINAGUA y pseudoestación Salto Grande con tramo cercano, área, caudal medio y diagnóstico del join.",
+      "sources": ["dinagua_wfs", "hydrorivers", "dinagua_climatologia", "cauce"],
+      "pipeline": "pipeline/build_estaciones.py",
+      "classification": ["oficial", "derivado"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "coordinate_precision_degrees": 0.00001,
+      "vertical_reference": "Campo cota_cero en metros sobre referencia Wharton según DINAGUA; cada regla tiene cero local y no se compara directamente con otra estación.",
+      "limitations": ["El emparejamiento estación-tramo es espacial y se declara con dist_m/join_ok.", "q_medio puede provenir de DINAGUA o HydroRIVERS según q_medio_fuente."]
+    },
+    "estado_actual.json": {
+      "title": "Estado hídrico consolidado",
+      "description": "Últimas observaciones, pronóstico UTE, estimaciones visuales, frescura, QC y cobertura de activación.",
+      "sources": ["dinagua_wfs", "inumet", "inia", "salto_grande", "ute", "ina", "ana", "caru", "sohma", "cauce"],
+      "pipeline": "pipeline/build_estado.py",
+      "classification": ["observado", "oficial", "pronosticado", "estimado"],
+      "update_frequency": "cada 2 horas",
+      "horizontal_crs": "OGC:CRS84 para coordenadas de estaciones",
+      "vertical_reference": "Mixta: ceros locales de cada estación; SOHMA y campos DINAGUA indican Ex Wharton/Wharton donde corresponde. Nunca comparar metros entre estaciones sin transformación documentada.",
+      "json_schema": "schema/estado-v3.schema.json",
+      "limitations": ["Estado global vencido después de 6 h.", "El intervalo temporal bruto incluye mediciones vencidas o rechazadas; usable_temporal contiene solo insumos aptos para derivados en ese snapshot.", "Factores de curso son escalas visuales estimadas, no caudales medidos en todo el curso.", "Pronóstico UTE sin probabilidad ni incertidumbre publicadas.", "Las coordenadas de los mareógrafos SOHMA son aproximadas porque la página fuente no las publica.", "La fuente ANA usa un servicio legado cuya fecha de soporte anunciada ya venció."]
+    },
+    "inundacion_cri.geojson": {
+      "title": "Inundaciones registradas",
+      "description": "Polígonos oficiales de eventos históricos de inundación con fecha y fuente del levantamiento.",
+      "sources": ["dinagua_wfs"],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": ["oficial", "observado_historico", "fluvial"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada con tolerancia de 8 m",
+      "coordinate_precision_degrees": 0.00001,
+      "vertical_reference": "Atributos cota_local y cota_oficial conservados de DINAGUA; referencia vertical dependiente del estudio.",
+      "temporal_fields": ["fecha_evento"],
+      "limitations": ["El registro no es exhaustivo y no constituye un inventario de días sin inundación."]
+    },
+    "inundacion_tr.geojson": {
+      "title": "Escenarios oficiales por período de retorno",
+      "description": "Manchas precalculadas de DINAGUA para períodos de retorno y creciente máxima probable.",
+      "sources": ["dinagua_wfs"],
+      "pipeline": "pipeline/build_inundacion.py",
+      "classification": ["oficial", "escenario", "fluvial"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "geometría simplificada con tolerancia de 8 m",
+      "coordinate_precision_degrees": 0.00001,
+      "vertical_reference": "Atributos cota_local y cota_oficial conservados de DINAGUA; referencia vertical dependiente del estudio.",
+      "limitations": ["No es observación ni pronóstico.", "Cobertura limitada a localidades estudiadas.", "La probabilidad anual no indica periodicidad determinista."]
+    },
+    "red_nombres.geojson": {
+      "title": "Geometrías para etiquetas de cursos",
+      "description": "Selección simplificada de cursos con nombre para rotulación cartográfica.",
+      "sources": ["hydrorivers", "dinagua_wfs", "cauce"],
+      "pipeline": "pipeline/build_red.py",
+      "classification": ["derivado", "contexto"],
+      "horizontal_crs": "OGC:CRS84",
+      "spatial_resolution": "simplificación de 0.008 grados para etiquetas",
+      "coordinate_precision_degrees": 0.00001,
+      "vertical_reference": "no aplica",
+      "limitations": ["Geometría de rotulación; no usar para análisis de red o distancia."]
+    },
+    "red_uy.geojson": {
+      "title": "Red hidrográfica animada",
+      "description": "Tramos HydroRIVERS recortados, suavizados y enriquecidos con nombres DINAGUA y climatología nacional.",
+      "sources": ["hydrorivers", "dinagua_wfs", "dinagua_climatologia", "cauce"],
+      "pipeline": "pipeline/build_red.py + pipeline/build_climatologia.py",
+      "classification": ["oficial", "modelo_global", "derivado"],
+      "horizontal_crs": "OGC:CRS84",
+      "processing_crs": "EPSG:32721",
+      "spatial_resolution": "HydroRIVERS ~450 m; dos iteraciones Chaikin y simplificación de 0.0001 grados",
+      "coordinate_precision_degrees": 0.00001,
+      "vertical_reference": "no aplica",
+      "limitations": ["Geometría suavizada para visualización; no apta para hidráulica, navegación ni delimitación legal.", "q_medio_uy cubre solo aportes representados por la climatología territorial de Uruguay; el resto conserva HydroRIVERS."]
+    },
+    "series.json": {
+      "title": "Series recientes reconstruidas desde snapshots",
+      "description": "Niveles y caudales deduplicados por fecha de observación a partir del archivo histórico de Cauce.",
+      "sources": ["cauce", "dinagua_wfs", "salto_grande", "ina", "ana", "sohma", "ute"],
+      "pipeline": "pipeline/build_series.py",
+      "classification": ["observado", "pronosticado", "derivado"],
+      "update_frequency": "cada 2 horas",
+      "temporal_resolution": "irregular según fuente; ventana móvil de 45 días",
+      "vertical_reference": "Mixta por estación; conservar id y fuente antes de interpretar niveles.",
+      "limitations": ["El archivo histórico propio comienza en agosto de 2026.", "Observaciones dudosas/rechazadas por QC se excluyen de la serie, pero permanecen en los snapshots."]
+    },
+    "validacion_activacion.json": {
+      "title": "Evidencia retrospectiva de activaciones candidatas",
+      "description": "Evaluación reproducible por evento completo, localidad y cuenca de umbrales candidatos frente a niveles históricos 2017-2019.",
+      "sources": ["dinagua_wfs", "dinagua_niveles_historicos", "cauce"],
+      "pipeline": "pipeline/build_validacion_activacion.py",
+      "classification": ["oficial", "observado_historico", "estimado_retrospectivo_no_operativo"],
+      "update_frequency": "manual; al incorporar eventos o series históricas",
+      "horizontal_crs": "Partición espacial en EPSG:32721; la capa fuente de cuencas declara erróneamente EPSG:4326 y se corrige por magnitud.",
+      "vertical_reference": "Escala local de cada estación; no se aplica corrección de datum.",
+      "temporal_resolution": "irregular; evaluación en ventanas de ±7 días por evento",
+      "json_schema": "schema/validacion-activacion-v1.schema.json",
+      "limitations": ["No es validación operativa ni pronóstico.", "CRI no registra exhaustivamente eventos positivos o negativos.", "Una coincidencia no valida datum ni causalidad hidráulica.", "Cobertura histórica pública limitada a 2017-2019."]
+    },
+    "vecinos.geojson": {
+      "title": "Países vecinos",
+      "description": "Contexto cartográfico simplificado de Argentina, Brasil y Paraguay.",
+      "sources": ["natural_earth"],
+      "pipeline": "pipeline/build_contexto.py",
+      "classification": ["contexto"],
+      "horizontal_crs": "OGC:CRS84",
+      "spatial_resolution": "Natural Earth 1:10m; simplificación de 0.01 grados",
+      "coordinate_precision_degrees": 0.001,
+      "vertical_reference": "no aplica",
+      "limitations": ["No usar como límite jurídico."]
+    }
+  }
+}
