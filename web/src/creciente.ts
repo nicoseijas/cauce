@@ -10,6 +10,8 @@ let activacion: Record<string, ActivacionLocalidad> = {};
 let uteRioNegro: Estado["ute_rio_negro"];
 let factoresCurso: Estado["factores_curso"] = {};
 let avisosLluvia: AvisoLluvia[] = [];
+let coberturaActivacion: Estado["activacion_cobertura"];
+let estadoActualVigente = false;
 
 // Umbrales orientativos de "lluvia abundante" (del orden de las advertencias
 // meteorológicas de INUMET); son un aviso de atención sobre la cuenca, nunca
@@ -77,6 +79,21 @@ function coma(n: number): string {
   return n.toFixed(2).replace(".", ",");
 }
 
+const ETIQUETAS_TIPO: Record<string, string> = {
+  fluvial: "fluviales",
+  costera_estuarina: "costeras/estuarinas",
+  pluvial_urbana: "pluvial urbana",
+  mixta_no_separada: "mixta sin separar",
+  sin_clasificar: "sin clasificar",
+};
+
+function resumenTipos(cobertura: NonNullable<Estado["activacion_cobertura"]>): string {
+  return Object.entries(cobertura.tipos_inundacion ?? {})
+    .filter(([, cantidad]) => cantidad > 0)
+    .map(([tipo, cantidad]) => `${cantidad} ${ETIQUETAS_TIPO[tipo] ?? tipo}`)
+    .join(", ");
+}
+
 function resumenAhora(): { html: string; nivel: string; corto: string } {
   const activas = Object.entries(activacion).filter(([, a]) => a.periodo_activo > 0);
   const crecidas = Object.entries(factoresCurso)
@@ -85,9 +102,34 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
 
   const lineas: string[] = [];
   let nivel = "verde";
-  let corto = "Sin manchas de inundación superadas";
+  let corto = "Estado hídrico disponible";
 
-  if (activas.length) {
+  if (!estadoActualVigente) {
+    nivel = "ambar";
+    corto = "Estado sin actualizar — inundación actual no evaluada";
+    lineas.push(
+      `<div class="ahora-linea"><span class="dot ambar"></span><span>` +
+      `No hay un estado reciente. Se muestran los escenarios oficiales ` +
+      `precalculados, pero no se evalúa si están superados ahora.</span></div>`,
+    );
+  } else if (!coberturaActivacion || coberturaActivacion.habilitadas === 0) {
+    nivel = "ambar";
+    const candidatas = coberturaActivacion?.configuradas ?? 0;
+    const tipos = coberturaActivacion ? resumenTipos(coberturaActivacion) : "";
+    const conEstacion = coberturaActivacion?.con_estacion_superficial ?? 0;
+    const conCurso = coberturaActivacion?.con_curso_compatible ?? 0;
+    corto = "Activación automática deshabilitada — sin localidades validadas";
+    lineas.push(
+      `<div class="ahora-linea"><span class="dot ambar"></span><span>` +
+      `Activación automática deshabilitada: 0 de ${candidatas} localidades ` +
+      `candidatas tienen datum y relación hidráulica completamente validados. ` +
+      `No puede afirmarse que ninguna mancha esté superada.` +
+      (tipos ? ` Casos separados: ${tipos}.` : "") +
+      (candidatas ? ` ${conEstacion} tienen estación superficial y ${conCurso} ` +
+        `además coinciden con el curso.` : "") +
+      `</span></div>`,
+    );
+  } else if (activas.length) {
     nivel = "roja";
     corto = `${activas.length} mancha${activas.length > 1 ? "s" : ""} de inundación superada${activas.length > 1 ? "s" : ""}`;
     lineas.push(
@@ -96,26 +138,48 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
         `⚠ ${a.estacion}: superada la mancha de ${nombrePeriodo(a.periodo_activo)} ` +
         `(nivel ${coma(a.nivel)} m)`).join("<br>") +
       `</span></div>`);
-  } else {
-    if (crecidas.length) nivel = "ambar";
+  } else if (!coberturaActivacion.fuente_disponible) {
+    nivel = "ambar";
+    corto = "DINAGUA sin dato apto — inundación actual no evaluada";
     lineas.push(
-      `<div class="ahora-linea"><span class="dot ${nivel}"></span>` +
-      `Ninguna mancha de inundación superada</div>`);
+      `<div class="ahora-linea"><span class="dot ambar"></span><span>` +
+      `DINAGUA no aporta un dato apto en esta actualización. ` +
+      `No puede afirmarse que ninguna mancha esté superada.</span></div>`,
+    );
+  } else if (coberturaActivacion.evaluadas < coberturaActivacion.habilitadas) {
+    nivel = "ambar";
+    corto = `${coberturaActivacion.evaluadas} de ${coberturaActivacion.habilitadas} localidades evaluadas`;
+    lineas.push(
+      `<div class="ahora-linea"><span class="dot ambar"></span><span>` +
+      `Cobertura parcial: ${coberturaActivacion.evaluadas} de ` +
+      `${coberturaActivacion.habilitadas} localidades habilitadas evaluadas. ` +
+      `No se emite un resultado negativo nacional.</span></div>`,
+    );
+  } else {
+    corto = `Sin manchas superadas entre ${coberturaActivacion.evaluadas} localidades evaluadas`;
+    lineas.push(
+      `<div class="ahora-linea"><span class="dot verde"></span><span>` +
+      `Ninguna mancha superada entre las ${coberturaActivacion.evaluadas} ` +
+      `localidades habilitadas y evaluadas.</span></div>`,
+    );
   }
 
   if (crecidas.length) {
-    corto += ` · ${crecidas.length} río${crecidas.length > 1 ? "s" : ""} en crecida`;
+    if (nivel === "verde") nivel = "ambar";
+    corto += ` · ${crecidas.length} señal${crecidas.length > 1 ? "es" : ""} elevada${crecidas.length > 1 ? "s" : ""}`;
     const top = crecidas.slice(0, 3).map(([curso, v], i) => {
       // el factor llega recortado al clamp del pipeline: 20 significa "al menos 20"
       const fx = v.factor >= 20 ? "≥20" : v.factor.toFixed(1).replace(".", ",");
-      const texto = `${curso} ${fx}×`;
+      const tipo = v.insumo_clasificacion === "pronosticado" ? "pronóstico" : "observación";
+      const texto = `${curso} ${fx}× (${tipo})`;
       return i === 0 ? `<strong>${texto}</strong>` : texto;
     });
     const resto = crecidas.length > 3 ? ` · +${crecidas.length - 3} más` : "";
     lineas.push(
       `<div class="ahora-det"><span class="dot ambar"></span><span>` +
-      `${crecidas.length} río${crecidas.length > 1 ? "s" : ""} en crecida: ` +
-      `${top.join(" · ")}${resto} <span style="color:#6a86a1">(× su media)</span></span></div>`);
+      `${crecidas.length} curso${crecidas.length > 1 ? "s" : ""} con escala visual elevada: ` +
+      `${top.join(" · ")}${resto} <span style="color:#6a86a1">` +
+      `(estimación aplicada al curso; no prueba inundación)</span></span></div>`);
   }
 
   if (avisosLluvia.length) {
@@ -139,11 +203,85 @@ function resumenAhora(): { html: string; nivel: string; corto: string } {
       `${a.estacion}: a ${coma(a.proximo!.faltan_m)} m de su mancha de ` +
       `${nombrePeriodo(a.proximo!.periodo)}</span></div>`);
   }
-  if (!activas.length && !proximos.length && !crecidas.length && !avisosLluvia.length) {
-    lineas.push(`<div class="ahora-det"><span class="dot" style="background:#6a86a1"></span>` +
-      `<span>Sin niveles frescos para evaluar activación.</span></div>`);
-  }
   return { html: lineas.join(""), nivel, corto };
+}
+
+const NOMBRES_FUENTE: Record<string, string> = {
+  dinagua_wfs: "DINAGUA", salto_grande: "Salto Grande", inumet_lluvia: "INUMET",
+  inia_lluvia: "INIA", ina: "INA", ute_rio_negro: "UTE", ana: "ANA", sohma: "SOHMA",
+};
+
+function fechaCorta(valor: string | null): string {
+  if (!valor) return "sin fecha conocida";
+  const fecha = new Date(valor);
+  return Number.isFinite(fecha.getTime())
+    ? fecha.toLocaleString("es-UY", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+    : valor;
+}
+
+function escaparHtml(valor: string): string {
+  return valor.replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[c]!);
+}
+
+function llenarFuentes(estado?: Estado): void {
+  const resumen = document.getElementById("estado-fuentes-resumen")!;
+  const detalle = document.getElementById("estado-fuentes-detalle")!;
+  const fuentes = Object.entries(estado?.fuentes_detalle ?? {})
+    .filter(([clave, f]) => clave !== "caru" && f.estado !== "no_implementada");
+  const problemas = fuentes.filter(([, f]) => f.estado !== "ok").length;
+  resumen.textContent = estado
+    ? `Fuentes: ${fuentes.length - problemas} aptas · ${problemas} con problema`
+    : "Fuentes: sin archivo de estado";
+  if (!fuentes.length) {
+    detalle.textContent = "No hay metadatos de fuentes disponibles.";
+    return;
+  }
+  detalle.innerHTML = fuentes.map(([clave, f]) => {
+    const bien = f.estado === "ok";
+    const rotulo = bien ? "apta" : f.estado.replace("_", " ");
+    return `<div class="fuente-fila"><span>${NOMBRES_FUENTE[clave] ?? clave}</span>` +
+      `<span class="${bien ? "estado-ok" : "estado-mal"}">${rotulo}</span>` +
+      `<span class="fuente-fecha">última observación: ` +
+      `${escaparHtml(fechaCorta(f.ultima_observacion))}</span></div>`;
+  }).join("");
+}
+
+function llenarControlCalidad(estado?: Estado): void {
+  const resumen = document.getElementById("estado-qc-resumen")!;
+  const detalle = document.getElementById("estado-qc-detalle")!;
+  const qc = estado?.control_calidad;
+  if (!qc) {
+    resumen.textContent = "Control de calidad: sin metadatos";
+    detalle.textContent = "Este archivo de estado no publica resultados QC.";
+    return;
+  }
+  const contar = (variable: "nivel" | "caudal", estadoQc: string) =>
+    (qc.resumen[variable] as Record<string, number | undefined>)[estadoQc] ?? 0;
+  const problemas = qc.incidencias.length;
+  resumen.textContent = `QC v${qc.version}: ${problemas} incidencia${problemas === 1 ? "" : "s"}`;
+
+  const filasIncidencia = qc.incidencias.map((i) =>
+    `<div class="fuente-fila"><span>${escaparHtml(i.estacion)} · ${i.variable}</span>` +
+    `<span class="estado-mal">${i.estado}</span>` +
+    `<span class="fuente-fecha">${escaparHtml(i.codigos.join(", ").replaceAll("_", " "))}` +
+    ` · valor original ${i.valor} · ${escaparHtml(fechaCorta(i.fecha))}</span></div>`,
+  ).join("");
+  const vigilancia = qc.vigilancia_reforzada.map((v) =>
+    `<div class="fuente-fila"><span>${escaparHtml(v.estacion)}</span>` +
+    `<span class="estado-mal">vigilancia</span>` +
+    `<span class="fuente-fecha">${escaparHtml(v.motivo)}</span></div>`,
+  ).join("");
+  detalle.innerHTML =
+    `<div>Nivel: ${contar("nivel", "ok")} aptos · ${contar("nivel", "vencido")} vencidos · ` +
+    `${contar("nivel", "dudoso")} dudosos · ${contar("nivel", "rechazado")} rechazados.</div>` +
+    `<div>Caudal: ${contar("caudal", "ok")} aptos · ${contar("caudal", "vencido")} vencidos · ` +
+    `${contar("caudal", "dudoso")} dudosos · ${contar("caudal", "rechazado")} rechazados.</div>` +
+    (filasIncidencia || `<div style="color:#6a86a1">Sin incidencias dudosas o rechazadas.</div>`) +
+    (vigilancia ? `<div style="margin-top:7px;color:#8fa8bd">Antecedentes que exigen vigilancia reforzada:</div>${vigilancia}` : "") +
+    `<div style="margin-top:7px;color:#6a86a1">No corrige ni interpola valores. ` +
+    `${escaparHtml(qc.metodo.limitacion)}.</div>`;
 }
 
 function llenarPrevision(): void {
@@ -152,7 +290,7 @@ function llenarPrevision(): void {
   const hoy = uteRioNegro.dias[0];
   const maxMercedes = uteRioNegro.maximos.find((m) => /Mercedes/.test(m.lugar));
   document.getElementById("prevision-resumen")!.innerHTML =
-    `Río Negro — previsión 7 días` +
+    `Río Negro — pronóstico oficial · horizonte 7 días` +
     (maxMercedes
       ? ` <span style="color:#8fa8bd">· Mercedes máx ${coma(maxMercedes.nivel)} m` +
         ` el ${maxMercedes.fecha.slice(0, 5)}</span>`
@@ -163,7 +301,7 @@ function llenarPrevision(): void {
   const partes: string[] = [];
   if (hoy.erogado_palmar) {
     partes.push(
-      `<div>Palmar suelta al río hoy ` +
+      `<div>Palmar: suelta prevista para hoy ` +
       `${hoy.erogado_palmar.toLocaleString("es-UY")} m³/s</div>`);
   }
   // se conserva el paréntesis con la escala de referencia de cada nivel
@@ -173,7 +311,10 @@ function llenarPrevision(): void {
     const lugar = m.lugar.replace(/^Ciudad( de)?\s*/, "");
     partes.push(`<div>${lugar}: máx previsto ${coma(m.nivel)} m el ${m.fecha.slice(0, 5)}</div>`);
   }
-  partes.push(`<div style="color:#6a86a1">${act}</div>`);
+  partes.push(
+    `<div style="color:#6a86a1">Pronóstico determinista · horizonte 7 días · ` +
+    `probabilidad e incertidumbre no publicadas por UTE · ${act}</div>`,
+  );
   document.getElementById("prevision-detalle")!.innerHTML = partes.join("");
   det.style.display = "block";
 }
@@ -271,8 +412,9 @@ async function cargarCapas(map: Map, base: string): Promise<void> {
       ? `<span class="alerta">⚠ ACTIVA AHORA</span> — nivel ${a.nivel.toFixed(2)} m en ${a.estacion}<br>`
       : "";
     const incertidumbre = activa
-      ? `<span class="aclara">Umbral aproximado (±1 m) y sin validar contra ` +
-        `eventos históricos. No es un aviso oficial.</span>`
+      ? `<span class="aclara">Resultado estimado a partir de una relación ` +
+        `nivel→escenario previamente habilitada. No es un aviso oficial; ` +
+        `consulte las fuentes y autoridades indicadas.</span>`
       : "";
     popup(
       cabecera +
@@ -465,12 +607,20 @@ function aplicarVisibilidad(map: Map, activo: boolean): void {
   }
 }
 
-export function setupCreciente(map: Map, base: string, estado?: Estado): void {
-  activacion = estado?.activacion ?? {};
-  uteRioNegro = estado?.ute_rio_negro;
-  factoresCurso = estado?.factores_curso ?? {};
-  avisosLluvia = calcularAvisosLluvia(estado);
-  if (estado) crearCapaLluvia(map, estado);
+export function setupCreciente(
+  map: Map,
+  base: string,
+  estado?: Estado,
+  vigente = false,
+): void {
+  const estadoActual = estado && vigente ? estado : undefined;
+  estadoActualVigente = Boolean(estadoActual);
+  coberturaActivacion = estado?.activacion_cobertura;
+  activacion = estadoActual?.activacion ?? {};
+  uteRioNegro = estadoActual?.ute_rio_negro;
+  factoresCurso = estadoActual?.factores_curso ?? {};
+  avisosLluvia = calcularAvisosLluvia(estadoActual);
+  if (estadoActual) crearCapaLluvia(map, estadoActual);
   void crearCapaCuencasLluvia(map, base);
   const panel = document.getElementById("creciente")!;
   const toggle = document.getElementById("creciente-toggle")!;
@@ -481,6 +631,8 @@ export function setupCreciente(map: Map, base: string, estado?: Estado): void {
   document.getElementById("creciente-estado")!.innerHTML = ahora.html;
   document.getElementById("hoja-resumen")!.textContent = ahora.corto;
   document.getElementById("hoja-dot")!.className = `dot ${ahora.nivel}`;
+  llenarFuentes(estado);
+  llenarControlCalidad(estado);
   llenarPrevision();
 
   toggle.addEventListener("click", async () => {

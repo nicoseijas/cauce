@@ -7,16 +7,33 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { FlowLayer } from "./flow-layer";
 import {
   aplicarFactores,
+  antiguedadEstadoHoras,
   cargarEstado,
   cargarSeries,
+  estadoVigente,
   estacionesComoGeoJSON,
+  filasEstaciones,
+  fuentesConProblemas,
+  redondearHoras,
   type Estado,
-  type EstacionEstado,
+  type FilaEstacion,
   type SeriePuntos,
 } from "./estado";
 import { setupCreciente } from "./creciente";
+import { setupTabla } from "./tabla";
 
 const BASE = import.meta.env.BASE_URL;
+
+const NOMBRE_FUENTE: Record<string, string> = {
+  dinagua_wfs: "DINAGUA",
+  salto_grande: "Salto Grande",
+  inumet_lluvia: "INUMET",
+  inia_lluvia: "INIA",
+  ina: "INA",
+  ute_rio_negro: "UTE",
+  ana: "ANA",
+  sohma: "SOHMA",
+};
 
 const ESCALA_LOG_Q: ExpressionSpecification = [
   "ln", ["+", 1, ["coalesce", ["get", "DIS_AV_CMS"], 0]],
@@ -314,9 +331,14 @@ function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
   const fx = factor && factor >= 20 ? "≥20" : factor?.toFixed(1);
   const nacional = f.properties.q_medio_uy != null;
   const referencia = nacional ? "climatología DINAGUA" : "modelo HydroRIVERS";
+  const tipoInsumo = String(f.properties.insumo_clasificacion ?? "sin clasificar");
+  const horas = Number(f.properties.factor_horas);
+  const edad = Number.isFinite(horas) ? ` · hace ${redondearHoras(horas)}` : "";
   const linea = factor
-    ? `caudal actual ≈ ${formatoCaudal(q)} (${fx}× la media` +
-      `, est. ${f.properties.estacion_factor})`
+    ? `escala estimada ${fx}× la media · caudal de visualización ` +
+      `≈ ${formatoCaudal(q)}<br><span class="aclara">insumo ${tipoInsumo}: ` +
+      `${f.properties.estacion_factor}${edad}. No representa el caudal medido ` +
+      `en todo el curso.</span>`
     : `caudal medio ${formatoCaudal(q)} · ${referencia}`;
   tooltip.innerHTML = `<strong>${nombre}</strong><br><span class="q">${linea}</span>`;
   tooltip.style.display = "block";
@@ -324,23 +346,92 @@ function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
   tooltip.style.top = `${y + 14}px`;
 }
 
-type EstacionPopup = EstacionEstado & {
+/** Lo que el popup necesita, ya aplanado: llega de las propiedades del
+ * feature del mapa o de una fila de la tabla. */
+type EstacionPopup = {
+  id?: number | string;
+  nombre: string;
+  curso?: string | null;
+  clasificacion?: string | null;
+  oficial?: boolean;
+  nivel?: number | null;
+  nivel_horas?: number | null;
+  caudal?: number | null;
+  caudal_horas?: number | null;
   alerta?: number | null;
   evacuacion?: number | null;
   fuente?: string;
+  incertidumbre?: string;
+  qc_estado?: string;
+  qc_nivel_estado?: string;
+  qc_nivel_codigos?: string;
+  qc_caudal_estado?: string;
+  qc_caudal_codigos?: string;
 };
+
+const ROTULO_QC: Record<string, string> = {
+  fecha_futura: "fecha futura",
+  fecha_retrocede: "la fecha retrocede respecto de la última referencia aceptada",
+  fecha_ausente: "fecha ausente",
+  fecha_invalida: "fecha inválida",
+  valor_no_finito: "valor no numérico",
+  fuera_rango_fisico: "fuera del rango físico operativo",
+  cambio_brusco_no_verificado: "cambio brusco aún no verificado",
+  revision_misma_fecha: "la fuente revisó el valor para la misma fecha",
+  dato_vencido: "dato vencido",
+};
+
+function rotulosQC(codigos?: string): string {
+  return (codigos ?? "").split(",").filter(Boolean)
+    .map((c) => ROTULO_QC[c] ?? c.replaceAll("_", " ")).join("; ");
+}
+
+function lineaMedicion(
+  variable: "nivel" | "caudal",
+  valor: number,
+  horas: number | null,
+  estado?: string,
+  codigos?: string,
+): string {
+  const medida = variable === "nivel"
+    ? `nivel ${valor.toFixed(2)} m`
+    : `caudal ${formatoCaudal(valor)}`;
+  if (estado === "rechazado") {
+    return `<span class="alerta">${medida} informado por la fuente — rechazado QC</span>` +
+      `<span class="aclara">${rotulosQC(codigos)}. Se conserva para auditoría, ` +
+      `pero no se usa en cálculos ni alertas.</span>`;
+  }
+  if (estado === "dudoso") {
+    return `<span style="color:#e8c95a">${medida} — en revisión QC</span>` +
+      `<span class="aclara">${rotulosQC(codigos)}. No se usa en resultados derivados.</span>`;
+  }
+  if (estado === "vencido") {
+    return `${medida} · <span class="q">vencido, hace ${redondearHoras(horas)}</span>`;
+  }
+  return `${medida} · hace ${redondearHoras(horas)}`;
+}
 
 function popupEstacion(e: EstacionPopup): string {
   const filas: string[] = [`<strong>${e.nombre}</strong>`];
   if (e.curso) filas.push(`<span class="q">${e.curso}</span>`);
+  if (e.clasificacion) {
+    filas.push(`<span class="q">${e.clasificacion}${e.oficial ? " · fuente oficial" : ""}</span>`);
+  }
   if (e.nivel != null) {
-    filas.push(`nivel ${e.nivel.toFixed(2)} m · hace ${redondearHoras(e.nivel_horas)}`);
+    filas.push(lineaMedicion(
+      "nivel", Number(e.nivel), e.nivel_horas ?? null,
+      e.qc_nivel_estado, e.qc_nivel_codigos,
+    ));
   }
   if (e.caudal != null) {
-    filas.push(`caudal ${formatoCaudal(e.caudal)} · hace ${redondearHoras(e.caudal_horas)}`);
+    filas.push(lineaMedicion(
+      "caudal", Number(e.caudal), e.caudal_horas ?? null,
+      e.qc_caudal_estado, e.qc_caudal_codigos,
+    ));
   }
   if (e.nivel == null && e.caudal == null) filas.push("sin datos recientes");
-  if (e.alerta != null && e.nivel != null) {
+  const nivelApto = e.qc_nivel_estado == null || e.qc_nivel_estado === "ok";
+  if (e.alerta != null && e.nivel != null && nivelApto) {
     if (e.evacuacion != null && e.nivel >= e.evacuacion) {
       filas.push(`<span class="alerta">⚠ nivel de evacuación superado</span>`);
     } else if (e.nivel >= e.alerta) {
@@ -356,13 +447,44 @@ function popupEstacion(e: EstacionPopup): string {
     );
   }
   if (e.fuente) filas.push(`<span class="q">${e.fuente}</span>`);
+  if (e.incertidumbre) filas.push(`<span class="aclara">Incertidumbre: ${e.incertidumbre}</span>`);
   return filas.join("<br>");
 }
 
-function redondearHoras(h: number | null): string {
-  if (h == null) return "—";
-  if (h < 48) return `${Math.round(h)} h`;
-  return `${Math.round(h / 24)} días`;
+/** Abre el popup y, cuando la serie llega, le agrega el minigráfico. */
+async function abrirPopupEstacion(
+  donde: maplibregl.LngLatLike,
+  props: EstacionPopup,
+): Promise<void> {
+  const popup = new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
+    .setLngLat(donde)
+    .setHTML(popupEstacion(props))
+    .addTo(map);
+  const series = await cargarSeries(`${BASE}data/series.json`);
+  const serie = series?.estaciones[String(props.id)];
+  if (!serie || !popup.isOpen()) return;
+  const grafico = miniGrafico(serie);
+  if (grafico) popup.setHTML(popupEstacion(props) + grafico);
+}
+
+function popupDesdeFila(f: FilaEstacion): EstacionPopup {
+  return {
+    id: f.id,
+    nombre: f.nombre,
+    curso: f.curso,
+    clasificacion: f.clasificacion,
+    nivel: f.nivel,
+    nivel_horas: f.nivel_horas,
+    caudal: f.caudal,
+    caudal_horas: f.caudal_horas,
+    alerta: f.alerta,
+    evacuacion: f.evacuacion,
+    fuente: f.fuente,
+    qc_nivel_estado: f.qc_nivel?.estado,
+    qc_nivel_codigos: f.qc_nivel?.codigos.join(","),
+    qc_caudal_estado: f.qc_caudal?.estado,
+    qc_caudal_codigos: f.qc_caudal?.codigos.join(","),
+  };
 }
 
 const REPRESAS = [
@@ -401,7 +523,12 @@ function popupRepresa(clave: string, estado: Estado | null): string {
   } else if (clave === "bonete" || clave === "palmar") {
     const erogado = clave === "bonete" ? hoy?.erogado_bonete : hoy?.erogado_palmar;
     if (erogado) {
-      filas.push(`suelta al río hoy ${formatoCaudal(erogado)} <span class="q">(erogado previsto, UTE)</span>`);
+      filas.push(
+        `suelta prevista para hoy ${formatoCaudal(erogado)} ` +
+        `<span class="q">(pronóstico oficial UTE)</span>` +
+        `<span class="aclara">Pronóstico determinista dentro de un horizonte ` +
+        `de 7 días; UTE no publica probabilidad ni incertidumbre.</span>`,
+      );
     }
     const patron = clave === "bonete" ? /Rincón del Bonete/ : /Constitución/;
     const max = ute?.maximos?.find((m) => patron.test(m.lugar));
@@ -563,7 +690,7 @@ function setupVistaAnomalia(map: maplibregl.Map, flow: FlowLayer): void {
 }
 
 map.on("load", async () => {
-  const [fc, estado] = await Promise.all([
+  const [fc, estadoCargado] = await Promise.all([
     fetch(`${BASE}data/red_uy.geojson`).then((r) => r.json()),
     cargarEstado(`${BASE}data/estado_actual.json`),
   ]);
@@ -571,8 +698,17 @@ map.on("load", async () => {
   document.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
 
   const estadoEl = document.getElementById("titulo-estado")!;
+  const badge = document.getElementById("envivo")!;
+  const badgeText = document.getElementById("estado-badge-text")!;
+  const vigente = estadoCargado ? estadoVigente(estadoCargado) : false;
+  const estado = vigente ? estadoCargado : null;
   if (estado) {
-    document.getElementById("envivo")!.style.display = "inline-flex";
+    const problemas = fuentesConProblemas(estado);
+    const incidenciasQc = estado.control_calidad?.incidencias ?? [];
+    badge.style.display = "inline-flex";
+    badge.className = problemas.length || incidenciasQc.length ? "parcial" : "reciente";
+    badgeText.textContent = problemas.length || incidenciasQc.length ? "PARCIAL" : "RECIENTE";
+
     const tocados = aplicarFactores(fc, estado);
     (map.getSource("red") as GeoJSONSource).setData(fc);
 
@@ -587,47 +723,71 @@ map.on("load", async () => {
       paint: {
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.5, 12, 7],
         "circle-color": [
-          "step", ["get", "frescura"],
-          "#5ad18a", 24, "#e8c95a", 48, "#6a86a1",
+          "case",
+          ["==", ["get", "qc_estado"], "rechazado"], "#ff4d4d",
+          ["==", ["get", "qc_estado"], "dudoso"], "#e8c95a",
+          ["step", ["get", "frescura"],
+            "#5ad18a", 24, "#e8c95a", 48, "#6a86a1"],
         ],
         "circle-stroke-color": "#0b141d",
         "circle-stroke-width": 1,
         "circle-opacity": 0.9,
       },
     });
-    map.on("click", "estaciones", async (ev) => {
+    map.on("click", "estaciones", (ev) => {
       // si hay una represa bajo el cursor, gana su popup
       if (map.queryRenderedFeatures(ev.point, { layers: ["represas"] }).length) return;
       const f = ev.features?.[0];
       if (!f) return;
-      const props = f.properties as unknown as EstacionPopup;
-      const popup = new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
-        .setLngLat(ev.lngLat)
-        .setHTML(popupEstacion(props))
-        .addTo(map);
-      const series = await cargarSeries(`${BASE}data/series.json`);
-      const serie = series?.estaciones[String(props.id)];
-      if (!serie || !popup.isOpen()) return;
-      const grafico = miniGrafico(serie);
-      if (grafico) popup.setHTML(popupEstacion(props) + grafico);
+      void abrirPopupEstacion(ev.lngLat, f.properties as unknown as EstacionPopup);
     });
     map.on("mouseenter", "estaciones", () => {
       map.getCanvas().style.cursor = "pointer";
     });
 
     const fecha = new Date(estado.generado);
+    const factores = Object.values(estado.factores_curso);
+    const observados = factores.filter((f) => f.insumo_clasificacion === "observado").length;
+    const pronosticados = factores.filter((f) => f.insumo_clasificacion === "pronosticado").length;
+    const mezcla = [
+      observados ? `${observados} desde observación` : "",
+      pronosticados ? `${pronosticados} desde pronóstico` : "",
+    ].filter(Boolean).join("; ");
+    const caidas = problemas.map((k) => NOMBRE_FUENTE[k] ?? k).join(", ");
+    const mensajeQc = incidenciasQc.length
+      ? `QC: ${incidenciasQc.length} observación${incidenciasQc.length > 1 ? "es" : ""} ` +
+        `${incidenciasQc.length > 1 ? "dudosas/rechazadas" : "dudosa o rechazada"}. `
+      : "";
     estadoEl.textContent =
-      `Datos en vivo: ${tocados} tramos escalados por ${Object.keys(estado.factores_curso).length} ` +
-      `estaciones · actualizado ${fecha.toLocaleString("es-UY", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}`;
+      `${problemas.length ? `Datos parciales; sin dato apto de ${caidas}. ` : ""}` +
+      mensajeQc +
+      `${tocados} tramos con escala estimada (${mezcla || "sin insumos aptos"}) · ` +
+      `generado ${fecha.toLocaleString("es-UY", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}`;
+  } else if (estadoCargado) {
+    const fecha = new Date(estadoCargado.generado);
+    const horas = antiguedadEstadoHoras(estadoCargado);
+    badge.style.display = "inline-flex";
+    badge.className = "vencido";
+    badgeText.textContent = "VENCIDO";
+    estadoEl.textContent =
+      `Estado sin actualizar${horas == null ? "" : ` desde hace ${redondearHoras(horas)}`}` +
+      ` (${fecha.toLocaleString("es-UY")}). Se muestra solo la climatología; ` +
+      `no se evalúa inundación actual.`;
   } else {
     estadoEl.textContent =
-      "Caudal medio de largo plazo (sin datos en vivo disponibles).";
+      "Sin archivo de estado disponible. Se muestra solo la climatología; no se evalúa inundación actual.";
   }
 
   const flow = new FlowLayer(fc);
   map.addLayer(flow, "rios-hover");
   crearCapaRepresas(map, estado);
-  setupCreciente(map, BASE, estado ?? undefined);
+  setupCreciente(map, BASE, estadoCargado ?? undefined, vigente);
+  if (estadoCargado) {
+    setupTabla(estadoCargado, BASE, vigente, filasEstaciones(estadoCargado), (fila) => {
+      map.flyTo({ center: [fila.lon, fila.lat], zoom: Math.max(map.getZoom(), 9) });
+      void abrirPopupEstacion([fila.lon, fila.lat], popupDesdeFila(fila));
+    });
+  }
   if (estado) setupVistaAnomalia(map, flow);
 
   let frames = 0;

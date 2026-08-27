@@ -52,6 +52,10 @@
       letter-spacing: 0.06em;
     }
     #envivo i { width: 6px; height: 6px; border-radius: 50%; background: #5ad18a; }
+    #envivo.parcial { background: #302914; border-color: #665722; color: #e8c95a; }
+    #envivo.parcial i { background: #e8c95a; }
+    #envivo.vencido { background: #321b1e; border-color: #66343a; color: #ff9a9a; }
+    #envivo.vencido i { background: #ff6b6b; }
     #titulo p { margin: 4px 0 0; color: #6a86a1; font-size: 11px; }
 
     #descargo {
@@ -59,6 +63,7 @@
       display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
     }
     #descargo b { color: #eec9c9; font-weight: 650; }
+    #enlaces { margin: 5px 0 0; font-size: 11px; }
     .enlace {
       background: none; border: none; padding: 0; cursor: pointer;
       font: inherit; color: #8fc6ec; text-decoration: underline;
@@ -135,6 +140,16 @@
     #acerca .clave { font-size: 12px; font-weight: 650; line-height: 1.4; color: #eaf4fd; }
     #acerca .fuerte { color: #dbe9f6; font-weight: 650; }
 
+    #acerca .descargas {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+    }
+    #acerca .descargas a {
+      display: inline-block; padding: 7px 10px; border: 1px solid #31516e;
+      border-radius: 6px; background: #102334; font-size: 11.5px;
+      line-height: 1.2; text-decoration: none;
+    }
+    #acerca .descargas a:hover { background: #173149; border-color: #48779e; }
+
     #acerca .pie { margin-top: 22px; padding-top: 14px; border-top: 1px solid #1a2a3a; }
     #acerca .pie > p { font-size: 12.5px; line-height: 1.55; color: #a8c0d4; text-wrap: pretty; }
     #acerca .cita {
@@ -153,6 +168,111 @@
       #acerca .canales > span:nth-child(n+3):nth-child(odd) { margin-top: 9px; }
     }
 
+    #tabla {
+      width: calc(100% - 32px); max-width: 1080px; height: 86vh;
+      margin: auto; padding: 0; color: #cfe0ee;
+      background: #0d1a25; border: 1px solid #2c4257; border-radius: 12px;
+      font: 13px/1.5 system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+    #tabla[open] { display: flex; flex-direction: column; }
+    #tabla::backdrop { background: rgba(4, 9, 14, 0.7); }
+    #tabla-cab {
+      flex: none; display: flex; align-items: flex-start; gap: 12px;
+      padding: 15px 20px 12px; border-bottom: 1px solid #1a2a3a;
+    }
+    #tabla-cab > div { flex: 1; min-width: 0; }
+    #tabla-cab h2 {
+      margin: 0; color: #eaf4fd;
+      font: 700 17px/1.2 "Bricolage Grotesque", system-ui, sans-serif;
+    }
+    #tabla-cab p { margin: 3px 0 0; font-size: 11.5px; color: #6a86a1; }
+    #tabla-cerrar {
+      flex: none; cursor: pointer;
+      background: #1a2a3a; border: 1px solid #2c4257; border-radius: 6px;
+      color: #cfe0ee; font: 15px/1 system-ui, sans-serif; padding: 7px 10px;
+    }
+    #tabla-barra {
+      flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 10px 20px; border-bottom: 1px solid #1a2a3a;
+    }
+    #tabla-pestanas { display: flex; gap: 6px; }
+    #tabla-barra button, #tabla-barra input, #tabla-barra select {
+      font: 12px system-ui, sans-serif; color: #cfe0ee;
+      background: #1a2a3a; border: 1px solid #2c4257; border-radius: 5px;
+      padding: 4px 10px;
+    }
+    #tabla-pestanas button { cursor: pointer; }
+    #tabla-pestanas .sel { background: #2c4a66; border-color: #4a7096; color: #eaf4fd; }
+    #tabla-buscar { flex: 1; min-width: 150px; margin-left: 6px; }
+    #tabla-conteo { font-size: 11.5px; color: #6a86a1; margin-left: auto; }
+    #tabla-cuerpo {
+      flex: 1 1 auto; min-height: 0; overflow: auto;
+      scrollbar-width: thin; scrollbar-color: #2c4257 transparent;
+    }
+    #tabla-datos { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    #tabla-datos th {
+      position: sticky; top: 0; z-index: 1; cursor: pointer; user-select: none;
+      padding: 9px 9px; text-align: left; white-space: nowrap;
+      background: #10202e; color: #8fa8bd; font-weight: 650;
+      border-bottom: 1px solid #2c4257;
+    }
+    #tabla-datos th:hover { color: #eaf4fd; }
+    #tabla-datos th.orden { color: #eaf4fd; }
+    #tabla-datos td {
+      padding: 7px 9px; border-bottom: 1px solid #16283a; color: #cfe0ee;
+      white-space: nowrap;
+    }
+    #tabla-datos th.num, #tabla-datos td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    #tabla-datos tbody tr.clicable { cursor: pointer; }
+    #tabla-datos tbody tr:hover td { background: #12222f; }
+    #tabla-datos .vacio { color: #4d6579; }
+    #tabla-datos .medida.qc-dudoso { color: #e8c95a; }
+    #tabla-datos .medida.qc-rechazado { color: #ff8080; text-decoration: line-through; }
+    #tabla-datos .medida.qc-vencido { color: #8fa8bd; }
+    #tabla-datos .etiqueta {
+      font-size: 10px; letter-spacing: 0.04em; color: #8fa8bd;
+      border: 1px solid #2c4257; border-radius: 4px; padding: 1px 5px;
+    }
+    #tabla-datos .qc {
+      font-size: 11px; border-radius: 4px; padding: 1px 7px;
+      background: #17262f; color: #8fa8bd; border: 1px solid #24384a;
+    }
+    #tabla-datos .qc.ok { background: #122a1e; border-color: #24513a; color: #5ad18a; }
+    #tabla-datos .qc.dudoso { background: #302914; border-color: #665722; color: #e8c95a; }
+    #tabla-datos .qc.rechazado { background: #321b1e; border-color: #66343a; color: #ff9a9a; }
+    #tabla-pie {
+      flex: none; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding: 11px 20px; border-top: 1px solid #1a2a3a;
+    }
+    #tabla-pie .nota { margin: 0; flex: 1; min-width: 220px; font-size: 11px; color: #6a86a1; }
+    #tabla-pie .descargas { display: flex; gap: 8px; flex-wrap: wrap; }
+    #tabla-pie .descargas button, #tabla-pie .descargas a {
+      cursor: pointer; text-decoration: none; display: inline-block;
+      padding: 6px 10px; border: 1px solid #31516e; border-radius: 6px;
+      background: #102334; color: #8fc6ec;
+      font: 11.5px/1.2 system-ui, sans-serif;
+    }
+    #tabla-pie .descargas button:hover, #tabla-pie .descargas a:hover {
+      background: #173149; border-color: #48779e;
+    }
+    #tabla-pie .descargas button[disabled] { opacity: 0.6; cursor: progress; }
+    @media (max-width: 640px) {
+      #tabla { width: 100%; max-width: none; height: 100%; border-radius: 0; border: none; }
+      #tabla-cab { padding: 13px 16px 11px; }
+      #tabla-barra, #tabla-pie { padding: 9px 16px; }
+      #tabla-datos { font-size: 12px; }
+      #tabla-datos td, #tabla-datos th { padding: 7px 9px; }
+      /* el nombre queda fijo: el resto de las columnas se lee desplazando */
+      #tabla-datos th:first-child, #tabla-datos td:first-child {
+        position: sticky; left: 0; z-index: 2;
+        background: #0d1a25; border-right: 1px solid #16283a;
+      }
+      #tabla-datos th:first-child { z-index: 3; background: #10202e; }
+      #tabla-datos tbody tr:hover td:first-child { background: #12222f; }
+      #tabla-conteo { margin-left: 0; }
+    }
+
     #creciente-toggle {
       display: flex; align-items: center; gap: 8px; cursor: pointer;
       font-weight: 650; color: #eaf4fd; user-select: none;
@@ -164,6 +284,7 @@
     .dot.verde { background: #5ad18a; }
     .dot.ambar { background: #e8c95a; }
     .dot.roja { background: #ff4d4d; }
+    .dot.gris { background: #6a86a1; }
     .ahora { margin-top: 10px; display: flex; flex-direction: column; gap: 7px; }
     .ahora-linea { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #eaf4fd; font-weight: 650; line-height: 1.35; }
     .ahora-linea .dot { margin-top: 4px; }
@@ -171,6 +292,10 @@
     .ahora-det .dot { width: 7px; height: 7px; margin-top: 4px; }
     .ahora-det strong { color: #7ef0d8; font-weight: 650; }
     .alerta { color: #ff8080; font-weight: 650; }
+    .fuente-fila { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+    .fuente-fila .estado-ok { color: #5ad18a; }
+    .fuente-fila .estado-mal { color: #e8c95a; }
+    .fuente-fecha { grid-column: 1 / -1; color: #6a86a1; font-size: 10.5px; }
 
     details.seccion { margin-top: 10px; border-top: 1px solid #1a2a3a; padding-top: 8px; }
     details.seccion summary {
@@ -259,8 +384,11 @@
       #columna { left: 0; right: 0; top: auto; bottom: 0; width: auto; gap: 0; }
       #titulo { position: fixed; top: 10px; left: 10px; right: 10px; padding: 6px 12px; }
       /* el título pasa a ocupar el ancho: los controles bajan debajo */
-      .maplibregl-ctrl-top-right { top: 102px !important; }
-      #titulo-estado { display: none; }
+      .maplibregl-ctrl-top-right { top: 150px !important; }
+      #titulo-estado {
+        display: block; font-size: 10px !important; line-height: 1.3;
+        max-height: 2.6em; overflow: hidden;
+      }
       #acerca-cab { padding: 13px 16px 11px; }
       #acerca-cuerpo { padding: 14px 16px 18px; }
       #hoja {
@@ -291,11 +419,12 @@
   <div id="columna">
     <div id="titulo" class="panel">
       <h1>Cauce <span class="tagline">ríos del Uruguay</span>
-        <span id="envivo"><i></i>EN VIVO</span></h1>
+        <span id="envivo"><i></i><span id="estado-badge-text">ESTADO</span></span></h1>
       <p id="titulo-estado">Caudal medio de largo plazo. Ancho, brillo y velocidad
          proporcionales al caudal (escala logarítmica).</p>
       <p id="descargo"><b>No es un servicio oficial de alertas.</b>
         <button type="button" class="enlace" id="btn-acerca">Acerca de, fuentes y a quién acudir</button></p>
+      <p id="enlaces"><button type="button" class="enlace" id="btn-tabla" style="display:none">Ver los datos en una tabla</button></p>
     </div>
     <div id="hoja">
       <div id="hoja-barra">
@@ -311,6 +440,14 @@
           </div>
           <div id="creciente-opciones" style="display:none">
             <div id="creciente-estado" class="ahora"></div>
+            <details id="estado-fuentes" class="seccion">
+              <summary id="estado-fuentes-resumen">Estado de fuentes</summary>
+              <div id="estado-fuentes-detalle" class="cuerpo"></div>
+            </details>
+            <details id="estado-qc" class="seccion">
+              <summary id="estado-qc-resumen">Control de calidad</summary>
+              <div id="estado-qc-detalle" class="cuerpo"></div>
+            </details>
             <details id="creciente-prevision" class="seccion" style="display:none">
               <summary id="prevision-resumen"></summary>
               <div id="prevision-detalle" class="cuerpo"></div>
@@ -338,10 +475,15 @@
                   precalculadas por probabilidad: «10 años» ≈ 10 % de probabilidad en
                   cualquier año, «100 años» ≈ 1 %, «Extrema» = creciente máxima
                   probable. No indican lo que pasa hoy.</div>
-                <div class="nota">El estado actual es la mancha
-                  <span style="color:#ff6b6b">roja</span>: se enciende cuando el nivel
-                  medido en una estación supera su umbral (aproximado, ±1 m), con
-                  cualquier escenario. Solo ciudades con estudio: fuera de ellas la
+                <div class="nota">La activación automática está cerrada por defecto:
+                  una mancha solo podría encenderse en
+                  <span style="color:#ff6b6b">rojo</span> después de validar el datum y
+                  la relación hidráulica estación→localidad. Hoy hay 19 localidades
+                  candidatas (15 fluviales, 2 costeras/estuarinas, 1 pluvial y 1
+                  mixta) y 0 habilitadas; 17 tienen estación superficial y solo 14
+                  coinciden además con el curso. La revisión 2017–2019 encontró 10
+                  eventos registrados, pero solo 5 hidrogramas completos: evidencia
+                  insuficiente para uso operativo. Fuera de las ciudades con estudio, la
                   ausencia de mancha no implica ausencia de riesgo.</div>
               </div>
             </details>
@@ -368,6 +510,7 @@
           <div class="fila" style="margin-top:8px"><span class="dot verde" style="width:9px;height:9px"></span><span class="etiqueta">estación con dato &lt; 24 h</span></div>
           <div class="fila"><span class="dot ambar" style="width:9px;height:9px"></span><span class="etiqueta">24–48 h</span></div>
           <div class="fila"><span class="dot" style="width:9px;height:9px;background:#6a86a1"></span><span class="etiqueta">&gt; 48 h / sin dato</span></div>
+          <div class="fila"><span class="dot roja" style="width:9px;height:9px"></span><span class="etiqueta">valor rechazado por control de calidad</span></div>
           <div class="fila"><span style="width:9px;height:9px;flex:none;background:#16324a;border:1.5px solid #cfe0ee"></span><span class="etiqueta">represa</span></div>
         </div>
       </div>
@@ -437,18 +580,17 @@
       <div class="filas claves">
         <div>
           <span class="clave">Manchas</span>
-          <p>Las manchas rojas se encienden cuando el nivel medido supera el
-            umbral de la mancha. Ese umbral es <b class="fuerte">aproximado,
-            ±1 m</b>: viene de convertir la cota del estudio al cero de la
-            estación. No está validado contra eventos históricos.</p>
+          <p>Los polígonos por escenario son oficiales de DINAGUA. La activación
+            automática está <b class="fuerte">deshabilitada</b> hasta validar por
+            localidad el datum y la relación hidráulica con su estación. La falta
+            de activación no significa que no exista inundación.</p>
         </div>
         <div>
           <span class="clave">«× su media»</span>
-          <p>Es una <b class="fuerte">escala visual</b>, no una estimación
-            hidrológica: un caudal medido escala el curso entero, sin considerar
-            tiempo de tránsito ni afluentes. La media de referencia es la
-            climatología de DINAGUA por subcuenca, no la medida en esa
-            estación.</p>
+          <p>Es una <b class="fuerte">escala visual estimada</b>, no una predicción
+            hidrológica: un insumo observado o pronosticado escala el curso entero,
+            sin considerar tiempo de tránsito ni afluentes. La interfaz declara el
+            tipo y la antigüedad del insumo.</p>
         </div>
         <div>
           <span class="clave">Lluvia</span>
@@ -464,8 +606,30 @@
         </div>
         <div>
           <span class="clave">Sensores</span>
-          <p>Cada observación se muestra tal como la publica su organismo, con
-            su hora. No hay control de calidad sobre los sensores.</p>
+          <p>Cada observación conserva el valor y la hora de origen. Un control
+            operativo marca datos vencidos, futuros, fuera de rango o con
+            saltos bruscos; no sustituye la calibración del sensor ni valida
+            su datum vertical.</p>
+        </div>
+      </div>
+
+      <div class="rotulo">Datos para investigación</div>
+      <div class="filas">
+        <div>
+          <p>Todos los productos incluyen procedencia, licencia conocida,
+            clasificación, limitaciones, extensión, esquema observado y hash
+            SHA-256. Las geometrías se publican en <b class="fuerte">OGC:CRS84</b>
+            (longitud, latitud); cuando se indica, el procesamiento métrico usa
+            EPSG:32721. Las referencias verticales son mixtas y los niveles de
+            estaciones diferentes no son comparables sin una transformación
+            documentada.</p>
+          <div class="descargas">
+            <a href="data/datapackage.json" download>Catálogo de datos</a>
+            <a href="data/checksums.sha256" download>Sumas SHA-256</a>
+            <a href="data/schema/estado-v3.schema.json" download>Esquema estado v3</a>
+            <a href="data/validacion_activacion.json" download>Validación retrospectiva</a>
+            <a href="data/schema/validacion-activacion-v1.schema.json" download>Esquema validación v1</a>
+          </div>
         </div>
       </div>
 
@@ -484,6 +648,13 @@
           <span class="clave">Escala local</span>
           <p>Cada estación mide sobre su propio cero. Los metros no son altura
             sobre el mar ni se comparan entre estaciones.</p>
+        </div>
+        <div>
+          <span class="clave">Control de calidad</span>
+          <p>Valores futuros, no numéricos o fuera de rango se rechazan; un
+            cambio de nivel mayor a 1 m en hasta 2 h queda dudoso hasta poder
+            verificarse. No se corrigen ni desplazan series: el valor original,
+            su fecha y la bandera QC permanecen publicados para auditoría.</p>
         </div>
         <div>
           <span class="clave">Cero Ex Wharton</span>
@@ -509,6 +680,35 @@
           <span>Cita sugerida</span>
           <p>Seijas, N. <i>Cauce — ríos del Uruguay</i>. https://nicoseijas.github.io/cauce/</p>
         </div>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="tabla">
+    <div id="tabla-cab">
+      <div>
+        <h2>Datos recopilados</h2>
+        <p id="tabla-sub"></p>
+      </div>
+      <button type="button" id="tabla-cerrar" title="Cerrar">✕</button>
+    </div>
+    <div id="tabla-barra">
+      <div id="tabla-pestanas">
+        <button type="button" data-hoja="estaciones" class="sel">Estaciones</button>
+        <button type="button" data-hoja="historico">Histórico</button>
+        <button type="button" data-hoja="lluvia">Lluvia</button>
+      </div>
+      <input type="search" id="tabla-buscar" placeholder="Buscar estación o curso…" />
+      <select id="tabla-fuente"></select>
+      <span id="tabla-conteo"></span>
+    </div>
+    <div id="tabla-cuerpo"><table id="tabla-datos"></table></div>
+    <div id="tabla-pie">
+      <p class="nota" id="tabla-nota"></p>
+      <div class="descargas">
+        <button type="button" id="tabla-csv">CSV de la vista</button>
+        <a href="data/estado_actual.json" download>JSON del estado</a>
+        <a href="data/series.json" download>JSON de la serie</a>
+        <a href="data/datapackage.json" download>Catálogo</a>
       </div>
     </div>
   </dialog>
