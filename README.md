@@ -74,6 +74,32 @@ npm run dev        # desarrollo
 npm run build      # producción (dist/)
 ```
 
+## Enlaces permanentes
+
+Cada estación tiene una URL propia que se puede compartir, citar o guardar:
+
+```text
+https://nicoseijas.github.io/cauce/estaciones/paso-de-los-toros
+```
+
+El popup de cada estación ofrece «Copiar enlace a esta estación». Abrir uno de
+esos enlaces lleva el mapa a la estación y muestra su última observación.
+
+El segmento legible deriva del nombre que publica el organismo. Cuando dos
+organismos miden el mismo lugar, el segundo lleva el organismo como sufijo:
+`nueva-palmira` es la estación de DINAGUA y `nueva-palmira-ina` la del INA.
+
+Como un nombre publicado puede cambiar, cada estación tiene además un
+identificador canónico `<organismo>-<id de origen>` que no cambia nunca. Sirve
+como enlace alternativo y redirige al nombre legible vigente:
+
+```text
+/estaciones/dinagua-189   ->   /estaciones/paso-de-los-toros
+```
+
+Ambos identificadores se publican en `estado_actual.json` como `estacion_id` y
+`slug`, y el esquema del contrato de datos los exige.
+
 ## Datos para investigación
 
 La interfaz publica los datos también en forma tabular: «Ver los datos en una

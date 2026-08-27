@@ -21,6 +21,14 @@ import {
 } from "./estado";
 import { setupCreciente } from "./creciente";
 import { setupTabla } from "./tabla";
+import {
+  construirIndice,
+  crearEnrutador,
+  interpretar,
+  recuperarRutaDiferida,
+  resolver,
+  urlAbsoluta,
+} from "./rutas";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -350,6 +358,7 @@ function mostrarTooltip(f: MapGeoJSONFeature, x: number, y: number): void {
  * feature del mapa o de una fila de la tabla. */
 type EstacionPopup = {
   id?: number | string;
+  slug?: string;
   nombre: string;
   curso?: string | null;
   clasificacion?: string | null;
@@ -448,18 +457,56 @@ function popupEstacion(e: EstacionPopup): string {
   }
   if (e.fuente) filas.push(`<span class="q">${e.fuente}</span>`);
   if (e.incertidumbre) filas.push(`<span class="aclara">Incertidumbre: ${e.incertidumbre}</span>`);
+  if (e.slug) {
+    filas.push(
+      `<button type="button" class="copiar-enlace" ` +
+      `data-enlace="${urlAbsoluta({ vista: "estacion", slug: e.slug })}">` +
+      `Copiar enlace a esta estación</button>`,
+    );
+  }
   return filas.join("<br>");
 }
+
+// El popup reescribe su HTML cuando llega el minigráfico, así que el clic se
+// atiende por delegación en lugar de sobre el botón concreto.
+addEventListener("click", (ev) => {
+  const boton = (ev.target as HTMLElement | null)?.closest<HTMLButtonElement>(
+    ".copiar-enlace",
+  );
+  const enlace = boton?.dataset.enlace;
+  if (!boton || !enlace) return;
+  const original = boton.textContent;
+  navigator.clipboard.writeText(enlace).then(
+    () => { boton.textContent = "Enlace copiado"; },
+    () => { boton.textContent = enlace; },
+  ).finally(() => {
+    setTimeout(() => { boton.textContent = original; }, 2500);
+  });
+});
+
+/** Navega a una estación por su slug. Queda definida cuando hay estado
+ * cargado; sin él el mapa sigue funcionando sin rutas por estación. */
+let irAEstacion: (slug: string) => void = () => {};
+
+/** Popup de estación abierto, para no apilar uno sobre otro al navegar. */
+let popupAbierto: maplibregl.Popup | null = null;
 
 /** Abre el popup y, cuando la serie llega, le agrega el minigráfico. */
 async function abrirPopupEstacion(
   donde: maplibregl.LngLatLike,
   props: EstacionPopup,
+  alCerrar?: () => void,
 ): Promise<void> {
+  popupAbierto?.remove();
   const popup = new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
     .setLngLat(donde)
     .setHTML(popupEstacion(props))
     .addTo(map);
+  popupAbierto = popup;
+  popup.on("close", () => {
+    if (popupAbierto === popup) popupAbierto = null;
+    alCerrar?.();
+  });
   const series = await cargarSeries(`${BASE}data/series.json`);
   const serie = series?.estaciones[String(props.id)];
   if (!serie || !popup.isOpen()) return;
@@ -470,6 +517,7 @@ async function abrirPopupEstacion(
 function popupDesdeFila(f: FilaEstacion): EstacionPopup {
   return {
     id: f.id,
+    slug: f.slug,
     nombre: f.nombre,
     curso: f.curso,
     clasificacion: f.clasificacion,
@@ -739,7 +787,9 @@ map.on("load", async () => {
       if (map.queryRenderedFeatures(ev.point, { layers: ["represas"] }).length) return;
       const f = ev.features?.[0];
       if (!f) return;
-      void abrirPopupEstacion(ev.lngLat, f.properties as unknown as EstacionPopup);
+      const props = f.properties as unknown as EstacionPopup;
+      if (props.slug) irAEstacion(props.slug);
+      else void abrirPopupEstacion(ev.lngLat, props);
     });
     map.on("mouseenter", "estaciones", () => {
       map.getCanvas().style.cursor = "pointer";
@@ -783,10 +833,45 @@ map.on("load", async () => {
   crearCapaRepresas(map, estado);
   setupCreciente(map, BASE, estadoCargado ?? undefined, vigente);
   if (estadoCargado) {
-    setupTabla(estadoCargado, BASE, vigente, filasEstaciones(estadoCargado), (fila) => {
+    const filas = filasEstaciones(estadoCargado);
+    const indice = construirIndice(filas);
+    const porSlug = new Map(filas.map((f) => [f.slug, f]));
+
+    // El popup es la vista de estación de este paso; al cerrarlo la URL vuelve
+    // al mapa, salvo que el cierre lo haya provocado otra navegación.
+    let slugAbierto: string | null = null;
+    const mostrar = (fila: FilaEstacion) => {
+      slugAbierto = fila.slug;
       map.flyTo({ center: [fila.lon, fila.lat], zoom: Math.max(map.getZoom(), 9) });
-      void abrirPopupEstacion([fila.lon, fila.lat], popupDesdeFila(fila));
+      void abrirPopupEstacion([fila.lon, fila.lat], popupDesdeFila(fila), () => {
+        if (slugAbierto === fila.slug) {
+          slugAbierto = null;
+          enrutador.sustituir({ vista: "mapa" });
+        }
+      });
+    };
+
+    const enrutador = crearEnrutador((ruta) => {
+      if (ruta.vista === "mapa") {
+        slugAbierto = null;
+        return;
+      }
+      const canonico = resolver(indice, ruta.slug);
+      const fila = canonico ? porSlug.get(canonico) : undefined;
+      if (!fila) {
+        enrutador.sustituir({ vista: "mapa" });
+        return;
+      }
+      if (canonico !== ruta.slug) enrutador.sustituir({ vista: "estacion", slug: canonico! });
+      if (slugAbierto !== fila.slug) mostrar(fila);
     });
+    irAEstacion = (slug) => enrutador.ir({ vista: "estacion", slug });
+
+    setupTabla(estadoCargado, BASE, vigente, filas, (fila) => irAEstacion(fila.slug));
+
+    recuperarRutaDiferida();
+    const inicial = interpretar();
+    if (inicial.vista === "estacion") enrutador.sustituir(inicial);
   }
   if (estado) setupVistaAnomalia(map, flow);
 

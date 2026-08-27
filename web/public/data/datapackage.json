@@ -13,7 +13,7 @@
     "inundación",
     "GeoJSON"
   ],
-  "created": "2026-08-27T13:48:32Z",
+  "created": "2026-08-27T14:00:51Z",
   "metadata_schema_version": 1,
   "licenses": [
     {
@@ -967,8 +967,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 117531,
-      "hash": "sha256:176441b6b904f527b90e46ffc7ab21447fcab3f019d9a80b1438948c4a2fb0e2",
+      "bytes": 132055,
+      "hash": "sha256:7a84412aa2908e1ee13117e2ea6b6fdfe226ae7c4c1d2dc89e6b192f87d43ec2",
       "title": "Estado hídrico consolidado",
       "description": "Últimas observaciones, pronóstico UTE, estimaciones visuales, frescura, QC y cobertura de activación.",
       "sources": [
@@ -1136,7 +1136,7 @@
       },
       "usable_temporal": {
         "start": "2026-08-25T18:00:00Z",
-        "end": "2026-08-27T13:43:00Z",
+        "end": "2026-08-27T13:55:00Z",
         "scope": "mediciones aptas para derivados según QC al generar el snapshot"
       },
       "forecast_temporal": {

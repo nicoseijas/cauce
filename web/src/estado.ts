@@ -93,6 +93,10 @@ export type LluviaEstacion = {
 };
 
 export type EstacionINA = {
+  /** identificador canónico <organismo>-<id de origen> */
+  estacion_id: string;
+  /** URL legible derivada del nombre publicado */
+  slug: string;
   id: string;
   nombre: string;
   curso: string;
@@ -108,6 +112,10 @@ export type EstacionINA = {
 };
 
 export type EstacionANA = {
+  /** identificador canónico <organismo>-<id de origen> */
+  estacion_id: string;
+  /** URL legible derivada del nombre publicado */
+  slug: string;
   id: string;
   nombre: string;
   curso: string;
@@ -126,6 +134,10 @@ export type EstacionANA = {
 };
 
 export type EstacionSOHMA = {
+  /** identificador canónico <organismo>-<id de origen> */
+  estacion_id: string;
+  /** URL legible derivada del nombre publicado */
+  slug: string;
   id: string;
   nombre: string;
   curso: string;
@@ -182,6 +194,10 @@ export type Estado = {
 };
 
 export type EstacionEstado = {
+  /** identificador canónico <organismo>-<id de origen> */
+  estacion_id: string;
+  /** URL legible derivada del nombre publicado */
+  slug: string;
   id: number;
   nombre: string;
   curso: string | null;
@@ -320,6 +336,8 @@ export function redondearHoras(h: number | null): string {
  * build_estado normaliza ANA y SOHMA a nivel_* y caudal_* antes de escribir. */
 type EstacionPublicada = {
   id: number | string;
+  estacion_id: string;
+  slug: string;
   nombre: string;
   curso?: string | null;
   fuente?: string;
@@ -343,6 +361,10 @@ type EstacionPublicada = {
 /** Fila plana para la vista tabular y las exportaciones CSV. */
 export type FilaEstacion = {
   id: string;
+  /** identificador canónico <organismo>-<id de origen>; sobrevive a un renombre */
+  estacion_id: string;
+  /** URL legible; deriva del nombre publicado por el organismo */
+  slug: string;
   nombre: string;
   curso: string | null;
   fuente: string;
@@ -374,6 +396,8 @@ export function filasEstaciones(estado: Estado): FilaEstacion[] {
   ];
   return todas.map((e) => ({
     id: String(e.id),
+    estacion_id: e.estacion_id,
+    slug: e.slug,
     nombre: e.nombre,
     curso: e.curso ?? null,
     fuente: e.fuente ?? "—",

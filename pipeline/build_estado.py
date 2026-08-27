@@ -29,6 +29,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import wfs
+from identidad import asignar_identidad
 from qc_hidrometria import (
     QC_VERSION,
     agregar_vigilancia,
@@ -900,6 +901,7 @@ def main() -> None:
     todas_estaciones = list(estaciones)
     for fuente in (ina, ana, sohma):
         todas_estaciones.extend((fuente or {}).get("estaciones", []))
+    asignar_identidad(todas_estaciones)
     control_calidad = construir_resumen(todas_estaciones)
 
     estado = {

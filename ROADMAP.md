@@ -207,7 +207,14 @@ hay dato de estación fresco, cuál está activa hoy.
 - [x] Nombres de ríos con jerarquía por zoom (glyphs autoalojados, guía
       fusionada por curso y generalizada; sin hidrónimos genéricos). También:
       nombres de departamentos y capitales (Natural Earth). ✔
-- [ ] Buscador de cursos y permalinks por río/estación.
+- [x] Permalinks por estación (2026-08-27, paso 1 del Roadmap V2): identidad
+      canónica `<organismo>-<id de origen>` y slug legible asignados en
+      `pipeline/identidad.py` y exigidos por el esquema del estado; enrutado
+      por History API con `404.html` de rebote; el `estacion_id` redirige al
+      slug vigente. Verificado en Chrome sobre un servidor que emula el
+      comportamiento de GitHub Pages. ✔
+- [ ] Permalinks por río; requiere antes la entidad de río (Fase 5G del V2).
+- [ ] Buscador global de ríos, estaciones y localidades (paso 2 del V2).
 - [ ] Detalle 1:10.000 de IDEuy en zooms altos (solo estética).
 - [ ] Pedir a `dinagua.servicios@ambiente.gub.uy` acceso a series/curvas de
       gasto; si llegan, reemplazar la heurística de escala por conversión

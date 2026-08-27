@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cauce</title>
+<meta name="robots" content="noindex">
+<script>
+  // GitHub Pages sirve este archivo ante cualquier ruta que no sea un archivo
+  // real. Devuelve el control al índice conservando la ruta pedida, para que
+  // el enrutador la lea igual que si el servidor la hubiera reescrito.
+  (function () {
+    var raiz = "/cauce/";
+    var l = location;
+    var ruta = l.pathname.indexOf(raiz) === 0 ? l.pathname.slice(raiz.length) : "";
+    // sessionStorage sobrevive a la redirección y no queda en la URL
+    try { sessionStorage.setItem("cauce:ruta", ruta + l.search + l.hash); } catch (e) {}
+    l.replace(raiz);
+  })();
+</script>
+</head>
+<body>
+<noscript>
+  <p>Esta página necesita JavaScript. Ir a <a href="/cauce/">Cauce</a>.</p>
+</noscript>
+</body>
+</html>

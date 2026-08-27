@@ -150,6 +150,34 @@ con cota cero conocida. Con eso:
   `estado_actual.json` con `cache-control` corto. El JSON de estado es lo
   único que cambia entre visitas.
 
+## Identidad y enrutado
+
+Cada estación tiene dos identificadores con roles distintos, asignados en
+`pipeline/identidad.py` sobre el conjunto completo (una estación aislada no
+permite detectar colisiones de nombre):
+
+| Campo | Forma | Rol |
+|---|---|---|
+| `estacion_id` | `<organismo>-<id de origen>` | Canónico. No cambia aunque el organismo renombre la estación. |
+| `slug` | derivado del nombre publicado | Segmento de URL legible. Es la forma canónica de la URL. |
+
+Cuando dos organismos miden el mismo lugar —ocurre con Nueva Palmira
+(DINAGUA e INA) y La Paloma (DINAGUA y SOHMA)— el desempate sigue un orden
+declarado de organismos, de modo que agregar una estación nueva no reasigne
+los slugs ya publicados. El `estacion_id` funciona como enlace alternativo y
+redirige al slug vigente.
+
+El enrutado usa la History API. GitHub Pages no reescribe rutas: sirve
+`public/404.html` ante cualquier ruta que no sea un archivo. Ese documento
+guarda la ruta pedida en `sessionStorage` y devuelve el control al índice, que
+la restaura antes de interpretarla. Por eso `vite.config.ts` declara una base
+absoluta (`/cauce/`): con base relativa los assets se romperían en cualquier
+ruta anidada. Ambas declaraciones de la raíz deben coincidir, y una prueba lo
+verifica.
+
+MapLibre mantiene su propio hash de encuadre en la URL; convive con el
+enrutado porque la ruta vive en el *pathname* y el hash solo en el fragmento.
+
 ## Hosting y CI — decisión: GitHub Pages
 
 - Sitio publicado con GitHub Pages vía el workflow oficial
