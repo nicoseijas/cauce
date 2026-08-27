@@ -1,7 +1,5 @@
-.venv/
-node_modules/
-data/raw/
 data/processed/
 __pycache__/
 *.pyc
 dist/
+ROADMAP_V2.md
