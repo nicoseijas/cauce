@@ -1,0 +1,2823 @@
+{
+  "schema_version": 1,
+  "generado_desde_datos": "2019-12-31T23:30",
+  "clasificacion": "estimado_retrospectivo_no_operativo",
+  "decision_operativa": "ninguna_localidad_habilitada",
+  "metodo": {
+    "unidad_evaluacion": "evento completo dentro de localidad y cuenca",
+    "particion": "por evento y cuenca; nunca se dividen aleatoriamente lecturas de un mismo evento",
+    "tipos_separados": [
+      "fluvial",
+      "pluvial_urbana",
+      "costera_estuarina",
+      "mixta_no_separada"
+    ],
+    "ventana_analisis_dias_antes_y_despues": 7,
+    "criterio_hidrograma_completo": "al menos 24 h antes y después del pico, huecos <=12 h, ascenso y recesión >=0,20 m",
+    "correccion_datum": false,
+    "zona_horaria_series": "no publicada en los CSV; las horas se conservan sin zona y no se convierten",
+    "limitaciones": [
+      "La fecha CRI no delimita por sí sola el inicio y fin físico del evento.",
+      "CRI no es un registro exhaustivo de eventos positivos ni negativos.",
+      "Una coincidencia de umbral no valida datum ni causalidad hidráulica.",
+      "Solo existen series públicas DINAGUA 2017-2019 para esta evaluación."
+    ]
+  },
+  "fuentes_series": [
+    {
+      "anio": 2017,
+      "url": "https://catalogodatos.gub.uy/dataset/03d936f2-5dc8-4e66-b936-5da8f2a7fdd1/resource/4a048882-ef6c-4fa7-b0ce-87207aa7741a/download/lecturas_anuales_nivel_2017.csv",
+      "archivo": "lecturas_anuales_nivel_2017.csv",
+      "bytes": 57109038,
+      "sha256": "52f62a9b306220f194e5780fb8bb8bcf9b51236a1b0155893a8d2a80230bd47b",
+      "licencia": "Licencia de Datos Abiertos de Uruguay (odc-uy)"
+    },
+    {
+      "anio": 2018,
+      "url": "https://catalogodatos.gub.uy/dataset/4ba2cad8-adc3-4e60-82d5-8183ce23717f/resource/155d7cf9-7744-4ecc-a097-7f5fb776d175/download/lecturas_anuales_nivel_2018.csv",
+      "archivo": "lecturas_anuales_nivel_2018.csv",
+      "bytes": 62536782,
+      "sha256": "5286bac9ad6486444decd9e40583634c51bb577c8aedd163f7e2df51fd2f6da8",
+      "licencia": "Licencia de Datos Abiertos de Uruguay (odc-uy)"
+    },
+    {
+      "anio": 2019,
+      "url": "https://catalogodatos.gub.uy/dataset/11b9f183-bbc4-4e5d-8047-b5647cf041cc/resource/3f035e36-da7e-4f3f-a707-d5c54a83e022/download/lecturas_anuales_nivel_2019.csv",
+      "archivo": "lecturas_anuales_nivel_2019.csv",
+      "bytes": 45278152,
+      "sha256": "fe5db1dce2e3e4cda61c041005f67967ceee80d0a8d9ed3fa971a3d88a85ced8",
+      "licencia": "Licencia de Datos Abiertos de Uruguay (odc-uy)"
+    }
+  ],
+  "resumen": {
+    "localidades_candidatas": 19,
+    "localidades_con_estacion_superficial": 17,
+    "localidades_con_curso_compatible": 14,
+    "tipos_inundacion": {
+      "costera_estuarina": 2,
+      "fluvial": 15,
+      "mixta_no_separada": 1,
+      "pluvial_urbana": 1
+    },
+    "bloqueos_candidatos": {
+      "curso_estacion_no_coincide": 3,
+      "datum_vertical_no_validado": 19,
+      "mecanismos_costero_y_pluvial_no_separados": 1,
+      "relacion_hidraulica_no_validada_por_eventos_completos": 19,
+      "requiere_modelo_pluvial_urbano": 1,
+      "requiere_nivel_costero_y_forzantes_estuarinas": 2,
+      "sin_estacion_superficial_compatible": 2,
+      "umbrales_indistinguibles_dada_incertidumbre": 16
+    },
+    "eventos_registrados": 10,
+    "eventos_con_cobertura": 5,
+    "hidrogramas_completos": 5,
+    "coincidencias_umbral": 4,
+    "fallos_omision": 1,
+    "localidades_habilitables": 0
+  },
+  "estaciones": {
+    "Carmelo (Atracadero)": {
+      "2017": {
+        "observaciones_entrada": 13698,
+        "observaciones_aceptadas": 13698,
+        "inicio": "2017-01-01T00:00",
+        "fin": "2017-12-29T03:30",
+        "dias_con_datos": 289,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 7096,
+        "observaciones_aceptadas": 7096,
+        "inicio": "2018-03-06T14:30",
+        "fin": "2018-10-10T21:30",
+        "dias_con_datos": 149,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 11674,
+        "observaciones_aceptadas": 11674,
+        "inicio": "2019-04-29T12:10",
+        "fin": "2019-12-31T23:30",
+        "dias_con_datos": 246,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Constitución": {
+      "2017": {
+        "observaciones_entrada": 1043,
+        "observaciones_aceptadas": 1043,
+        "inicio": "2017-01-04T08:00",
+        "fin": "2017-12-26T17:00",
+        "dias_con_datos": 349,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 749,
+        "observaciones_aceptadas": 749,
+        "inicio": "2018-01-05T08:00",
+        "fin": "2018-12-31T17:00",
+        "dias_con_datos": 253,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 270,
+        "observaciones_aceptadas": 270,
+        "inicio": "2019-01-01T08:00",
+        "fin": "2019-03-31T17:00",
+        "dias_con_datos": 90,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Dolores": {
+      "2017": {
+        "observaciones_entrada": 1095,
+        "observaciones_aceptadas": 1095,
+        "inicio": "2017-01-01T07:00",
+        "fin": "2017-12-31T18:00",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 1095,
+        "observaciones_aceptadas": 1095,
+        "inicio": "2018-01-01T07:00",
+        "fin": "2018-12-31T18:00",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 279,
+        "observaciones_aceptadas": 279,
+        "inicio": "2019-01-01T07:00",
+        "fin": "2019-05-31T18:00",
+        "dias_con_datos": 93,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Dársena Higueritas": {
+      "2017": {
+        "observaciones_entrada": 1001,
+        "observaciones_aceptadas": 1001,
+        "inicio": "2017-01-01T08:00",
+        "fin": "2017-11-30T18:00",
+        "dias_con_datos": 334,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 1095,
+        "observaciones_aceptadas": 1095,
+        "inicio": "2018-01-01T08:00",
+        "fin": "2018-12-31T18:00",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 300,
+        "observaciones_aceptadas": 300,
+        "inicio": "2019-01-01T08:00",
+        "fin": "2019-06-30T18:00",
+        "dias_con_datos": 100,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Florida (Puente Ruta 5)": {
+      "2017": {
+        "observaciones_entrada": 17515,
+        "observaciones_aceptadas": 17515,
+        "inicio": "2017-01-01T00:00",
+        "fin": "2017-12-31T23:30",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 17516,
+        "observaciones_aceptadas": 17516,
+        "inicio": "2018-01-01T00:00",
+        "fin": "2018-12-31T23:30",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 17492,
+        "observaciones_aceptadas": 17492,
+        "inicio": "2019-01-01T00:00",
+        "fin": "2019-12-31T23:30",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "La Charqueada": {
+      "2017": {
+        "observaciones_entrada": 28831,
+        "observaciones_aceptadas": 28831,
+        "inicio": "2017-01-01T00:00",
+        "fin": "2017-12-31T23:30",
+        "dias_con_datos": 349,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 16249,
+        "observaciones_aceptadas": 16249,
+        "inicio": "2018-01-01T00:00",
+        "fin": "2018-12-05T12:00",
+        "dias_con_datos": 339,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 14904,
+        "observaciones_aceptadas": 14904,
+        "inicio": "2019-02-07T15:30",
+        "fin": "2019-12-23T18:00",
+        "dias_con_datos": 313,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Mercedes (Puerto)": {
+      "2017": {
+        "observaciones_entrada": 8650,
+        "observaciones_aceptadas": 8650,
+        "inicio": "2017-01-01T00:00",
+        "fin": "2017-12-31T23:00",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 7237,
+        "observaciones_aceptadas": 7237,
+        "inicio": "2018-01-01T00:00",
+        "fin": "2018-12-31T23:00",
+        "dias_con_datos": 302,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 1717,
+        "observaciones_aceptadas": 1717,
+        "inicio": "2019-01-01T00:00",
+        "fin": "2019-03-13T12:00",
+        "dias_con_datos": 72,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Paso de los Toros": {
+      "2017": {
+        "observaciones_entrada": 657,
+        "observaciones_aceptadas": 657,
+        "inicio": "2017-01-01T06:00",
+        "fin": "2017-12-31T18:00",
+        "dias_con_datos": 331,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 729,
+        "observaciones_aceptadas": 729,
+        "inicio": "2018-01-01T06:00",
+        "fin": "2018-12-31T18:00",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 237,
+        "observaciones_aceptadas": 237,
+        "inicio": "2019-01-01T06:00",
+        "fin": "2019-11-30T18:00",
+        "dias_con_datos": 119,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Paysandú": {
+      "2017": {
+        "observaciones_entrada": 18046,
+        "observaciones_aceptadas": 18046,
+        "inicio": "2017-06-27T00:15",
+        "fin": "2017-12-31T23:45",
+        "dias_con_datos": 188,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 35037,
+        "observaciones_aceptadas": 35037,
+        "inicio": "2018-01-01T00:00",
+        "fin": "2018-12-31T23:45",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 6979,
+        "observaciones_aceptadas": 6979,
+        "inicio": "2019-01-01T00:00",
+        "fin": "2019-03-14T16:30",
+        "dias_con_datos": 73,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Peaje Solís": {
+      "2017": {
+        "observaciones_entrada": 1089,
+        "observaciones_aceptadas": 1089,
+        "inicio": "2017-01-01T08:00",
+        "fin": "2017-12-31T20:00",
+        "dias_con_datos": 363,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 1095,
+        "observaciones_aceptadas": 1095,
+        "inicio": "2018-01-01T08:00",
+        "fin": "2018-12-31T20:00",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 177,
+        "observaciones_aceptadas": 177,
+        "inicio": "2019-01-01T08:00",
+        "fin": "2019-02-28T20:00",
+        "dias_con_datos": 59,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    },
+    "Santa Lucia (Ruta 11)": {
+      "2017": {
+        "observaciones_entrada": 18210,
+        "observaciones_aceptadas": 18210,
+        "inicio": "2017-01-01T00:00",
+        "fin": "2017-12-31T23:30",
+        "dias_con_datos": 365,
+        "escalones_detectados": [],
+        "segmentos_descartados": [],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2018": {
+        "observaciones_entrada": 17513,
+        "observaciones_aceptadas": 16772,
+        "inicio": "2018-01-01T00:00",
+        "fin": "2018-12-16T13:00",
+        "dias_con_datos": 350,
+        "escalones_detectados": [
+          {
+            "fecha": "2018-12-16T13:30",
+            "salto_m": 12.91
+          }
+        ],
+        "segmentos_descartados": [
+          {
+            "inicio": "2018-12-16T13:30",
+            "fin": "2018-12-31T23:30",
+            "observaciones": 741
+          }
+        ],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      },
+      "2019": {
+        "observaciones_entrada": 17088,
+        "observaciones_aceptadas": 14564,
+        "inicio": "2019-02-22T14:00",
+        "fin": "2019-12-23T18:00",
+        "dias_con_datos": 305,
+        "escalones_detectados": [
+          {
+            "fecha": "2019-02-22T14:00",
+            "salto_m": -9.4
+          }
+        ],
+        "segmentos_descartados": [
+          {
+            "inicio": "2019-01-01T00:00",
+            "fin": "2019-02-22T13:30",
+            "observaciones": 2524
+          }
+        ],
+        "limitacion": "el filtro detecta escalones persistentes; no detecta deriva lenta"
+      }
+    }
+  },
+  "particiones_por_cuenca": {
+    "14": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 14,
+        "nombre": "RÍO URUGUAY entre Río Arapey Grande y Río Daymán",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "SA-CON",
+        "SA-STO"
+      ],
+      "eventos": [
+        {
+          "localidad": "SA-STO",
+          "fecha_evento": "2017-06-23",
+          "ventana": {
+            "inicio": "2017-06-16",
+            "fin": "2017-06-30"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2017
+        },
+        {
+          "localidad": "SA-STO",
+          "fecha_evento": "2019-01-23",
+          "ventana": {
+            "inicio": "2019-01-16",
+            "fin": "2019-01-30"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2019
+        }
+      ]
+    },
+    "18": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 18,
+        "nombre": "RÍO URUGUAY entre Río Queguay Grande y Río Negro",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "PA-PSD",
+        "RN-FBS"
+      ],
+      "eventos": [
+        {
+          "localidad": "PA-PSD",
+          "fecha_evento": "2017-06-12",
+          "ventana": {
+            "inicio": "2017-06-05",
+            "fin": "2017-06-19"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2017
+        },
+        {
+          "localidad": "RN-FBS",
+          "fecha_evento": "2017-09-01",
+          "ventana": {
+            "inicio": "2017-08-25",
+            "fin": "2017-09-08"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2017
+        },
+        {
+          "localidad": "PA-PSD",
+          "fecha_evento": "2019-01-23",
+          "ventana": {
+            "inicio": "2019-01-16",
+            "fin": "2019-01-30"
+          },
+          "observaciones": 1440,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.25,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 1.18,
+            "recesion_m": 2.46,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-01-23T18:30",
+            "nivel_m": 8.43
+          },
+          "periodo_candidato_superado": 10,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        }
+      ]
+    },
+    "19": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 19,
+        "nombre": "RÍO URUGUAY entre Río Negro y Río de la Plata",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "CO-NPA",
+        "SO-DOL"
+      ],
+      "eventos": []
+    },
+    "20": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 20,
+        "nombre": "RÍO DE LA PLATA entre Río Uruguay y Río San Juan",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "CO-CLO"
+      ],
+      "eventos": []
+    },
+    "22": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 22,
+        "nombre": "RÍO DE LA PLATA entre Río San Juan y Río Rosario",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "CO-JLL"
+      ],
+      "eventos": []
+    },
+    "28": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 28,
+        "nombre": "Ao. SOLÍS GRANDE",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "CA-JBY"
+      ],
+      "eventos": []
+    },
+    "44": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 44,
+        "nombre": "RÍO CEBOLLATÍ (excepto Río Olimar Grande)",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "TT-GEM"
+      ],
+      "eventos": []
+    },
+    "54": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 54,
+        "nombre": "RÍO NEGRO entre Río Tacuarembó y Rincón del Bonete",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "TA-SGP"
+      ],
+      "eventos": []
+    },
+    "55": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 55,
+        "nombre": "RÍO NEGRO entre Rincón del Bonete y Río Yí",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "DU-CEN",
+        "TA-PTS"
+      ],
+      "eventos": []
+    },
+    "58": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 58,
+        "nombre": "RÍO NEGRO entre Rincón de Palmar y Río Uruguay",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "RN-LAR",
+        "SO-MER"
+      ],
+      "eventos": [
+        {
+          "localidad": "SO-MER",
+          "fecha_evento": "2019-06-19",
+          "ventana": {
+            "inicio": "2019-06-12",
+            "fin": "2019-06-26"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2019
+        }
+      ]
+    },
+    "61": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 61,
+        "nombre": "RÍO SANTA LUCÍA CHICO",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "FD-FDA"
+      ],
+      "eventos": [
+        {
+          "localidad": "FD-FDA",
+          "fecha_evento": "2019-06-16",
+          "ventana": {
+            "inicio": "2019-06-09",
+            "fin": "2019-06-23"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 7.72,
+            "recesion_m": 7.23,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-16T16:30",
+            "nivel_m": 10.03
+          },
+          "periodo_candidato_superado": 10,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        }
+      ]
+    },
+    "62": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 62,
+        "nombre": "RÍO SANTA LUCÍA entre Río Santa Lucía Chico y Ao. Canelón Grande",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "CA-SLA",
+        "FD-2DA"
+      ],
+      "eventos": [
+        {
+          "localidad": "CA-SLA",
+          "fecha_evento": "2019-06-18",
+          "ventana": {
+            "inicio": "2019-06-11",
+            "fin": "2019-06-25"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 10.08,
+            "recesion_m": 8.57,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-18T05:30",
+            "nivel_m": 11.48
+          },
+          "periodo_candidato_superado": 100,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        },
+        {
+          "localidad": "FD-2DA",
+          "fecha_evento": "2019-06-18",
+          "ventana": {
+            "inicio": "2019-06-11",
+            "fin": "2019-06-25"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 10.08,
+            "recesion_m": 8.57,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-18T05:30",
+            "nivel_m": 11.48
+          },
+          "periodo_candidato_superado": null,
+          "resultado_regla_candidata": "fallo_omision_de_regla_candidata",
+          "anio": 2019
+        }
+      ]
+    },
+    "64": {
+      "cuenca_nivel2": {
+        "codigo_nivel2": 64,
+        "nombre": "RÍO SANTA LUCÍA entre Ao. Canelón Grande y Río San José",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "localidades": [
+        "CA-ACS"
+      ],
+      "eventos": [
+        {
+          "localidad": "CA-ACS",
+          "fecha_evento": "2019-06-17",
+          "ventana": {
+            "inicio": "2019-06-10",
+            "fin": "2019-06-24"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 10.08,
+            "recesion_m": 8.41,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-18T05:30",
+            "nivel_m": 11.48
+          },
+          "periodo_candidato_superado": 9999,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        }
+      ]
+    }
+  },
+  "localidades": {
+    "CA-ACS": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 64,
+        "nombre": "RÍO SANTA LUCÍA entre Ao. Canelón Grande y Río San José",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 47,
+      "estacion": "Santa Lucia R-11",
+      "estacion_tipo": "Hidrométrica + T",
+      "dist_m": 8731,
+      "curso_curvas": "Río Santa Lucía",
+      "curso_estacion": "Río Santa Lucía",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 100,
+          "nivel": 9.04,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            8.04,
+            10.04
+          ]
+        },
+        {
+          "periodo": 9999,
+          "nivel": 9.27,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            8.27,
+            10.27
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 350
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 305
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2019-06-17",
+          "ventana": {
+            "inicio": "2019-06-10",
+            "fin": "2019-06-24"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 10.08,
+            "recesion_m": 8.41,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-18T05:30",
+            "nivel_m": 11.48
+          },
+          "periodo_candidato_superado": 9999,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        }
+      ],
+      "activaciones_sin_evento_registrado": [
+        {
+          "anio": 2017,
+          "dias": 6,
+          "dias_con_datos": 365,
+          "porcentaje": 1.64,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        },
+        {
+          "anio": 2019,
+          "dias": 3,
+          "dias_con_datos": 305,
+          "porcentaje": 0.98,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        }
+      ],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "CA-JBY": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 28,
+        "nombre": "Ao. SOLÍS GRANDE",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 124,
+      "estacion": "Peaje Solís",
+      "estacion_tipo": "Limnimétrica",
+      "dist_m": 639,
+      "curso_curvas": "Arroyo Solís",
+      "curso_estacion": "Ao. Solís Grande",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 3.76,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            2.76,
+            4.76
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 4.42,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            3.42,
+            5.42
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Peaje Solís",
+          "dias_con_datos": 363
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Peaje Solís",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Peaje Solís",
+          "dias_con_datos": 59
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [
+        {
+          "anio": 2017,
+          "dias": 3,
+          "dias_con_datos": 363,
+          "porcentaje": 0.83,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        }
+      ],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "CA-SLA": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 62,
+        "nombre": "RÍO SANTA LUCÍA entre Río Santa Lucía Chico y Ao. Canelón Grande",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 47,
+      "estacion": "Santa Lucia R-11",
+      "estacion_tipo": "Hidrométrica + T",
+      "dist_m": 299,
+      "curso_curvas": "Río Santa Lucía",
+      "curso_estacion": "Río Santa Lucía",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 100,
+          "nivel": 10.8,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.91,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            9.8,
+            11.8
+          ]
+        },
+        {
+          "periodo": 9999,
+          "nivel": 13.35,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            12.35,
+            14.35
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 350
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 305
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2019-06-18",
+          "ventana": {
+            "inicio": "2019-06-11",
+            "fin": "2019-06-25"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 10.08,
+            "recesion_m": 8.57,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-18T05:30",
+            "nivel_m": 11.48
+          },
+          "periodo_candidato_superado": 100,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        }
+      ],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "CO-CLO": {
+      "tipo_inundacion": "costera_estuarina",
+      "regulada": false,
+      "cadena_fisica_requerida": "caudal fluvial + marea/sudestada → nivel estuarino → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 20,
+        "nombre": "RÍO DE LA PLATA entre Río Uruguay y Río San Juan",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 208,
+      "estacion": "Carmelo - Atracadero",
+      "estacion_tipo": "Limnimétrica + T",
+      "dist_m": 1505,
+      "curso_curvas": "Arroyo Las Vacas, Río de la Plata",
+      "curso_estacion": "Ao. De Las Vacas",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 1.94,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            0.94,
+            2.94
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 3.24,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            2.24,
+            4.24
+          ]
+        },
+        {
+          "periodo": 500,
+          "nivel": 4.64,
+          "tipo_curva": "500 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            3.64,
+            5.64
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Carmelo (Atracadero)",
+          "dias_con_datos": 289
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Carmelo (Atracadero)",
+          "dias_con_datos": 149
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Carmelo (Atracadero)",
+          "dias_con_datos": 246
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [
+        {
+          "anio": 2017,
+          "dias": 18,
+          "dias_con_datos": 289,
+          "porcentaje": 6.23,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        },
+        {
+          "anio": 2018,
+          "dias": 9,
+          "dias_con_datos": 149,
+          "porcentaje": 6.04,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        },
+        {
+          "anio": 2019,
+          "dias": 21,
+          "dias_con_datos": 246,
+          "porcentaje": 8.54,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        }
+      ],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "requiere_nivel_costero_y_forzantes_estuarinas",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "CO-JLL": {
+      "tipo_inundacion": "mixta_no_separada",
+      "regulada": false,
+      "cadena_fisica_requerida": "separar costera/estuarina de pluvial urbana antes de asociar sensores",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 22,
+        "nombre": "RÍO DE LA PLATA entre Río San Juan y Río Rosario",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": null,
+      "estacion": null,
+      "estacion_tipo": null,
+      "dist_m": null,
+      "curso_curvas": "Río de la Plata",
+      "curso_estacion": null,
+      "curso_compatible": false,
+      "datum_vertical": "sin estación superficial compatible",
+      "umbrales": [],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2018,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2019,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "sin_estacion_superficial_compatible",
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "mecanismos_costero_y_pluvial_no_separados",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "CO-NPA": {
+      "tipo_inundacion": "costera_estuarina",
+      "regulada": false,
+      "cadena_fisica_requerida": "caudal fluvial + marea/sudestada → nivel estuarino → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 19,
+        "nombre": "RÍO URUGUAY entre Río Negro y Río de la Plata",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 111,
+      "estacion": "Dársena Higueritas",
+      "estacion_tipo": "Limnimétrica",
+      "dist_m": 268,
+      "curso_curvas": "Río de la Plata",
+      "curso_estacion": "Río Uruguay",
+      "curso_compatible": false,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 2.39,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.9,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            1.39,
+            3.39
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 3.34,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.9,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            2.34,
+            4.34
+          ]
+        },
+        {
+          "periodo": 500,
+          "nivel": 3.99,
+          "tipo_curva": "500 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.9,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            2.99,
+            4.99
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Dársena Higueritas",
+          "dias_con_datos": 334
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Dársena Higueritas",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Dársena Higueritas",
+          "dias_con_datos": 100
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [
+        {
+          "anio": 2017,
+          "dias": 1,
+          "dias_con_datos": 334,
+          "porcentaje": 0.3,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        },
+        {
+          "anio": 2018,
+          "dias": 5,
+          "dias_con_datos": 365,
+          "porcentaje": 1.37,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        },
+        {
+          "anio": 2019,
+          "dias": 6,
+          "dias_con_datos": 100,
+          "porcentaje": 6.0,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        }
+      ],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "curso_estacion_no_coincide",
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "requiere_nivel_costero_y_forzantes_estuarinas",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "DU-CEN": {
+      "tipo_inundacion": "fluvial",
+      "regulada": true,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 55,
+        "nombre": "RÍO NEGRO entre Rincón del Bonete y Río Yí",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 189,
+      "estacion": "Paso de los Toros",
+      "estacion_tipo": "Limnimétrica",
+      "dist_m": 1127,
+      "curso_curvas": "Río Negro",
+      "curso_estacion": "Río Negro",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 20,
+          "nivel": 11.53,
+          "tipo_curva": "20 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            10.53,
+            12.53
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 12.29,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            11.29,
+            13.29
+          ]
+        },
+        {
+          "periodo": 9999,
+          "nivel": 17.95,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            16.95,
+            18.95
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Paso de los Toros",
+          "dias_con_datos": 331
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Paso de los Toros",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Paso de los Toros",
+          "dias_con_datos": 119
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "FD-2DA": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 62,
+        "nombre": "RÍO SANTA LUCÍA entre Río Santa Lucía Chico y Ao. Canelón Grande",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 47,
+      "estacion": "Santa Lucia R-11",
+      "estacion_tipo": "Hidrométrica + T",
+      "dist_m": 3571,
+      "curso_curvas": "Río Santa Lucía",
+      "curso_estacion": "Río Santa Lucía",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 9999,
+          "nivel": 14.22,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            13.22,
+            15.22
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 350
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Santa Lucia (Ruta 11)",
+          "dias_con_datos": 305
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2019-06-18",
+          "ventana": {
+            "inicio": "2019-06-11",
+            "fin": "2019-06-25"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 10.08,
+            "recesion_m": 8.57,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-18T05:30",
+            "nivel_m": 11.48
+          },
+          "periodo_candidato_superado": null,
+          "resultado_regla_candidata": "fallo_omision_de_regla_candidata",
+          "anio": 2019
+        }
+      ],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "FD-FDA": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 61,
+        "nombre": "RÍO SANTA LUCÍA CHICO",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 126,
+      "estacion": "Florida - Puente R.5",
+      "estacion_tipo": "Hidrométrica + T",
+      "dist_m": 1760,
+      "curso_curvas": "Río Santa Lucía Chico",
+      "curso_estacion": "Río Santa Lucía Chico",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 8.11,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            7.11,
+            9.11
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 10.6,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            9.6,
+            11.6
+          ]
+        },
+        {
+          "periodo": 500,
+          "nivel": 12.31,
+          "tipo_curva": "500 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            11.31,
+            13.31
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Florida (Puente Ruta 5)",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Florida (Puente Ruta 5)",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Florida (Puente Ruta 5)",
+          "dias_con_datos": 365
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2019-06-16",
+          "ventana": {
+            "inicio": "2019-06-09",
+            "fin": "2019-06-23"
+          },
+          "observaciones": 720,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.5,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 7.72,
+            "recesion_m": 7.23,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-06-16T16:30",
+            "nivel_m": 10.03
+          },
+          "periodo_candidato_superado": 10,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        }
+      ],
+      "activaciones_sin_evento_registrado": [
+        {
+          "anio": 2018,
+          "dias": 1,
+          "dias_con_datos": 365,
+          "porcentaje": 0.27,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        },
+        {
+          "anio": 2019,
+          "dias": 2,
+          "dias_con_datos": 365,
+          "porcentaje": 0.55,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        }
+      ],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "PA-PSD": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 18,
+        "nombre": "RÍO URUGUAY entre Río Queguay Grande y Río Negro",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 225,
+      "estacion": "Paysandú",
+      "estacion_tipo": "Limnimétrica + T",
+      "dist_m": 1357,
+      "curso_curvas": "Arroyo Sacra",
+      "curso_estacion": "Río Uruguay",
+      "curso_compatible": false,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 6.86,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.88,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            5.86,
+            7.86
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 8.61,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.88,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            7.61,
+            9.61
+          ]
+        },
+        {
+          "periodo": 9999,
+          "nivel": 13.19,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.88,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            12.19,
+            14.19
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Paysandú",
+          "dias_con_datos": 188
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Paysandú",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Paysandú",
+          "dias_con_datos": 73
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2017-06-12",
+          "ventana": {
+            "inicio": "2017-06-05",
+            "fin": "2017-06-19"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2017
+        },
+        {
+          "fecha_evento": "2019-01-23",
+          "ventana": {
+            "inicio": "2019-01-16",
+            "fin": "2019-01-30"
+          },
+          "observaciones": 1440,
+          "estado_cobertura": "con_cobertura",
+          "hidrograma_completo": true,
+          "criterios_completitud": {
+            "pre_pico_24h": true,
+            "post_pico_24h": true,
+            "hueco_maximo_h": 0.25,
+            "hueco_admisible_h": 12,
+            "ascenso_m": 1.18,
+            "recesion_m": 2.46,
+            "cambio_minimo_m": 0.2
+          },
+          "pico": {
+            "fecha": "2019-01-23T18:30",
+            "nivel_m": 8.43
+          },
+          "periodo_candidato_superado": 10,
+          "resultado_regla_candidata": "coincide_superacion_de_umbral",
+          "anio": 2019
+        }
+      ],
+      "activaciones_sin_evento_registrado": [
+        {
+          "anio": 2019,
+          "dias": 1,
+          "dias_con_datos": 73,
+          "porcentaje": 1.37,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        }
+      ],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "curso_estacion_no_coincide",
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "RN-FBS": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 18,
+        "nombre": "RÍO URUGUAY entre Río Queguay Grande y Río Negro",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 227,
+      "estacion": "Fray Bentos",
+      "estacion_tipo": "Limnimétrica + T",
+      "dist_m": 3754,
+      "curso_curvas": "Río Uruguay",
+      "curso_estacion": "Río Uruguay",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 2.27,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            1.27,
+            3.27
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 4.42,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            3.42,
+            5.42
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2018,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2019,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2017-09-01",
+          "ventana": {
+            "inicio": "2017-08-25",
+            "fin": "2017-09-08"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2017
+        }
+      ],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_evento_con_hidrograma_completo",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "RN-LAR": {
+      "tipo_inundacion": "fluvial",
+      "regulada": true,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 58,
+        "nombre": "RÍO NEGRO entre Rincón de Palmar y Río Uruguay",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 184,
+      "estacion": "Mercedes (Puerto)",
+      "estacion_tipo": "Hidrométrica",
+      "dist_m": 1895,
+      "curso_curvas": "Río Negro",
+      "curso_estacion": "Río Negro",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 20,
+          "nivel": 8.76,
+          "tipo_curva": "20 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            7.76,
+            9.76
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 9.76,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            8.76,
+            10.76
+          ]
+        },
+        {
+          "periodo": 500,
+          "nivel": 11.86,
+          "tipo_curva": "500 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            10.86,
+            12.86
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Mercedes (Puerto)",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Mercedes (Puerto)",
+          "dias_con_datos": 302
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Mercedes (Puerto)",
+          "dias_con_datos": 72
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "SA-CON": {
+      "tipo_inundacion": "fluvial",
+      "regulada": true,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 14,
+        "nombre": "RÍO URUGUAY entre Río Arapey Grande y Río Daymán",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 223,
+      "estacion": "Constitución",
+      "estacion_tipo": "Limnimétrica",
+      "dist_m": 567,
+      "curso_curvas": "Río Uruguay",
+      "curso_estacion": "Río Uruguay",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 3.31,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -34.32,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            2.31,
+            4.31
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 3.45,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -34.32,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            2.45,
+            4.45
+          ]
+        },
+        {
+          "periodo": 9999,
+          "nivel": 3.93,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -34.32,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            2.93,
+            4.93
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Constitución",
+          "dias_con_datos": 349
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Constitución",
+          "dias_con_datos": 253
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Constitución",
+          "dias_con_datos": 90
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "SA-STO": {
+      "tipo_inundacion": "pluvial_urbana",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → drenaje/escorrentía urbana → nivel local → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 14,
+        "nombre": "RÍO URUGUAY entre Río Arapey Grande y Río Daymán",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": null,
+      "estacion": null,
+      "estacion_tipo": null,
+      "dist_m": null,
+      "curso_curvas": "Arroyo Ceibal",
+      "curso_estacion": null,
+      "curso_compatible": false,
+      "datum_vertical": "sin estación superficial compatible",
+      "umbrales": [],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2018,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2019,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2017-06-23",
+          "ventana": {
+            "inicio": "2017-06-16",
+            "fin": "2017-06-30"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2017
+        },
+        {
+          "fecha_evento": "2019-01-23",
+          "ventana": {
+            "inicio": "2019-01-16",
+            "fin": "2019-01-30"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2019
+        }
+      ],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "sin_estacion_superficial_compatible",
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "requiere_modelo_pluvial_urbano",
+        "sin_evento_con_hidrograma_completo",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "SO-DOL": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 19,
+        "nombre": "RÍO URUGUAY entre Río Negro y Río de la Plata",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 207,
+      "estacion": "Dolores",
+      "estacion_tipo": "Limnimétrica",
+      "dist_m": 1661,
+      "curso_curvas": "Río San Salvador",
+      "curso_estacion": "Río San Salvador",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 5.37,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.91,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            4.37,
+            6.37
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 6.88,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.91,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            5.88,
+            7.88
+          ]
+        },
+        {
+          "periodo": 500,
+          "nivel": 7.79,
+          "tipo_curva": "500 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.91,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            6.79,
+            8.79
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Dolores",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Dolores",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Dolores",
+          "dias_con_datos": 93
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "SO-MER": {
+      "tipo_inundacion": "fluvial",
+      "regulada": true,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 58,
+        "nombre": "RÍO NEGRO entre Rincón de Palmar y Río Uruguay",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 184,
+      "estacion": "Mercedes (Puerto)",
+      "estacion_tipo": "Hidrométrica",
+      "dist_m": 781,
+      "curso_curvas": "Río Negro",
+      "curso_estacion": "Río Negro",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 20,
+          "nivel": 8.73,
+          "tipo_curva": "20 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            7.73,
+            9.73
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 9.75,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            8.75,
+            10.75
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Mercedes (Puerto)",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Mercedes (Puerto)",
+          "dias_con_datos": 302
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Mercedes (Puerto)",
+          "dias_con_datos": 72
+        }
+      ],
+      "eventos": [
+        {
+          "fecha_evento": "2019-06-19",
+          "ventana": {
+            "inicio": "2019-06-12",
+            "fin": "2019-06-26"
+          },
+          "observaciones": 0,
+          "estado_cobertura": "sin_cobertura",
+          "hidrograma_completo": false,
+          "resultado_regla_candidata": "no_evaluable",
+          "anio": 2019
+        }
+      ],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_evento_con_hidrograma_completo",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "TA-PTS": {
+      "tipo_inundacion": "fluvial",
+      "regulada": true,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 55,
+        "nombre": "RÍO NEGRO entre Rincón del Bonete y Río Yí",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 189,
+      "estacion": "Paso de los Toros",
+      "estacion_tipo": "Limnimétrica",
+      "dist_m": 1426,
+      "curso_curvas": "Cda. Ceibal",
+      "curso_estacion": "Río Negro",
+      "curso_compatible": false,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 20,
+          "nivel": 11.24,
+          "tipo_curva": "20 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            10.24,
+            12.24
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 12.29,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            11.29,
+            13.29
+          ]
+        },
+        {
+          "periodo": 9999,
+          "nivel": 17.94,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            16.94,
+            18.94
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "Paso de los Toros",
+          "dias_con_datos": 331
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "Paso de los Toros",
+          "dias_con_datos": 365
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "Paso de los Toros",
+          "dias_con_datos": 119
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "curso_estacion_no_coincide",
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "TA-SGP": {
+      "tipo_inundacion": "fluvial",
+      "regulada": true,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 54,
+        "nombre": "RÍO NEGRO entre Río Tacuarembó y Rincón del Bonete",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 17152,
+      "estacion": "San Gregorio de Polanco (lago)",
+      "estacion_tipo": "Limnimétrica",
+      "dist_m": 724,
+      "curso_curvas": "Río Negro",
+      "curso_estacion": "Río Negro",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 20,
+          "nivel": 12.98,
+          "tipo_curva": "20 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            11.98,
+            13.98
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 13.71,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            12.71,
+            14.71
+          ]
+        },
+        {
+          "periodo": 9999,
+          "nivel": 18.78,
+          "tipo_curva": "CMP",
+          "datum_ok": false,
+          "datum_estado": "sin_evidencia",
+          "diferencia_datum_m": null,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            17.78,
+            19.78
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2018,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        },
+        {
+          "anio": 2019,
+          "estado": "sin_mapeo_de_estacion",
+          "estacion_serie": null,
+          "dias_con_datos": 0
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    },
+    "TT-GEM": {
+      "tipo_inundacion": "fluvial",
+      "regulada": false,
+      "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+      "cuenca_nivel2": {
+        "codigo_nivel2": 44,
+        "nombre": "RÍO CEBOLLATÍ (excepto Río Olimar Grande)",
+        "fuente": "DINAGUA shp_cuencas_nivel2",
+        "crs_geometria_fuente": {
+          "crs_declarado": "EPSG:4326",
+          "crs_interpretado": "EPSG:32721",
+          "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+        },
+        "crs_union_espacial": "EPSG:32721"
+      },
+      "estacion_id": 201,
+      "estacion": "La Charqueada",
+      "estacion_tipo": "Limnimétrica + T + P",
+      "dist_m": 324,
+      "curso_curvas": "Río Cebollatí",
+      "curso_estacion": "Río Cebollatí",
+      "curso_compatible": true,
+      "datum_vertical": "Wharton (según campos de DINAGUA)",
+      "umbrales": [
+        {
+          "periodo": 10,
+          "nivel": 5.31,
+          "tipo_curva": "10 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.91,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            4.31,
+            6.31
+          ]
+        },
+        {
+          "periodo": 100,
+          "nivel": 6.17,
+          "tipo_curva": "100 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.91,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            5.17,
+            7.17
+          ]
+        },
+        {
+          "periodo": 500,
+          "nivel": 6.75,
+          "tipo_curva": "500 años",
+          "datum_ok": false,
+          "datum_estado": "incompatible",
+          "diferencia_datum_m": -0.91,
+          "incertidumbre_m": 1.0,
+          "intervalo_nivel_m": [
+            5.75,
+            7.75
+          ]
+        }
+      ],
+      "cobertura_anual": [
+        {
+          "anio": 2017,
+          "estado": "con_serie",
+          "estacion_serie": "La Charqueada",
+          "dias_con_datos": 349
+        },
+        {
+          "anio": 2018,
+          "estado": "con_serie",
+          "estacion_serie": "La Charqueada",
+          "dias_con_datos": 339
+        },
+        {
+          "anio": 2019,
+          "estado": "con_serie",
+          "estacion_serie": "La Charqueada",
+          "dias_con_datos": 313
+        }
+      ],
+      "eventos": [],
+      "activaciones_sin_evento_registrado": [
+        {
+          "anio": 2019,
+          "dias": 12,
+          "dias_con_datos": 313,
+          "porcentaje": 3.83,
+          "interpretacion": "cota superior; CRI no registra exhaustivamente los días sin inundación"
+        }
+      ],
+      "estado_validacion": "insuficiente_para_habilitar",
+      "bloqueos": [
+        "datum_vertical_no_validado",
+        "umbrales_indistinguibles_dada_incertidumbre",
+        "relacion_hidraulica_no_validada_por_eventos_completos",
+        "sin_eventos_cri_en_2017_2019",
+        "sin_registro_exhaustivo_de_eventos_negativos"
+      ]
+    }
+  }
+}

@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nicoseijas.github.io/cauce/data/schema/validacion-activacion-v1.schema.json",
+  "title": "Cauce — validación retrospectiva de activación v1",
+  "description": "Evidencia por evento completo y cuenca. Una coincidencia no autoriza activación operativa.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generado_desde_datos",
+    "clasificacion",
+    "decision_operativa",
+    "metodo",
+    "fuentes_series",
+    "resumen",
+    "estaciones",
+    "particiones_por_cuenca",
+    "localidades"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "generado_desde_datos": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$" },
+    "clasificacion": { "const": "estimado_retrospectivo_no_operativo" },
+    "decision_operativa": { "const": "ninguna_localidad_habilitada" },
+    "metodo": {
+      "type": "object",
+      "required": [
+        "unidad_evaluacion",
+        "particion",
+        "tipos_separados",
+        "ventana_analisis_dias_antes_y_despues",
+        "criterio_hidrograma_completo",
+        "correccion_datum",
+        "zona_horaria_series",
+        "limitaciones"
+      ],
+      "properties": {
+        "unidad_evaluacion": { "type": "string" },
+        "particion": { "type": "string" },
+        "tipos_separados": {
+          "type": "array",
+          "items": {
+            "enum": ["fluvial", "pluvial_urbana", "costera_estuarina", "mixta_no_separada"]
+          },
+          "uniqueItems": true
+        },
+        "ventana_analisis_dias_antes_y_despues": { "type": "integer", "minimum": 1 },
+        "criterio_hidrograma_completo": { "type": "string" },
+        "correccion_datum": { "const": false },
+        "zona_horaria_series": { "type": "string" },
+        "limitaciones": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "fuentes_series": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["anio", "url", "archivo", "bytes", "sha256", "licencia"],
+        "properties": {
+          "anio": { "type": "integer", "minimum": 1900 },
+          "url": { "type": "string", "format": "uri" },
+          "archivo": { "type": "string" },
+          "bytes": { "type": "integer", "minimum": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "licencia": { "type": "string" }
+        }
+      }
+    },
+    "resumen": {
+      "type": "object",
+      "required": [
+        "localidades_candidatas",
+        "localidades_con_estacion_superficial",
+        "localidades_con_curso_compatible",
+        "tipos_inundacion",
+        "bloqueos_candidatos",
+        "eventos_registrados",
+        "eventos_con_cobertura",
+        "hidrogramas_completos",
+        "coincidencias_umbral",
+        "fallos_omision",
+        "localidades_habilitables"
+      ],
+      "properties": {
+        "localidades_candidatas": { "$ref": "#/$defs/conteo" },
+        "localidades_con_estacion_superficial": { "$ref": "#/$defs/conteo" },
+        "localidades_con_curso_compatible": { "$ref": "#/$defs/conteo" },
+        "tipos_inundacion": { "$ref": "#/$defs/conteos" },
+        "bloqueos_candidatos": { "$ref": "#/$defs/conteos" },
+        "eventos_registrados": { "$ref": "#/$defs/conteo" },
+        "eventos_con_cobertura": { "$ref": "#/$defs/conteo" },
+        "hidrogramas_completos": { "$ref": "#/$defs/conteo" },
+        "coincidencias_umbral": { "$ref": "#/$defs/conteo" },
+        "fallos_omision": { "$ref": "#/$defs/conteo" },
+        "localidades_habilitables": { "const": 0 }
+      }
+    },
+    "estaciones": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "patternProperties": {
+          "^\\d{4}$": { "$ref": "#/$defs/diagnostico_serie" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "particiones_por_cuenca": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["cuenca_nivel2", "localidades", "eventos"],
+        "properties": {
+          "cuenca_nivel2": { "$ref": "#/$defs/cuenca" },
+          "localidades": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "eventos": { "type": "array", "items": { "$ref": "#/$defs/evento_particion" } }
+        }
+      }
+    },
+    "localidades": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/localidad" }
+    }
+  },
+  "$defs": {
+    "conteo": { "type": "integer", "minimum": 0 },
+    "conteos": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/conteo" }
+    },
+    "cuenca": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["codigo_nivel2", "nombre", "fuente", "crs_geometria_fuente", "crs_union_espacial"],
+          "properties": {
+            "codigo_nivel2": { "type": "integer" },
+            "nombre": { "type": "string" },
+            "fuente": { "type": "string" },
+            "crs_geometria_fuente": {
+              "type": "object",
+              "required": ["crs_declarado", "crs_interpretado", "accion"],
+              "properties": {
+                "crs_declarado": { "type": "string" },
+                "crs_interpretado": { "const": "EPSG:32721" },
+                "accion": {
+                  "enum": ["reproyectado_desde_crs_declarado", "crs_declarado_incorrecto_corregido_por_magnitud"]
+                }
+              }
+            },
+            "crs_union_espacial": { "const": "EPSG:32721" }
+          }
+        }
+      ]
+    },
+    "umbral": {
+      "type": "object",
+      "required": [
+        "periodo", "nivel", "tipo_curva", "datum_ok", "datum_estado",
+        "diferencia_datum_m", "incertidumbre_m", "intervalo_nivel_m"
+      ],
+      "properties": {
+        "periodo": { "type": "integer", "minimum": 1 },
+        "nivel": { "type": "number" },
+        "tipo_curva": { "type": "string" },
+        "datum_ok": { "type": "boolean" },
+        "datum_estado": { "enum": ["compatible", "incompatible", "sin_evidencia"] },
+        "diferencia_datum_m": { "type": ["number", "null"] },
+        "incertidumbre_m": { "type": "number", "minimum": 0 },
+        "intervalo_nivel_m": {
+          "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false
+        }
+      }
+    },
+    "evento": {
+      "type": "object",
+      "required": [
+        "fecha_evento", "ventana", "observaciones", "estado_cobertura",
+        "hidrograma_completo", "resultado_regla_candidata", "anio"
+      ],
+      "properties": {
+        "fecha_evento": { "type": "string", "format": "date" },
+        "ventana": {
+          "type": "object",
+          "required": ["inicio", "fin"],
+          "properties": {
+            "inicio": { "type": "string", "format": "date" },
+            "fin": { "type": "string", "format": "date" }
+          }
+        },
+        "observaciones": { "$ref": "#/$defs/conteo" },
+        "estado_cobertura": { "enum": ["con_cobertura", "sin_cobertura"] },
+        "hidrograma_completo": { "type": "boolean" },
+        "criterios_completitud": { "type": "object" },
+        "pico": { "type": "object" },
+        "periodo_candidato_superado": { "type": ["integer", "null"] },
+        "resultado_regla_candidata": {
+          "enum": [
+            "no_evaluable",
+            "no_evaluable_hidrograma_incompleto",
+            "coincide_superacion_de_umbral",
+            "fallo_omision_de_regla_candidata"
+          ]
+        },
+        "anio": { "type": "integer" }
+      }
+    },
+    "evento_particion": {
+      "allOf": [
+        { "$ref": "#/$defs/evento" },
+        {
+          "type": "object",
+          "required": ["localidad"],
+          "properties": { "localidad": { "type": "string" } }
+        }
+      ]
+    },
+    "diagnostico_serie": {
+      "type": "object",
+      "required": [
+        "observaciones_entrada", "observaciones_aceptadas", "inicio", "fin",
+        "dias_con_datos", "escalones_detectados", "segmentos_descartados", "limitacion"
+      ],
+      "properties": {
+        "observaciones_entrada": { "$ref": "#/$defs/conteo" },
+        "observaciones_aceptadas": { "$ref": "#/$defs/conteo" },
+        "inicio": { "type": ["string", "null"] },
+        "fin": { "type": ["string", "null"] },
+        "dias_con_datos": { "$ref": "#/$defs/conteo" },
+        "escalones_detectados": { "type": "array", "items": { "type": "object" } },
+        "segmentos_descartados": { "type": "array", "items": { "type": "object" } },
+        "limitacion": { "type": "string" }
+      }
+    },
+    "localidad": {
+      "type": "object",
+      "required": [
+        "tipo_inundacion", "regulada", "cadena_fisica_requerida", "cuenca_nivel2",
+        "estacion_id", "estacion", "estacion_tipo", "dist_m", "curso_curvas",
+        "curso_estacion", "curso_compatible", "datum_vertical", "umbrales", "cobertura_anual",
+        "eventos", "activaciones_sin_evento_registrado", "estado_validacion", "bloqueos"
+      ],
+      "properties": {
+        "tipo_inundacion": {
+          "enum": ["fluvial", "pluvial_urbana", "costera_estuarina", "mixta_no_separada"]
+        },
+        "regulada": { "type": "boolean" },
+        "cadena_fisica_requerida": { "type": "string" },
+        "cuenca_nivel2": { "$ref": "#/$defs/cuenca" },
+        "estacion_id": { "type": ["integer", "null"] },
+        "estacion": { "type": ["string", "null"] },
+        "estacion_tipo": { "type": ["string", "null"] },
+        "dist_m": { "type": ["integer", "null"], "minimum": 0 },
+        "curso_curvas": { "type": "string" },
+        "curso_estacion": { "type": ["string", "null"] },
+        "curso_compatible": { "type": "boolean" },
+        "datum_vertical": { "type": "string" },
+        "umbrales": { "type": "array", "items": { "$ref": "#/$defs/umbral" } },
+        "cobertura_anual": { "type": "array", "items": { "type": "object" } },
+        "eventos": { "type": "array", "items": { "$ref": "#/$defs/evento" } },
+        "activaciones_sin_evento_registrado": { "type": "array", "items": { "type": "object" } },
+        "estado_validacion": { "const": "insuficiente_para_habilitar" },
+        "bloqueos": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true }
+      }
+    }
+  }
+}

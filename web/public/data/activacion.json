@@ -2,378 +2,1438 @@
  "CA-ACS": {
   "estacion_id": 47,
   "estacion": "Santa Lucia R-11",
+  "estacion_tipo": "Hidrométrica + T",
   "dist_m": 8731,
+  "curso_curvas": "Río Santa Lucía",
+  "curso_estacion": "Río Santa Lucía",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 64,
+   "nombre": "RÍO SANTA LUCÍA entre Ao. Canelón Grande y Río San José",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 9999,
+    "separacion_m": 0.23,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 100,
     "nivel": 9.04,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     8.04,
+     10.04
+    ]
    },
    {
     "periodo": 9999,
     "nivel": 9.27,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     8.27,
+     10.27
+    ]
    }
   ]
  },
  "CA-JBY": {
   "estacion_id": 124,
   "estacion": "Peaje Solís",
+  "estacion_tipo": "Limnimétrica",
   "dist_m": 639,
+  "curso_curvas": "Arroyo Solís",
+  "curso_estacion": "Ao. Solís Grande",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 28,
+   "nombre": "Ao. SOLÍS GRANDE",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 0.66,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 3.76,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     2.76,
+     4.76
+    ]
    },
    {
     "periodo": 100,
     "nivel": 4.42,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     3.42,
+     5.42
+    ]
    }
   ]
  },
  "CA-SLA": {
   "estacion_id": 47,
   "estacion": "Santa Lucia R-11",
+  "estacion_tipo": "Hidrométrica + T",
   "dist_m": 299,
+  "curso_curvas": "Río Santa Lucía",
+  "curso_estacion": "Río Santa Lucía",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 62,
+   "nombre": "RÍO SANTA LUCÍA entre Río Santa Lucía Chico y Ao. Canelón Grande",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": true,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 9999,
+    "separacion_m": 2.55,
+    "distinguible": true
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 100,
     "nivel": 10.8,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.91,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     9.8,
+     11.8
+    ]
    },
    {
     "periodo": 9999,
     "nivel": 13.35,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     12.35,
+     14.35
+    ]
    }
   ]
  },
  "CO-CLO": {
   "estacion_id": 208,
   "estacion": "Carmelo - Atracadero",
+  "estacion_tipo": "Limnimétrica + T",
   "dist_m": 1505,
+  "curso_curvas": "Arroyo Las Vacas, Río de la Plata",
+  "curso_estacion": "Ao. De Las Vacas",
+  "curso_compatible": true,
+  "tipo_inundacion": "costera_estuarina",
+  "regulada": false,
+  "cadena_fisica_requerida": "caudal fluvial + marea/sudestada → nivel estuarino → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 20,
+   "nombre": "RÍO DE LA PLATA entre Río Uruguay y Río San Juan",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 1.3,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 500,
+    "separacion_m": 1.4,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos",
+   "requiere_nivel_costero_y_forzantes_estuarinas"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 1.94,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     0.94,
+     2.94
+    ]
    },
    {
     "periodo": 100,
     "nivel": 3.24,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     2.24,
+     4.24
+    ]
    },
    {
     "periodo": 500,
     "nivel": 4.64,
-    "tipo_curva": "500 años"
+    "tipo_curva": "500 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     3.64,
+     5.64
+    ]
    }
   ]
  },
  "CO-JLL": {
-  "estacion_id": 45,
-  "estacion": "Juan Lacaze",
-  "dist_m": 773,
-  "umbrales": [
-   {
-    "periodo": 10,
-    "nivel": 2.87,
-    "tipo_curva": "10 años"
+  "estacion_id": null,
+  "estacion": null,
+  "estacion_tipo": null,
+  "dist_m": null,
+  "curso_curvas": "Río de la Plata",
+  "curso_estacion": null,
+  "curso_compatible": false,
+  "tipo_inundacion": "mixta_no_separada",
+  "regulada": false,
+  "cadena_fisica_requerida": "separar costera/estuarina de pluvial urbana antes de asociar sensores",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 22,
+   "nombre": "RÍO DE LA PLATA entre Río San Juan y Río Rosario",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
    },
-   {
-    "periodo": 100,
-    "nivel": 3.56,
-    "tipo_curva": "100 años"
-   },
-   {
-    "periodo": 500,
-    "nivel": 4.13,
-    "tipo_curva": "500 años"
-   }
-  ]
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "sin estación superficial compatible",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [],
+  "bloqueos": [
+   "sin_estacion_superficial_compatible",
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos",
+   "mecanismos_costero_y_pluvial_no_separados"
+  ],
+  "auto_habilitada": false,
+  "umbrales": []
  },
  "CO-NPA": {
   "estacion_id": 111,
   "estacion": "Dársena Higueritas",
+  "estacion_tipo": "Limnimétrica",
   "dist_m": 268,
+  "curso_curvas": "Río de la Plata",
+  "curso_estacion": "Río Uruguay",
+  "curso_compatible": false,
+  "tipo_inundacion": "costera_estuarina",
+  "regulada": false,
+  "cadena_fisica_requerida": "caudal fluvial + marea/sudestada → nivel estuarino → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 19,
+   "nombre": "RÍO URUGUAY entre Río Negro y Río de la Plata",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 0.95,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 500,
+    "separacion_m": 0.65,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "curso_estacion_no_coincide",
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos",
+   "requiere_nivel_costero_y_forzantes_estuarinas"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 2.39,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.9,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     1.39,
+     3.39
+    ]
    },
    {
     "periodo": 100,
     "nivel": 3.34,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.9,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     2.34,
+     4.34
+    ]
    },
    {
     "periodo": 500,
     "nivel": 3.99,
-    "tipo_curva": "500 años"
+    "tipo_curva": "500 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.9,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     2.99,
+     4.99
+    ]
    }
   ]
  },
  "DU-CEN": {
   "estacion_id": 189,
   "estacion": "Paso de los Toros",
+  "estacion_tipo": "Limnimétrica",
   "dist_m": 1127,
+  "curso_curvas": "Río Negro",
+  "curso_estacion": "Río Negro",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": true,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 55,
+   "nombre": "RÍO NEGRO entre Rincón del Bonete y Río Yí",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 20,
+    "periodo_superior": 100,
+    "separacion_m": 0.76,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 9999,
+    "separacion_m": 5.66,
+    "distinguible": true
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 20,
     "nivel": 11.53,
-    "tipo_curva": "20 años"
+    "tipo_curva": "20 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     10.53,
+     12.53
+    ]
    },
    {
     "periodo": 100,
     "nivel": 12.29,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     11.29,
+     13.29
+    ]
    },
    {
     "periodo": 9999,
     "nivel": 17.95,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     16.95,
+     18.95
+    ]
    }
   ]
  },
  "FD-2DA": {
   "estacion_id": 47,
   "estacion": "Santa Lucia R-11",
+  "estacion_tipo": "Hidrométrica + T",
   "dist_m": 3571,
+  "curso_curvas": "Río Santa Lucía",
+  "curso_estacion": "Río Santa Lucía",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 62,
+   "nombre": "RÍO SANTA LUCÍA entre Río Santa Lucía Chico y Ao. Canelón Grande",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": true,
+  "separacion_umbrales": [],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 9999,
     "nivel": 14.22,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     13.22,
+     15.22
+    ]
    }
   ]
  },
  "FD-FDA": {
   "estacion_id": 126,
   "estacion": "Florida - Puente R.5",
+  "estacion_tipo": "Hidrométrica + T",
   "dist_m": 1760,
+  "curso_curvas": "Río Santa Lucía Chico",
+  "curso_estacion": "Río Santa Lucía Chico",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 61,
+   "nombre": "RÍO SANTA LUCÍA CHICO",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 2.49,
+    "distinguible": true
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 500,
+    "separacion_m": 1.71,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 8.11,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     7.11,
+     9.11
+    ]
    },
    {
     "periodo": 100,
     "nivel": 10.6,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     9.6,
+     11.6
+    ]
    },
    {
     "periodo": 500,
     "nivel": 12.31,
-    "tipo_curva": "500 años"
+    "tipo_curva": "500 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     11.31,
+     13.31
+    ]
    }
   ]
  },
  "PA-PSD": {
   "estacion_id": 225,
   "estacion": "Paysandú",
+  "estacion_tipo": "Limnimétrica + T",
   "dist_m": 1357,
+  "curso_curvas": "Arroyo Sacra",
+  "curso_estacion": "Río Uruguay",
+  "curso_compatible": false,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 18,
+   "nombre": "RÍO URUGUAY entre Río Queguay Grande y Río Negro",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 1.75,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 9999,
+    "separacion_m": 4.58,
+    "distinguible": true
+   }
+  ],
+  "bloqueos": [
+   "curso_estacion_no_coincide",
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 6.86,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.88,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     5.86,
+     7.86
+    ]
    },
    {
     "periodo": 100,
     "nivel": 8.61,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.88,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     7.61,
+     9.61
+    ]
    },
    {
     "periodo": 9999,
     "nivel": 13.19,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.88,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     12.19,
+     14.19
+    ]
    }
   ]
  },
  "RN-FBS": {
   "estacion_id": 227,
   "estacion": "Fray Bentos",
+  "estacion_tipo": "Limnimétrica + T",
   "dist_m": 3754,
+  "curso_curvas": "Río Uruguay",
+  "curso_estacion": "Río Uruguay",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 18,
+   "nombre": "RÍO URUGUAY entre Río Queguay Grande y Río Negro",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": true,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 2.15,
+    "distinguible": true
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 2.27,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     1.27,
+     3.27
+    ]
    },
    {
     "periodo": 100,
     "nivel": 4.42,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     3.42,
+     5.42
+    ]
    }
   ]
  },
  "RN-LAR": {
   "estacion_id": 184,
   "estacion": "Mercedes (Puerto)",
+  "estacion_tipo": "Hidrométrica",
   "dist_m": 1895,
+  "curso_curvas": "Río Negro",
+  "curso_estacion": "Río Negro",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": true,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 58,
+   "nombre": "RÍO NEGRO entre Rincón de Palmar y Río Uruguay",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 20,
+    "periodo_superior": 100,
+    "separacion_m": 1.0,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 500,
+    "separacion_m": 2.1,
+    "distinguible": true
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 20,
     "nivel": 8.76,
-    "tipo_curva": "20 años"
+    "tipo_curva": "20 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     7.76,
+     9.76
+    ]
    },
    {
     "periodo": 100,
     "nivel": 9.76,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     8.76,
+     10.76
+    ]
    },
    {
     "periodo": 500,
     "nivel": 11.86,
-    "tipo_curva": "500 años"
+    "tipo_curva": "500 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     10.86,
+     12.86
+    ]
    }
   ]
  },
  "SA-CON": {
   "estacion_id": 223,
   "estacion": "Constitución",
+  "estacion_tipo": "Limnimétrica",
   "dist_m": 567,
+  "curso_curvas": "Río Uruguay",
+  "curso_estacion": "Río Uruguay",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": true,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 14,
+   "nombre": "RÍO URUGUAY entre Río Arapey Grande y Río Daymán",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 0.14,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 9999,
+    "separacion_m": 0.48,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 3.31,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -34.32,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     2.31,
+     4.31
+    ]
    },
    {
     "periodo": 100,
     "nivel": 3.45,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -34.32,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     2.45,
+     4.45
+    ]
    },
    {
     "periodo": 9999,
     "nivel": 3.93,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -34.32,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     2.93,
+     4.93
+    ]
    }
   ]
  },
  "SA-STO": {
-  "estacion_id": 15329,
-  "estacion": "Club Remeros Salto (Sa1)",
-  "dist_m": 3354,
-  "umbrales": [
-   {
-    "periodo": 100,
-    "nivel": 118.83,
-    "tipo_curva": "100 años"
+  "estacion_id": null,
+  "estacion": null,
+  "estacion_tipo": null,
+  "dist_m": null,
+  "curso_curvas": "Arroyo Ceibal",
+  "curso_estacion": null,
+  "curso_compatible": false,
+  "tipo_inundacion": "pluvial_urbana",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → drenaje/escorrentía urbana → nivel local → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 14,
+   "nombre": "RÍO URUGUAY entre Río Arapey Grande y Río Daymán",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
    },
-   {
-    "periodo": 9999,
-    "nivel": 125.58,
-    "tipo_curva": "CMP"
-   }
-  ]
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "sin estación superficial compatible",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [],
+  "bloqueos": [
+   "sin_estacion_superficial_compatible",
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos",
+   "requiere_modelo_pluvial_urbano"
+  ],
+  "auto_habilitada": false,
+  "umbrales": []
  },
  "SO-DOL": {
   "estacion_id": 207,
   "estacion": "Dolores",
+  "estacion_tipo": "Limnimétrica",
   "dist_m": 1661,
+  "curso_curvas": "Río San Salvador",
+  "curso_estacion": "Río San Salvador",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 19,
+   "nombre": "RÍO URUGUAY entre Río Negro y Río de la Plata",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 1.51,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 500,
+    "separacion_m": 0.91,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 5.37,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.91,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     4.37,
+     6.37
+    ]
    },
    {
     "periodo": 100,
     "nivel": 6.88,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.91,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     5.88,
+     7.88
+    ]
    },
    {
     "periodo": 500,
     "nivel": 7.79,
-    "tipo_curva": "500 años"
+    "tipo_curva": "500 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.91,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     6.79,
+     8.79
+    ]
    }
   ]
  },
  "SO-MER": {
   "estacion_id": 184,
   "estacion": "Mercedes (Puerto)",
+  "estacion_tipo": "Hidrométrica",
   "dist_m": 781,
+  "curso_curvas": "Río Negro",
+  "curso_estacion": "Río Negro",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": true,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 58,
+   "nombre": "RÍO NEGRO entre Rincón de Palmar y Río Uruguay",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 20,
+    "periodo_superior": 100,
+    "separacion_m": 1.02,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 20,
     "nivel": 8.73,
-    "tipo_curva": "20 años"
+    "tipo_curva": "20 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     7.73,
+     9.73
+    ]
    },
    {
     "periodo": 100,
     "nivel": 9.75,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     8.75,
+     10.75
+    ]
    }
   ]
  },
  "TA-PTS": {
   "estacion_id": 189,
   "estacion": "Paso de los Toros",
+  "estacion_tipo": "Limnimétrica",
   "dist_m": 1426,
+  "curso_curvas": "Cda. Ceibal",
+  "curso_estacion": "Río Negro",
+  "curso_compatible": false,
+  "tipo_inundacion": "fluvial",
+  "regulada": true,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 55,
+   "nombre": "RÍO NEGRO entre Rincón del Bonete y Río Yí",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 20,
+    "periodo_superior": 100,
+    "separacion_m": 1.05,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 9999,
+    "separacion_m": 5.65,
+    "distinguible": true
+   }
+  ],
+  "bloqueos": [
+   "curso_estacion_no_coincide",
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 20,
     "nivel": 11.24,
-    "tipo_curva": "20 años"
+    "tipo_curva": "20 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     10.24,
+     12.24
+    ]
    },
    {
     "periodo": 100,
     "nivel": 12.29,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     11.29,
+     13.29
+    ]
    },
    {
     "periodo": 9999,
     "nivel": 17.94,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     16.94,
+     18.94
+    ]
    }
   ]
  },
  "TA-SGP": {
   "estacion_id": 17152,
   "estacion": "San Gregorio de Polanco (lago)",
+  "estacion_tipo": "Limnimétrica",
   "dist_m": 724,
+  "curso_curvas": "Río Negro",
+  "curso_estacion": "Río Negro",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": true,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 54,
+   "nombre": "RÍO NEGRO entre Río Tacuarembó y Rincón del Bonete",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 20,
+    "periodo_superior": 100,
+    "separacion_m": 0.73,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 9999,
+    "separacion_m": 5.07,
+    "distinguible": true
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 20,
     "nivel": 12.98,
-    "tipo_curva": "20 años"
+    "tipo_curva": "20 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     11.98,
+     13.98
+    ]
    },
    {
     "periodo": 100,
     "nivel": 13.71,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     12.71,
+     14.71
+    ]
    },
    {
     "periodo": 9999,
     "nivel": 18.78,
-    "tipo_curva": "CMP"
+    "tipo_curva": "CMP",
+    "datum_ok": false,
+    "datum_estado": "sin_evidencia",
+    "diferencia_datum_m": null,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     17.78,
+     19.78
+    ]
    }
   ]
  },
  "TT-GEM": {
   "estacion_id": 201,
   "estacion": "La Charqueada",
+  "estacion_tipo": "Limnimétrica + T + P",
   "dist_m": 324,
+  "curso_curvas": "Río Cebollatí",
+  "curso_estacion": "Río Cebollatí",
+  "curso_compatible": true,
+  "tipo_inundacion": "fluvial",
+  "regulada": false,
+  "cadena_fisica_requerida": "lluvia → escorrentía/caudal → nivel fluvial → mancha",
+  "cuenca_nivel2": {
+   "codigo_nivel2": 44,
+   "nombre": "RÍO CEBOLLATÍ (excepto Río Olimar Grande)",
+   "fuente": "DINAGUA shp_cuencas_nivel2",
+   "crs_geometria_fuente": {
+    "crs_declarado": "EPSG:4326",
+    "crs_interpretado": "EPSG:32721",
+    "accion": "crs_declarado_incorrecto_corregido_por_magnitud"
+   },
+   "crs_union_espacial": "EPSG:32721"
+  },
+  "datum_vertical": "Wharton (según campos de DINAGUA)",
+  "relacion_hidraulica": "no_validada",
+  "incertidumbre_umbral_m": 1.0,
+  "umbrales_distinguibles": false,
+  "separacion_umbrales": [
+   {
+    "periodo_inferior": 10,
+    "periodo_superior": 100,
+    "separacion_m": 0.86,
+    "distinguible": false
+   },
+   {
+    "periodo_inferior": 100,
+    "periodo_superior": 500,
+    "separacion_m": 0.58,
+    "distinguible": false
+   }
+  ],
+  "bloqueos": [
+   "datum_vertical_no_validado",
+   "umbrales_indistinguibles_dada_incertidumbre",
+   "relacion_hidraulica_no_validada_por_eventos_completos"
+  ],
+  "auto_habilitada": false,
   "umbrales": [
    {
     "periodo": 10,
     "nivel": 5.31,
-    "tipo_curva": "10 años"
+    "tipo_curva": "10 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.91,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     4.31,
+     6.31
+    ]
    },
    {
     "periodo": 100,
     "nivel": 6.17,
-    "tipo_curva": "100 años"
+    "tipo_curva": "100 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.91,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     5.17,
+     7.17
+    ]
    },
    {
     "periodo": 500,
     "nivel": 6.75,
-    "tipo_curva": "500 años"
+    "tipo_curva": "500 años",
+    "datum_ok": false,
+    "datum_estado": "incompatible",
+    "diferencia_datum_m": -0.91,
+    "incertidumbre_m": 1.0,
+    "intervalo_nivel_m": [
+     5.75,
+     7.75
+    ]
    }
   ]
  }
