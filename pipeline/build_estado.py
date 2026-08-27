@@ -20,13 +20,23 @@ import csv
 import io
 import json
 import logging
+import math
 import re
 import sys
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import wfs
+from qc_hidrometria import (
+    QC_VERSION,
+    agregar_vigilancia,
+    construir_resumen,
+    contexto_nivel,
+    evaluar_medicion,
+    extraer_referencia,
+)
 
 log = logging.getLogger(__name__)
 
@@ -35,10 +45,10 @@ ESTACIONES = ROOT / "web" / "public" / "data" / "estaciones.geojson"
 ACTIVACION = ROOT / "web" / "public" / "data" / "activacion.json"
 SALIDA = ROOT / "web" / "public" / "data" / "estado_actual.json"
 HISTORICO = ROOT / "data" / "historico"
-FRESCURA_MAX_ACTIVACION_H = 48
-
-FRESCURA_MAX_CAUDAL_H = 24 * 7
-FRESCURA_MAX_NIVEL_H = 24 * 7
+# Una activación describe el estado presente: pasado un día deja de ser apta
+# para afirmar que una mancha está superada. Los factores visuales admiten 48 h
+# para acompañar fuentes diarias, pero nunca la semana que se toleraba antes.
+FRESCURA_MAX_ACTIVACION_H = 24
 FACTOR_CLAMP = (0.05, 20.0)
 SALTO_GRANDE_URL = "https://www.saltogrande.org/datos_horarios.php"
 ID_SALTO_GRANDE = -1
@@ -138,6 +148,9 @@ def leer_sohma(ahora: datetime) -> dict | None:
             "id": sid,
             "nombre": nombre,
             "curso": curso,
+            "clasificacion": "observado",
+            "oficial": True,
+            "fuente": "SOHMA (Armada)",
             "lat": lat,
             "lon": lon,
             "nivel": float(valor),
@@ -198,7 +211,16 @@ def leer_ute_rio_negro(ahora: datetime) -> dict | None:
     if not dias:
         log.warning("UTE río Negro: página sin tabla de previsión")
         return None
-    return {"actualizado": actualizado, "dias": dias, "maximos": maximos}
+    return {
+        "actualizado": actualizado,
+        "clasificacion": "pronosticado",
+        "oficial": True,
+        "horizonte_dias": 7,
+        "probabilidad": None,
+        "incertidumbre": "no publicada por UTE",
+        "dias": dias,
+        "maximos": maximos,
+    }
 
 
 ANA_URL = "https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos"
@@ -261,6 +283,9 @@ def leer_ana(ahora: datetime) -> dict | None:
             "id": f"ana-{cod}",
             "nombre": nombre,
             "curso": curso,
+            "clasificacion": "observado",
+            "oficial": True,
+            "fuente": "ANA (Brasil)",
             "lat": lat,
             "lon": lon,
             "nivel": round(nivel_cm / 100, 2) if nivel_cm is not None else None,
@@ -299,6 +324,9 @@ def leer_ina(ahora: datetime) -> dict | None:
             "id": f"ina-{code}",
             "nombre": nombre,
             "curso": curso,
+            "clasificacion": "observado",
+            "oficial": True,
+            "fuente": "INA / Prefectura (Argentina)",
             "lat": lat,
             "lon": lon,
             "nivel": ultimo["valor"],
@@ -317,7 +345,178 @@ def horas_desde(fecha_iso: str | None, ahora: datetime) -> float | None:
         fecha = datetime.fromisoformat(fecha_iso.replace("Z", "+00:00"))
     except ValueError:
         return None
+    if fecha.tzinfo is None:
+        fecha = fecha.replace(tzinfo=timezone.utc)
     return (ahora - fecha).total_seconds() / 3600
+
+
+def fecha_mas_reciente(valores, ahora: datetime) -> str | None:
+    """Devuelve la fecha parseable más reciente sin mezclar formatos por texto."""
+    candidatas = []
+    for valor in valores:
+        horas = horas_desde(valor, ahora)
+        if horas is not None and horas >= -1:
+            candidatas.append((horas, valor))
+    return min(candidatas, default=(None, None), key=lambda x: x[0])[1]
+
+
+FRESCURA_POR_FUENTE_H = {
+    "dinagua_wfs": 48,
+    "salto_grande": 48,
+    "inumet_lluvia": 48,
+    "inia_lluvia": 72,
+    "ina": 48,
+    "ute_rio_negro": 48,
+    "ana": 48,
+    "sohma": 24,
+}
+
+
+def construir_fuentes_detalle(
+    disponibles: dict[str, bool | None],
+    observaciones: dict[str, str | None],
+    ahora: datetime,
+    previas: dict | None = None,
+) -> dict[str, dict]:
+    """Estado observable de cada fuente, conservando el último éxito conocido."""
+    previas = previas or {}
+    salida = {}
+    for clave, disponible in disponibles.items():
+        anterior = previas.get(clave) or {}
+        observacion = observaciones.get(clave)
+        if disponible is None:
+            estado = "no_implementada"
+        elif not disponible:
+            estado = "caida"
+        elif not observacion:
+            estado = "sin_fecha"
+        else:
+            horas = horas_desde(observacion, ahora)
+            limite = FRESCURA_POR_FUENTE_H.get(clave)
+            estado = (
+                "vencida"
+                if horas is None or horas < -1 or (limite is not None and horas > limite)
+                else "ok"
+            )
+        salida[clave] = {
+            "estado": estado,
+            "ultima_observacion": observacion or anterior.get("ultima_observacion"),
+            "ultimo_exito": (
+                ahora.isoformat(timespec="seconds")
+                if disponible
+                else anterior.get("ultimo_exito")
+            ),
+        }
+    return salida
+
+
+def evaluar_activacion(
+    configuracion: dict,
+    estaciones: list[dict],
+) -> tuple[dict, dict]:
+    """Evalúa solo localidades habilitadas explícitamente y con datum aprobado."""
+    por_id = {e.get("id"): e for e in estaciones if e.get("id") is not None}
+    habilitadas = {
+        cod: cfg for cod, cfg in configuracion.items()
+        if cfg.get("auto_habilitada") is True
+    }
+    activacion = {}
+    rechazadas_qc = 0
+    for cod, cfg in habilitadas.items():
+        e = por_id.get(cfg.get("estacion_id"))
+        nivel = e.get("nivel") if e else None
+        nivel_horas = e.get("nivel_horas") if e else None
+        if e and e.get("qc_nivel", {}).get("apto_derivados") is not True:
+            rechazadas_qc += 1
+            continue
+        if (
+            not isinstance(nivel, (int, float))
+            or not math.isfinite(nivel)
+            or not dato_fresco(nivel_horas, FRESCURA_MAX_ACTIVACION_H)
+        ):
+            continue
+        umbrales = [
+            u for u in cfg.get("umbrales", [])
+            if u.get("datum_ok") is True
+            and isinstance(u.get("nivel"), (int, float))
+            and math.isfinite(u["nivel"])
+        ]
+        if not umbrales:
+            continue
+        activos = [u for u in umbrales if nivel >= u["nivel"]]
+        proximos = [u for u in umbrales if nivel < u["nivel"]]
+        entrada = {
+            "estacion": cfg.get("estacion", str(cfg.get("estacion_id", "sin identificar"))),
+            "nivel": nivel,
+            "nivel_horas": round(nivel_horas, 1),
+            "periodo_activo": max((u["periodo"] for u in activos), default=0),
+        }
+        if proximos:
+            u = min(proximos, key=lambda x: x["nivel"])
+            entrada["proximo"] = {
+                "periodo": u["periodo"],
+                "faltan_m": round(u["nivel"] - nivel, 2),
+            }
+        activacion[cod] = entrada
+    cobertura = {
+        "configuradas": len(configuracion),
+        "habilitadas": len(habilitadas),
+        "evaluadas": len(activacion),
+        "rechazadas_qc": rechazadas_qc,
+        "con_estacion_superficial": sum(
+            cfg.get("estacion_id") is not None for cfg in configuracion.values()
+        ),
+        "con_curso_compatible": sum(
+            cfg.get("curso_compatible") is True for cfg in configuracion.values()
+        ),
+        "tipos_inundacion": dict(sorted(Counter(
+            cfg.get("tipo_inundacion", "sin_clasificar")
+            for cfg in configuracion.values()
+        ).items())),
+        "bloqueos": dict(sorted(Counter(
+            bloqueo
+            for cfg in configuracion.values()
+            for bloqueo in cfg.get("bloqueos", [])
+        ).items())),
+    }
+    return activacion, cobertura
+
+
+def indexar_estaciones_previas(estado: dict) -> dict[str, dict]:
+    """Indexa estaciones propias y externas del último estado conocido."""
+    estaciones = list(estado.get("estaciones") or [])
+    for clave in ("ina", "ana", "sohma"):
+        estaciones.extend((estado.get(clave) or {}).get("estaciones") or [])
+    return {
+        str(e.get("id")): e for e in estaciones
+        if e.get("id") is not None
+    }
+
+
+def aplicar_qc_estacion(
+    estacion: dict,
+    anterior: dict | None,
+    ahora: datetime,
+    *,
+    continuidad_nivel: bool = True,
+) -> None:
+    """Adjunta QC de nivel/caudal usando nombres de campo normalizados."""
+    contexto = contexto_nivel(
+        estacion.get("nombre"), estacion.get("tipo"), estacion.get("curso")
+    )
+    for variable in ("nivel", "caudal"):
+        fecha_campo = f"{variable}_fecha"
+        referencia = extraer_referencia(anterior, variable, ahora)
+        estacion[f"qc_{variable}"] = evaluar_medicion(
+            variable,
+            estacion.get(variable),
+            estacion.get(fecha_campo),
+            ahora,
+            referencia=referencia,
+            contexto=contexto,
+            continuidad=continuidad_nivel if variable == "nivel" else False,
+        )
+    agregar_vigilancia(estacion)
 
 
 def leer_catalogo_dinagua() -> dict[int, dict]:
@@ -327,7 +526,22 @@ def leer_catalogo_dinagua() -> dict[int, dict]:
     return {int(f["properties"]["id"]): f["properties"] for f in feats}
 
 
-def leer_salto_grande() -> dict | None:
+def parsear_fecha_salto(fecha_local: str | None) -> datetime | None:
+    """Fecha de Salto Grande en hora oficial UTC-3, normalizada con offset."""
+    if not fecha_local:
+        return None
+    try:
+        return datetime.strptime(fecha_local, "%d/%m/%Y %H:%M").replace(tzinfo=INA_TZ)
+    except ValueError:
+        return None
+
+
+def dato_fresco(horas: float | None, max_horas: float) -> bool:
+    """Falla cerrado; tolera hasta una hora de desfase futuro entre relojes."""
+    return horas is not None and -1 <= horas <= max_horas
+
+
+def leer_salto_grande(ahora: datetime) -> dict | None:
     try:
         r = wfs.SESSION.get(SALTO_GRANDE_URL, timeout=40)
         r.raise_for_status()
@@ -348,11 +562,15 @@ def leer_salto_grande() -> dict | None:
     fecha = re.search(r"Fecha:\s*(\d{2}/\d{2}/\d{4})\s*Hora:\s*(\d{2}:\d{2})", html)
     if turbinado is None and vertido is None:
         return None
+    fecha_local = f"{fecha.group(1)} {fecha.group(2)}" if fecha else None
+    fecha_dt = parsear_fecha_salto(fecha_local)
     return {
         "turbinado": turbinado,
         "vertido": vertido,
         "total": (turbinado or 0) + (vertido or 0),
-        "fecha_local": f"{fecha.group(1)} {fecha.group(2)}" if fecha else None,
+        "fecha_local": fecha_local,
+        "fecha": fecha_dt.isoformat(timespec="minutes") if fecha_dt else None,
+        "horas": round((ahora - fecha_dt).total_seconds() / 3600, 1) if fecha_dt else None,
     }
 
 
@@ -390,6 +608,8 @@ def leer_lluvia_inumet(ahora: datetime) -> dict | None:
             "nombre": nombre.removesuffix(" G3"),
             "lat": lat,
             "lon": lon,
+            "clasificacion": "observado",
+            "oficial": True,
             "mm24": round(sum(m for f, m in vals if f > hasta - timedelta(hours=24)), 1),
             "mm72": round(sum(m for f, m in vals if f > hasta - timedelta(hours=72)), 1),
             "fuente": "INUMET",
@@ -432,6 +652,8 @@ def leer_lluvia_inia(ahora: datetime) -> list[dict] | None:
             "nombre": nombre,
             "lat": lat,
             "lon": lon,
+            "clasificacion": "observado",
+            "oficial": True,
             "mm24": round(mm[-1], 1),
             "mm72": round(sum(mm), 1),
             "fecha": filas[-1]["fecha"],
@@ -444,9 +666,15 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
     ahora = datetime.now(timezone.utc)
 
+    try:
+        estado_previo = json.loads(SALIDA.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        estado_previo = {}
+    previas_estacion = indexar_estaciones_previas(estado_previo)
+
     mapping = json.loads(ESTACIONES.read_text(encoding="utf-8"))
     catalogo = leer_catalogo_dinagua()
-    salto = leer_salto_grande()
+    salto = leer_salto_grande(ahora)
     lluvia_inumet = leer_lluvia_inumet(ahora)
     lluvia_inia = leer_lluvia_inia(ahora)
     lluvia = lluvia_inumet
@@ -459,17 +687,57 @@ def main() -> None:
     ute = leer_ute_rio_negro(ahora)
     ana = leer_ana(ahora)
     sohma = leer_sohma(ahora)
-    fuentes = {
-        "dinagua_wfs": "ok" if catalogo else "caida",
-        "salto_grande": "ok" if salto else "caida",
-        "inumet_lluvia": "ok" if lluvia_inumet else "caida",
-        "inia_lluvia": "ok" if lluvia_inia else "caida",
-        "ina": "ok" if ina else "caida",
-        "ute_rio_negro": "ok" if ute else "caida",
-        "ana": "ok" if ana else "caida",
-        "sohma": "ok" if sohma else "caida",
-        "caru": "no_implementada",
+
+    # Las fuentes externas usan nombres históricos distintos; se agregan
+    # alias normalizados para que el QC y los consumidores científicos puedan
+    # tratarlas con el mismo contrato que las estaciones DINAGUA.
+    for e in (ina or {}).get("estaciones", []):
+        aplicar_qc_estacion(e, previas_estacion.get(str(e["id"])), ahora)
+    for e in (ana or {}).get("estaciones", []):
+        e["nivel_fecha"] = e.get("fecha")
+        e["caudal_fecha"] = e.get("fecha")
+        e["nivel_horas"] = e.get("horas")
+        e["caudal_horas"] = e.get("horas")
+        aplicar_qc_estacion(e, previas_estacion.get(str(e["id"])), ahora)
+    for e in (sohma or {}).get("estaciones", []):
+        e["nivel_fecha"] = e.get("fecha")
+        e["nivel_horas"] = e.get("horas")
+        e["caudal"] = None
+        e["caudal_fecha"] = None
+        e["caudal_horas"] = None
+        aplicar_qc_estacion(e, previas_estacion.get(str(e["id"])), ahora)
+    disponibles = {
+        "dinagua_wfs": bool(catalogo),
+        "salto_grande": bool(salto),
+        "inumet_lluvia": bool(lluvia_inumet),
+        "inia_lluvia": bool(lluvia_inia),
+        "ina": bool(ina),
+        "ute_rio_negro": bool(ute),
+        "ana": bool(ana),
+        "sohma": bool(sohma),
+        "caru": None,
     }
+    observaciones = {
+        "dinagua_wfs": fecha_mas_reciente(
+            (c.get(k) for c in catalogo.values()
+             for k in ("ultima_fecha", "ultima_caudal_fecha")), ahora),
+        "salto_grande": salto.get("fecha") if salto else None,
+        "inumet_lluvia": lluvia_inumet.get("hasta") if lluvia_inumet else None,
+        "inia_lluvia": fecha_mas_reciente(
+            (e.get("fecha") for e in lluvia_inia or []), ahora),
+        "ina": fecha_mas_reciente(
+            (e.get("nivel_fecha") for e in (ina or {}).get("estaciones", [])), ahora),
+        "ute_rio_negro": ute.get("actualizado") if ute else None,
+        "ana": fecha_mas_reciente(
+            (e.get("fecha") for e in (ana or {}).get("estaciones", [])), ahora),
+        "sohma": fecha_mas_reciente(
+            (e.get("fecha") for e in (sohma or {}).get("estaciones", [])), ahora),
+        "caru": None,
+    }
+    fuentes_detalle = construir_fuentes_detalle(
+        disponibles, observaciones, ahora, estado_previo.get("fuentes_detalle")
+    )
+    fuentes = {k: v["estado"] for k, v in fuentes_detalle.items()}
 
     estaciones = []
     factores: dict[str, dict] = {}
@@ -482,6 +750,9 @@ def main() -> None:
             "nombre": p["nombre"],
             "curso": p["curso"],
             "tipo": p["tipo"],
+            "clasificacion": "observado",
+            "oficial": True,
+            "fuente": "Salto Grande (CTM)" if est_id == ID_SALTO_GRANDE else "DINAGUA",
             "lat": lat,
             "lon": lon,
             "q_medio": p["q_medio"],
@@ -494,8 +765,8 @@ def main() -> None:
         if est_id == ID_SALTO_GRANDE:
             if salto:
                 e["caudal"] = salto["total"]
-                e["caudal_fecha"] = salto["fecha_local"]
-                e["caudal_horas"] = 1.0
+                e["caudal_fecha"] = salto["fecha"]
+                e["caudal_horas"] = salto["horas"]
         elif est_id in catalogo:
             c = catalogo[est_id]
             e["nivel"] = c.get("ultimo_valor")
@@ -505,11 +776,8 @@ def main() -> None:
             e["caudal_fecha"] = c.get("ultima_caudal_fecha")
             e["caudal_horas"] = horas_desde(c.get("ultima_caudal_fecha"), ahora)
 
-        caudal_fresco = (
-            e["caudal"] is not None
-            and e["caudal_horas"] is not None
-            and e["caudal_horas"] <= FRESCURA_MAX_CAUDAL_H
-        )
+        aplicar_qc_estacion(e, previas_estacion.get(str(est_id)), ahora)
+        caudal_fresco = e["qc_caudal"]["apto_derivados"] is True
         if caudal_fresco and p["join_ok"] and p["q_medio"]:
             factor = e["caudal"] / p["q_medio"]
             e["factor"] = round(min(max(factor, FACTOR_CLAMP[0]), FACTOR_CLAMP[1]), 3)
@@ -526,6 +794,14 @@ def main() -> None:
                     "factor": e["factor"],
                     "estacion": p["nombre"],
                     "area_km2": p["area_km2"] or 0,
+                    "clasificacion": "estimado",
+                    "insumo_clasificacion": "observado",
+                    "oficial": True,
+                    "fecha_insumo": e["caudal_fecha"],
+                    "antiguedad_h": round(e["caudal_horas"], 1),
+                    "alcance": "curso completo por nombre",
+                    "incertidumbre": "no cuantificada; escala visual",
+                    "qc_version": QC_VERSION,
                 }
 
     # Palmar como pseudo-estación: el erogado previsto para hoy manda sobre el
@@ -534,14 +810,17 @@ def main() -> None:
     if ute and ute["dias"]:
         erogado = ute["dias"][0].get("erogado_palmar")
         horas_ute = horas_desde(ute.get("actualizado"), ahora)
-        if erogado and horas_ute is not None and horas_ute <= FRESCURA_MAX_CAUDAL_H:
+        if erogado is not None:
             factor = round(min(max(erogado / Q_MEDIO_PALMAR, FACTOR_CLAMP[0]),
                                FACTOR_CLAMP[1]), 3)
-            estaciones.append({
+            estacion_palmar = {
                 "id": ID_PALMAR,
                 "nombre": "Palmar — erogado previsto (UTE)",
                 "curso": "Río Negro",
                 "tipo": "erogado_previsto",
+                "clasificacion": "pronosticado",
+                "oficial": True,
+                "fuente": "UTE",
                 "lat": COORDS_PALMAR[0],
                 "lon": COORDS_PALMAR[1],
                 "q_medio": Q_MEDIO_PALMAR,
@@ -550,21 +829,48 @@ def main() -> None:
                 "caudal": erogado,
                 "caudal_fecha": ute.get("actualizado"),
                 "caudal_horas": round(horas_ute, 1),
-                "factor": factor,
-            })
+                "valido_para": ute["dias"][0].get("fecha"),
+                "horizonte": "día 1 de una previsión a 7 días",
+                "probabilidad": None,
+                "incertidumbre": "no publicada por UTE",
+                "factor": None,
+            }
+            aplicar_qc_estacion(
+                estacion_palmar,
+                previas_estacion.get(str(ID_PALMAR)),
+                ahora,
+                continuidad_nivel=False,
+            )
+            if estacion_palmar["qc_caudal"]["apto_derivados"] is True:
+                estacion_palmar["factor"] = factor
+            estaciones.append(estacion_palmar)
             previa = factores.get("Río Negro")
-            if previa is None or AREA_PALMAR_KM2 > previa["area_km2"]:
+            if (
+                estacion_palmar["factor"] is not None
+                and (previa is None or AREA_PALMAR_KM2 > previa["area_km2"])
+            ):
                 factores["Río Negro"] = {
                     "factor": factor,
                     "estacion": "Palmar — erogado previsto (UTE)",
                     "area_km2": AREA_PALMAR_KM2,
+                    "clasificacion": "estimado",
+                    "insumo_clasificacion": "pronosticado",
+                    "oficial": True,
+                    "fecha_insumo": ute.get("actualizado"),
+                    "valido_para": ute["dias"][0].get("fecha"),
+                    "antiguedad_h": round(horas_ute, 1),
+                    "horizonte": "día 1 de una previsión a 7 días",
+                    "probabilidad": None,
+                    "alcance": "curso completo por nombre",
+                    "incertidumbre": "no publicada por UTE; escala visual",
+                    "qc_version": QC_VERSION,
                 }
 
     # Caudal ANA fresco -> factor del curso compartido (misma regla: gana la
     # estación de mayor cuenca).
     if ana:
         for e in ana["estaciones"]:
-            if not e["caudal"] or e["horas"] > FRESCURA_MAX_CAUDAL_H:
+            if e["qc_caudal"]["apto_derivados"] is not True:
                 continue
             factor = round(min(max(e["caudal"] / e["q_medio"], FACTOR_CLAMP[0]),
                                FACTOR_CLAMP[1]), 3)
@@ -575,41 +881,40 @@ def main() -> None:
                     "factor": factor,
                     "estacion": e["nombre"],
                     "area_km2": e["area_km2"],
+                    "clasificacion": "estimado",
+                    "insumo_clasificacion": "observado",
+                    "oficial": True,
+                    "fecha_insumo": e["fecha"],
+                    "antiguedad_h": e["horas"],
+                    "alcance": "curso completo por nombre",
+                    "incertidumbre": "no cuantificada; escala visual",
+                    "qc_version": QC_VERSION,
                 }
 
-    # Activación de manchas: nivel actual vs umbrales por datum oficial
-    # (cota_oficial - cota_cero; incertidumbre ~±1 m, ver analizar_datum.py).
-    por_id = {e["id"]: e for e in estaciones}
-    activacion = {}
+    # Activación fail-closed: una localidad solo entra si analizar_datum.py la
+    # marcó explícitamente con datum Y relación hidráulica validados.
     umbrales_loc = json.loads(ACTIVACION.read_text(encoding="utf-8")) if ACTIVACION.exists() else {}
-    for cod, cfg in umbrales_loc.items():
-        e = por_id.get(cfg["estacion_id"])
-        if not e or e["nivel"] is None or e["nivel_horas"] is None:
-            continue
-        if e["nivel_horas"] > FRESCURA_MAX_ACTIVACION_H:
-            continue
-        nivel = e["nivel"]
-        activos = [u for u in cfg["umbrales"] if nivel >= u["nivel"]]
-        proximos = [u for u in cfg["umbrales"] if nivel < u["nivel"]]
-        entrada = {
-            "estacion": cfg["estacion"],
-            "nivel": nivel,
-            "nivel_horas": round(e["nivel_horas"], 1),
-            "periodo_activo": max((u["periodo"] for u in activos), default=0),
-        }
-        if proximos:
-            u = min(proximos, key=lambda x: x["nivel"])
-            entrada["proximo"] = {"periodo": u["periodo"],
-                                  "faltan_m": round(u["nivel"] - nivel, 2)}
-        activacion[cod] = entrada
+    activacion, cobertura_activacion = evaluar_activacion(umbrales_loc, estaciones)
+    cobertura_activacion["fuente_disponible"] = fuentes.get("dinagua_wfs") == "ok"
+
+    todas_estaciones = list(estaciones)
+    for fuente in (ina, ana, sohma):
+        todas_estaciones.extend((fuente or {}).get("estaciones", []))
+    control_calidad = construir_resumen(todas_estaciones)
 
     estado = {
+        "schema_version": 3,
         "generado": ahora.isoformat(timespec="seconds"),
         "fuentes": fuentes,
+        "fuentes_detalle": fuentes_detalle,
         "estaciones": estaciones,
-        "factores_curso": {k: {"factor": v["factor"], "estacion": v["estacion"]}
-                           for k, v in factores.items()},
+        "factores_curso": {
+            k: {campo: valor for campo, valor in v.items() if campo != "area_km2"}
+            for k, v in factores.items()
+        },
         "activacion": activacion,
+        "activacion_cobertura": cobertura_activacion,
+        "control_calidad": control_calidad,
         "lluvia": lluvia,
         "salto_grande": salto,
         "ina": ina,
