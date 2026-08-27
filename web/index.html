@@ -372,6 +372,85 @@
     .maplibregl-popup.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip { border-top-color: #0d1a25; }
     .maplibregl-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: #0d1a25; }
     .maplibregl-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: #0d1a25; }
+    #estacion {
+      position: absolute; z-index: 12; left: 0; top: 0; bottom: 0; width: 380px;
+      overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2c4257 transparent;
+      padding: 12px 16px 28px;
+      font: 13px/1.5 system-ui, -apple-system, sans-serif; color: #cfe0ee;
+      background: rgba(8, 16, 24, 0.96); border-right: 1px solid #223344;
+      backdrop-filter: blur(6px);
+    }
+    #estacion[hidden] { display: none; }
+    #estacion .cabecera-panel { display: flex; justify-content: space-between; gap: 8px; }
+    #estacion button {
+      padding: 4px 9px; font: inherit; font-size: 11.5px; color: #8fc6ec;
+      background: #16283a; border: 1px solid #2c4a66; border-radius: 5px; cursor: pointer;
+    }
+    #estacion button:hover { background: #1d3548; }
+    #estacion .identidad { margin: 12px 0 4px; }
+    #estacion h2 { margin: 0; font: 700 21px/1.2 "Bricolage Grotesque", system-ui, sans-serif; color: #eaf4fd; }
+    #estacion .curso { margin: 2px 0 0; font-size: 14px; color: #8fc6ec; }
+    #estacion .origen { margin: 6px 0 0; font-size: 12px; color: #a9c0d4; }
+    #estacion .coords { margin: 4px 0 0; font-size: 11px; }
+    #estacion .frescura { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; flex-wrap: wrap; }
+    #estacion .q { color: #8fa8bd; font-size: 11.5px; }
+    #estacion .chip {
+      padding: 2px 7px; font-size: 11px; border-radius: 20px; border: 1px solid;
+    }
+    #estacion .chip.ok { background: #122a1e; border-color: #24513a; color: #5ad18a; }
+    #estacion .chip.vencido { background: #1a2530; border-color: #2c4257; color: #8fa8bd; }
+    #estacion .chip.dudoso { background: #302914; border-color: #665722; color: #e8c95a; }
+    #estacion .chip.rechazado { background: #321b1e; border-color: #66343a; color: #ff9a9a; }
+    #estacion .bloque { margin-top: 20px; border-top: 1px solid #1b2c3c; padding-top: 12px; }
+    #estacion .bloque h3 {
+      margin: 0 0 9px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #6a86a1;
+    }
+    #estacion .datos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+    #estacion .dato { min-width: 0; }
+    #estacion .dato .rot { display: block; font-size: 11px; color: #8fa8bd; }
+    #estacion .dato .val { display: block; font-size: 19px; color: #eaf4fd; font-variant-numeric: tabular-nums; }
+    #estacion .dato .val em { font-style: normal; font-size: 12px; color: #8fa8bd; }
+    #estacion .dato .nota { display: block; font-size: 11px; color: #6a86a1; }
+    #estacion .par { margin-bottom: 8px; }
+    #estacion .par .etq {
+      margin: 0; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: #6a86a1;
+    }
+    #estacion .par ul { margin: 2px 0 0; padding-left: 16px; }
+    #estacion .aclara { margin: 9px 0 0; font-size: 11px; line-height: 1.45; color: #7f97ab; }
+    #estacion .vacio { margin: 0; font-size: 12.5px; color: #a9c0d4; }
+    #estacion .aviso { margin: 9px 0 0; font-size: 11.5px; color: #e8c95a; }
+    #estacion .bloque.pendiente { opacity: 0.85; }
+    #estacion .variables { display: flex; gap: 6px; margin-bottom: 8px; }
+    #estacion .variables .sel { background: #2c4a66; border-color: #4a7096; color: #eaf4fd; }
+    #estacion .lienzo { min-height: 40px; }
+    #estacion .descargar { margin-top: 10px; }
+    #estacion a { color: #8fc6ec; }
+    #estacion .lectura {
+      margin: 4px 0 0; min-height: 1.2em; font-size: 11.5px; color: #a9c0d4;
+      font-variant-numeric: tabular-nums;
+    }
+    #estacion .sin-serie { margin: 0; font-size: 12px; color: #7f97ab; }
+    .grafico { display: block; width: 100%; height: auto; overflow: visible; }
+    .grafico .rejilla { stroke: #1b2c3c; stroke-width: 1; }
+    .grafico .rotulo-y, .grafico .rotulo-x { fill: #6a86a1; font-size: 10px; }
+    .grafico .rotulo-y { text-anchor: end; }
+    .grafico .linea { fill: none; stroke: #6ea8d8; stroke-width: 1.6; stroke-linejoin: round; }
+    .grafico .punto { fill: #8fc6ec; }
+    .grafico .suelto { fill: #8fc6ec; }
+    /* un hueco se nota sin taparlo: no hubo observaciones, no es un dato cero */
+    .grafico .hueco { fill: #8fa8bd; opacity: 0.05; }
+    .grafico .borde-hueco { stroke: #2c4257; stroke-width: 1; stroke-dasharray: 2 3; }
+    .grafico .marca { stroke: #66343a; stroke-width: 1; stroke-dasharray: 3 3; }
+    .grafico .marca.referencia { stroke: #3f5f45; }
+    .grafico .rotulo-marca { fill: #a06a70; font-size: 9.5px; text-anchor: end; }
+    .grafico .rotulo-marca.referencia { fill: #6d9478; }
+    .grafico .cursor { stroke: #4a7096; stroke-width: 1; }
+    .grafico .cursor-punto { fill: #7ef0d8; }
+    @media (max-width: 720px) {
+      #estacion { width: auto; right: 0; border-right: none; }
+    }
+
     /* .panel usa backdrop-filter, que crea contexto de apilamiento: sin esto
        los paneles siguientes recortarían la lista de resultados. */
     #titulo { position: relative; z-index: 3; }
@@ -454,6 +533,7 @@
 </head>
 <body>
   <div id="map"></div>
+  <aside id="estacion" hidden></aside>
   <div id="columna">
     <div id="titulo" class="panel">
       <h1>Cauce <span class="tagline">ríos del Uruguay</span>

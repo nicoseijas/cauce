@@ -22,6 +22,7 @@ import {
 import { setupCreciente } from "./creciente";
 import { setupTabla } from "./tabla";
 import { setupBuscador, type Entidad } from "./buscador";
+import { montarPanelEstacion } from "./estacion";
 import {
   construirIndice,
   crearEnrutador,
@@ -460,9 +461,9 @@ function popupEstacion(e: EstacionPopup): string {
   if (e.incertidumbre) filas.push(`<span class="aclara">Incertidumbre: ${e.incertidumbre}</span>`);
   if (e.slug) {
     filas.push(
+      `<button type="button" class="ver-estacion" data-slug="${e.slug}">Ver estación →</button>` +
       `<button type="button" class="copiar-enlace" ` +
-      `data-enlace="${urlAbsoluta({ vista: "estacion", slug: e.slug })}">` +
-      `Copiar enlace a esta estación</button>`,
+      `data-enlace="${urlAbsoluta({ vista: "estacion", slug: e.slug })}">Copiar enlace</button>`,
     );
   }
   return filas.join("<br>");
@@ -471,6 +472,11 @@ function popupEstacion(e: EstacionPopup): string {
 // El popup reescribe su HTML cuando llega el minigráfico, así que el clic se
 // atiende por delegación en lugar de sobre el botón concreto.
 addEventListener("click", (ev) => {
+  const verEstacion = (ev.target as HTMLElement | null)?.closest<HTMLElement>(".ver-estacion");
+  if (verEstacion?.dataset.slug) {
+    irAEstacion(verEstacion.dataset.slug);
+    return;
+  }
   const boton = (ev.target as HTMLElement | null)?.closest<HTMLButtonElement>(
     ".copiar-enlace",
   );
@@ -788,9 +794,7 @@ map.on("load", async () => {
       if (map.queryRenderedFeatures(ev.point, { layers: ["represas"] }).length) return;
       const f = ev.features?.[0];
       if (!f) return;
-      const props = f.properties as unknown as EstacionPopup;
-      if (props.slug) irAEstacion(props.slug);
-      else void abrirPopupEstacion(ev.lngLat, props);
+      void abrirPopupEstacion(ev.lngLat, f.properties as unknown as EstacionPopup);
     });
     map.on("mouseenter", "estaciones", () => {
       map.getCanvas().style.cursor = "pointer";
@@ -838,23 +842,47 @@ map.on("load", async () => {
     const indice = construirIndice(filas);
     const porSlug = new Map(filas.map((f) => [f.slug, f]));
 
-    // El popup es la vista de estación de este paso; al cerrarlo la URL vuelve
-    // al mapa, salvo que el cierre lo haya provocado otra navegación.
+    const panel = document.getElementById("estacion")!;
     let slugAbierto: string | null = null;
+    // El catálogo alimenta el bloque de procedencia; llega diferido porque solo
+    // hace falta al abrir una estación.
+    let catalogo: Promise<Record<string, unknown> | null> | null = null;
+
     const mostrar = (fila: FilaEstacion) => {
       slugAbierto = fila.slug;
-      map.flyTo({ center: [fila.lon, fila.lat], zoom: Math.max(map.getZoom(), 9) });
-      void abrirPopupEstacion([fila.lon, fila.lat], popupDesdeFila(fila), () => {
-        if (slugAbierto === fila.slug) {
-          slugAbierto = null;
-          enrutador.sustituir({ vista: "mapa" });
-        }
+      popupAbierto?.remove();
+      map.flyTo({
+        center: [fila.lon, fila.lat],
+        zoom: Math.max(map.getZoom(), 9),
+        padding: { left: panel.offsetWidth, top: 0, right: 0, bottom: 0 },
       });
+      catalogo ??= fetch(`${BASE}data/datapackage.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+      void Promise.all([cargarSeries(`${BASE}data/series.json`), catalogo])
+        .then(([series, cat]) => {
+          if (slugAbierto !== fila.slug) return;
+          panel.hidden = false;
+          montarPanelEstacion({
+            contenedor: panel,
+            fila,
+            estado: estadoCargado,
+            series,
+            catalogo: cat as never,
+            alCerrar: () => enrutador.ir({ vista: "mapa" }),
+          });
+        });
+    };
+
+    const ocultarPanel = () => {
+      slugAbierto = null;
+      panel.hidden = true;
+      panel.innerHTML = "";
     };
 
     const enrutador = crearEnrutador((ruta) => {
       if (ruta.vista === "mapa") {
-        slugAbierto = null;
+        ocultarPanel();
         return;
       }
       const canonico = resolver(indice, ruta.slug);

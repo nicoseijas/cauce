@@ -167,6 +167,14 @@ declarado de organismos, de modo que agregar una estación nueva no reasigne
 los slugs ya publicados. El `estacion_id` funciona como enlace alternativo y
 redirige al slug vigente.
 
+La página de estación (`web/src/estacion.ts`) se arma en el cliente desde
+`estado_actual.json`, `series.json` y `datapackage.json`. Ese último alimenta
+el bloque de procedencia: la ficha cita el mismo catálogo que se publica como
+producto de datos, en lugar de repetir la metadata en el código. El gráfico
+(`web/src/grafico.ts`) corta la línea donde no hubo observaciones, detectando
+el hueco contra la mediana de intervalos de la propia serie para no depender de
+la frecuencia nominal, que varía entre organismos.
+
 El buscador global usa un índice propio (`pipeline/build_buscador.py`) en vez
 de leer las capas del mapa: la red pesa dos órdenes de magnitud más que el
 índice y solo se necesitaría para leer nombres. El índice se descarga al

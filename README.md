@@ -74,6 +74,27 @@ npm run dev        # desarrollo
 npm run build      # producción (dist/)
 ```
 
+## Página de estación
+
+Cada enlace permanente abre una ficha de la estación junto al mapa, ordenada de
+lo comprensible a lo verificable:
+
+| Bloque | Responde |
+|---|---|
+| Identidad | qué estación es, de qué organismo, cuándo observó por última vez |
+| Ahora | nivel, cambio de nivel, caudal y relación con su caudal de referencia |
+| Interpretación | separa lo observado de lo que Cauce concluye de ello |
+| Evolución | la serie acumulada, con los huecos a la vista y descarga en CSV |
+| Umbrales | los que publica la fuente, en la escala local de la estación |
+| Contexto histórico | hoy declara por qué todavía no puede responder |
+| Calidad y cobertura | estado del control automático y sus límites |
+| Procedencia | organismo, identificadores, licencia y referencia vertical |
+
+Los bloques sin datos no se rellenan con marcadores: se omiten o dicen qué
+falta. El gráfico no une los tramos sin observaciones, y el cambio de nivel
+declara el lapso real entre las dos observaciones que compara, que no siempre
+son 24 h exactas.
+
 ## Buscador
 
 El campo de la cabecera busca a la vez entre estaciones, cursos de agua,

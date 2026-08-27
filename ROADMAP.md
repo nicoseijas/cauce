@@ -218,6 +218,14 @@ hay dato de estación fresco, cuál está activa hoy.
       `pipeline/build_buscador.py` con estaciones, cursos, localidades,
       departamentos y represas; coincidencia sin diacríticos, agrupada por
       tipo y con carga diferida. Verificado en Chrome. ✔
+- [x] Página de estación v1 (2026-08-27, paso 3 del Roadmap V2): panel lateral
+      con identidad, estado actual, interpretación separada de la observación,
+      gráfico con huecos explícitos, umbrales de la fuente, calidad y
+      procedencia leída del catálogo publicado; CSV por estación. El popup del
+      mapa pasa a ser un paso intermedio con «Ver estación →». Verificado en
+      Chrome. ✔
+- [ ] Contexto histórico de la estación: depende de publicar 2017–2019
+      (paso 4 del V2); hoy el bloque declara por qué no puede responder.
 - [ ] Detalle 1:10.000 de IDEuy en zooms altos (solo estética).
 - [ ] Pedir a `dinagua.servicios@ambiente.gub.uy` acceso a series/curvas de
       gasto; si llegan, reemplazar la heurística de escala por conversión
