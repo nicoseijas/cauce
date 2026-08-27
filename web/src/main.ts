@@ -21,6 +21,7 @@ import {
 } from "./estado";
 import { setupCreciente } from "./creciente";
 import { setupTabla } from "./tabla";
+import { setupBuscador, type Entidad } from "./buscador";
 import {
   construirIndice,
   crearEnrutador,
@@ -868,6 +869,31 @@ map.on("load", async () => {
     irAEstacion = (slug) => enrutador.ir({ vista: "estacion", slug });
 
     setupTabla(estadoCargado, BASE, vigente, filas, (fila) => irAEstacion(fila.slug));
+
+    // Una estación tiene URL propia; el resto de las entidades todavía no,
+    // así que el buscador las resuelve encuadrando el mapa.
+    const buscar = document.getElementById("buscar") as HTMLInputElement | null;
+    const resultados = document.getElementById("buscar-resultados");
+    if (buscar && resultados) {
+      setupBuscador({
+        entrada: buscar,
+        panel: resultados,
+        urlIndice: `${BASE}data/buscador.json`,
+        alElegir: (entidad: Entidad) => {
+          if (entidad.tipo === "estacion" && entidad.slug) {
+            irAEstacion(entidad.slug);
+            return;
+          }
+          if (entidad.bbox) {
+            const [oeste, sur, este, norte] = entidad.bbox;
+            map.fitBounds([[oeste, sur], [este, norte]], { padding: 60, maxZoom: 11 });
+            return;
+          }
+          const zoom = entidad.tipo === "departamento" ? 8 : 11;
+          map.flyTo({ center: [entidad.lon, entidad.lat], zoom });
+        },
+      });
+    }
 
     recuperarRutaDiferida();
     const inicial = interpretar();

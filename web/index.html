@@ -372,6 +372,38 @@
     .maplibregl-popup.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip { border-top-color: #0d1a25; }
     .maplibregl-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: #0d1a25; }
     .maplibregl-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: #0d1a25; }
+    /* .panel usa backdrop-filter, que crea contexto de apilamiento: sin esto
+       los paneles siguientes recortarían la lista de resultados. */
+    #titulo { position: relative; z-index: 3; }
+    #buscador { position: relative; margin: 8px 0 0; }
+    #buscar {
+      width: 100%; box-sizing: border-box; padding: 6px 9px;
+      font: inherit; font-size: 12.5px; color: #eaf4fd;
+      background: #10202e; border: 1px solid #2c4a66; border-radius: 6px;
+    }
+    #buscar::placeholder { color: #6a86a1; }
+    #buscar:focus { outline: none; border-color: #4a7096; }
+    #buscar-resultados {
+      position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 4px);
+      max-height: 320px; overflow-y: auto;
+      background: #0e1b27; border: 1px solid #2c4a66; border-radius: 6px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    }
+    #buscar-resultados[hidden] { display: none; }
+    #buscar-resultados .grupo {
+      margin: 0; padding: 6px 9px 2px; font-size: 10.5px; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #6a86a1;
+    }
+    #buscar-resultados button {
+      display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
+      width: 100%; padding: 5px 9px; font: inherit; font-size: 12.5px; text-align: left;
+      color: #eaf4fd; background: none; border: none; cursor: pointer;
+    }
+    #buscar-resultados button:hover, #buscar-resultados button.activo { background: #1d3548; }
+    #buscar-resultados button mark { background: none; color: #8fc6ec; font-weight: 600; }
+    #buscar-resultados .nom { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #buscar-resultados .ctx { flex: none; font-size: 11px; color: #8fa8bd; }
+    #buscar-resultados .vacio { margin: 0; padding: 8px 9px; font-size: 12px; color: #8fa8bd; }
     .maplibregl-popup-content .copiar-enlace {
       margin-top: 7px; padding: 3px 7px; font: inherit; font-size: 11px;
       color: #8fc6ec; background: #16283a; border: 1px solid #2c4a66;
@@ -428,6 +460,12 @@
         <span id="envivo"><i></i><span id="estado-badge-text">ESTADO</span></span></h1>
       <p id="titulo-estado">Caudal medio de largo plazo. Ancho, brillo y velocidad
          proporcionales al caudal (escala logarítmica).</p>
+      <div id="buscador">
+        <input type="search" id="buscar" autocomplete="off" role="combobox"
+               aria-expanded="false" aria-controls="buscar-resultados"
+               placeholder="Buscar río, estación o localidad…" />
+        <div id="buscar-resultados" role="listbox" hidden></div>
+      </div>
       <p id="descargo"><b>No es un servicio oficial de alertas.</b>
         <button type="button" class="enlace" id="btn-acerca">Acerca de, fuentes y a quién acudir</button></p>
       <p id="enlaces"><button type="button" class="enlace" id="btn-tabla" style="display:none">Ver los datos en una tabla</button></p>

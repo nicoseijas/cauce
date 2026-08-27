@@ -167,6 +167,13 @@ declarado de organismos, de modo que agregar una estación nueva no reasigne
 los slugs ya publicados. El `estacion_id` funciona como enlace alternativo y
 redirige al slug vigente.
 
+El buscador global usa un índice propio (`pipeline/build_buscador.py`) en vez
+de leer las capas del mapa: la red pesa dos órdenes de magnitud más que el
+índice y solo se necesitaría para leer nombres. El índice se descarga al
+primer uso. Las estaciones se resuelven navegando a su URL; las demás
+entidades encuadran el mapa, y los cursos traen envolvente porque un río no
+se ve en un punto.
+
 El enrutado usa la History API. GitHub Pages no reescribe rutas: sirve
 `public/404.html` ante cualquier ruta que no sea un archivo. Ese documento
 guarda la ruta pedida en `sessionStorage` y devuelve el control al índice, que

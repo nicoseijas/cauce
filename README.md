@@ -74,6 +74,21 @@ npm run dev        # desarrollo
 npm run build      # producción (dist/)
 ```
 
+## Buscador
+
+El campo de la cabecera busca a la vez entre estaciones, cursos de agua,
+localidades, departamentos y represas, sin que haga falta saber de antemano
+qué clase de cosa se está buscando. Escribir «durazno» devuelve las dos
+estaciones sobre el Río Yí, el Ao. Del Durazno, la ciudad y el departamento,
+cada uno bajo su rótulo.
+
+Ignora los acentos en ambos sentidos: «rio yi» encuentra «Río Yí». Elegir una
+estación abre su enlace permanente; el resto de las entidades encuadra el
+mapa, y en el caso de un curso lo hace sobre su extensión completa.
+
+El índice (`buscador.json`, 1.264 entidades) se descarga al usar el buscador
+por primera vez, no al abrir el sitio.
+
 ## Enlaces permanentes
 
 Cada estación tiene una URL propia que se puede compartir, citar o guardar:

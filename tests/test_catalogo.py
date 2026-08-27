@@ -120,7 +120,15 @@ class JsonContractTests(unittest.TestCase):
         catalog_bytes, checksum_bytes = build_outputs()
         catalog = json.loads(catalog_bytes)
         self.assertEqual(catalog["profile"], "data-package")
-        self.assertEqual(len(catalog["resources"]), 16)
+        # Contra el catálogo base, no contra un número fijo: agregar un producto
+        # de datos no debería romper esta prueba, pero publicarlo sin declarar
+        # su procedencia sí.
+        declarados = load_json_strict(
+            ROOT / "data" / "referencia" / "catalogo_base.json"
+        )["resources"]
+        self.assertEqual(
+            sorted(r["path"] for r in catalog["resources"]), sorted(declarados)
+        )
         state = next(resource for resource in catalog["resources"] if resource["path"] == "estado_actual.json")
         self.assertIn("incluidas vencidas o rechazadas", state["temporal"]["scope"])
         self.assertIn("usable_temporal", state)

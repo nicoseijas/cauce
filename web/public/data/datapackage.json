@@ -13,7 +13,7 @@
     "inundación",
     "GeoJSON"
   ],
-  "created": "2026-08-27T14:00:51Z",
+  "created": "2026-08-27T14:22:41Z",
   "metadata_schema_version": 1,
   "licenses": [
     {
@@ -467,6 +467,71 @@
           -30.21291
         ]
       }
+    },
+    {
+      "name": "buscador",
+      "path": "buscador.json",
+      "profile": "data-resource",
+      "format": "json",
+      "mediatype": "application/json",
+      "bytes": 163745,
+      "hash": "sha256:d85c4b29cdebb681fcc9ebfd9b364528786cd8732ca99d5c3e339988d26909e8",
+      "title": "Índice de búsqueda de entidades",
+      "description": "Estaciones, cursos, localidades, departamentos y represas con su nombre y dónde encuadrarlos en el mapa. Sirve para navegar, no para analizar: no contiene mediciones.",
+      "sources": [
+        "dinagua_wfs",
+        "hydrorivers",
+        "natural_earth",
+        "cauce"
+      ],
+      "pipeline": "pipeline/build_buscador.py",
+      "classification": [
+        "derivado"
+      ],
+      "update_frequency": "cada 2 horas, junto con el estado",
+      "horizontal_crs": "OGC:CRS84",
+      "limitations": [
+        "Los topónimos de localidad provienen de la capa de amenazas, que los publica en mayúsculas y sin diacríticos; se recomponen para mostrarlos y no se les restituyen los acentos que la fuente no trae.",
+        "La envolvente de un curso agrupa los tramos que comparten nombre; nombres homónimos en cuencas distintas quedarían unidos.",
+        "Las represas son una lista fija de cuatro obras, no un inventario."
+      ],
+      "schema": {
+        "fields": [
+          {
+            "name": "entidades",
+            "type": "array",
+            "nullable": false,
+            "observed_types": [
+              "array"
+            ]
+          },
+          {
+            "name": "generado",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "nota",
+            "type": "string",
+            "nullable": false,
+            "observed_types": [
+              "string"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "integer",
+            "nullable": false,
+            "observed_types": [
+              "integer"
+            ]
+          }
+        ]
+      },
+      "record_count": 4
     },
     {
       "name": "capitales",

@@ -214,7 +214,10 @@ hay dato de estación fresco, cuál está activa hoy.
       slug vigente. Verificado en Chrome sobre un servidor que emula el
       comportamiento de GitHub Pages. ✔
 - [ ] Permalinks por río; requiere antes la entidad de río (Fase 5G del V2).
-- [ ] Buscador global de ríos, estaciones y localidades (paso 2 del V2).
+- [x] Buscador global (2026-08-27, paso 2 del Roadmap V2): índice propio en
+      `pipeline/build_buscador.py` con estaciones, cursos, localidades,
+      departamentos y represas; coincidencia sin diacríticos, agrupada por
+      tipo y con carga diferida. Verificado en Chrome. ✔
 - [ ] Detalle 1:10.000 de IDEuy en zooms altos (solo estética).
 - [ ] Pedir a `dinagua.servicios@ambiente.gub.uy` acceso a series/curvas de
       gasto; si llegan, reemplazar la heurística de escala por conversión
