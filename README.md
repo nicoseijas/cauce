@@ -5,8 +5,8 @@ ancho, color y animación proporcionales a su caudal, al estilo de
 [River Flow Map USA](https://norway-charts.netlify.app/river_flow_map_usa/).
 Incluye datos en vivo de 8 fuentes (DINAGUA, INUMET, INIA, Salto Grande, UTE,
 INA Argentina, ANA Brasil, SOHMA), modo creciente con manchas oficiales de
-inundación y activación automática por nivel de estación, y previsión a 7 días
-en la cuenca del río Negro.
+inundación, una compuerta de activación por nivel actualmente deshabilitada, y
+previsión a 7 días en la cuenca del río Negro.
 
 ## Aviso
 
@@ -19,47 +19,112 @@ de cada departamento.
 
 Limitaciones conocidas de los datos derivados:
 
-- La activación de manchas usa un umbral **aproximado (±1 m)**, obtenido al
-  convertir la cota del estudio al cero de la estación, y no está validada
-  contra eventos históricos.
+- La activación automática de manchas está **deshabilitada por defecto**. Las
+  19 localidades candidatas conservan sus escenarios oficiales manuales, pero
+  ninguna se marca «activa ahora» hasta validar tanto el datum como la relación
+  hidráulica estación→localidad.
 - El factor «× la media» es una escala de visualización, no una estimación
   hidrológica: un caudal medido escala el curso entero, sin tiempo de tránsito
-  ni afluentes, contra la media modelada de HydroRIVERS.
+  ni afluentes. El mapa lo rotula como estimado y declara si el insumo fue
+  observado o pronosticado.
+- Cada nivel y caudal publica una bandera QC. Los valores futuros, no finitos o
+  fuera del rango físico operativo se rechazan; un salto de nivel >1 m entre
+  lecturas separadas ≤2 h queda dudoso. Ninguno se usa en factores ni
+  activaciones. El valor original no se corrige ni se elimina del snapshot.
 - Los umbrales de lluvia (50 mm/24 h, 100 mm/72 h) son fijos: no consideran
   humedad antecedente ni tamaño de cuenca.
 - Solo hay manchas donde existe estudio oficial. Fuera de esas ciudades, la
   ausencia de mancha no implica ausencia de riesgo.
-- La validación retrospectiva sobre 2019 (`pipeline/validar_activacion.py`)
-  da 4 aciertos y 1 fallo en 5 eventos con umbral y serie histórica. En
-  Aguas Corrientes los umbrales de 100 años y de creciente extrema están a
-  0,23 m, menos que la incertidumbre del propio umbral; en 25 de Agosto el
-  único umbral utilizable es el extremo, y un evento real no lo activó.
+- La validación retrospectiva 2017–2019 registra 10 eventos candidatos: 5 no
+  tienen cobertura y 5 poseen un hidrograma completo; en estos últimos la
+  regla coincide 4 veces y omite 1. Es evidencia exploratoria, no desempeño
+  operativo: faltan eventos negativos exhaustivos, datum confirmado y
+  relación hidráulica validada. El dictamen público mantiene 0 localidades
+  habilitables.
 
 ## Estado
 
-En vivo en <https://nicoseijas.github.io/cauce/>. Fases 0–4 del
-[ROADMAP](ROADMAP.md) completas: mapa animado con datos en vivo (cron cada
-2 h), modo creciente y vista de anomalía.
+Publicado en <https://nicoseijas.github.io/cauce/>. Fases 0–4 del
+[ROADMAP](ROADMAP.md) completas: mapa animado con actualización cada 2 h, modo
+creciente y vista de anomalía. La interfaz muestra «RECIENTE», «PARCIAL» o
+«VENCIDO» según la edad del archivo y el estado de cada fuente; si faltan datos
+no emite un resultado negativo de inundación.
 
 ## Desarrollo
 
 ```bash
 # pipeline de datos (Python)
-python -m venv .venv && .venv/Scripts/pip install geopandas pyogrio requests pandas
+python -m venv .venv && .venv/Scripts/pip install -r requirements.lock
 .venv/Scripts/python pipeline/descargar_capas.py   # capas WFS DINAGUA -> data/raw/
 .venv/Scripts/python pipeline/build_red.py         # red recortada -> data/processed/
 .venv/Scripts/python pipeline/build_climatologia.py  # caudal medio DINAGUA por tramo
 .venv/Scripts/python pipeline/build_estaciones.py  # mapping estación<->tramo
 .venv/Scripts/python pipeline/verificar_join.py    # chequeo estación<->tramo
 
-# validación retrospectiva de la activación de manchas (descarga ~50 MB de CKAN)
-.venv/Scripts/python pipeline/validar_activacion.py --anio 2019
+# pruebas de la compuerta de seguridad temporal/hidráulica
+.venv/Scripts/python -m unittest discover -s tests -v
+.venv/Scripts/python pipeline/build_catalogo.py --check
+
+# informe retrospectivo por evento y cuenca (descarga ~165 MB de CKAN la primera vez)
+.venv/Scripts/python pipeline/build_validacion_activacion.py
 
 # web (Vite + MapLibre)
 cd web && npm install
 npm run dev        # desarrollo
 npm run build      # producción (dist/)
 ```
+
+## Datos para investigación
+
+La interfaz publica los datos también en forma tabular: «Ver los datos en una
+tabla» abre tres hojas con búsqueda, filtro por fuente, orden por columna y
+exportación a CSV de lo que quede filtrado.
+
+| Hoja | Contenido |
+|---|---|
+| Estaciones | Última observación de las cuatro redes: nivel, caudal, caudal medio de referencia, antigüedad y bandera QC |
+| Histórico | Una fila por instante medido de la serie acumulada (45 días), unida por fecha de observación |
+| Lluvia | Acumulados de 24 y 72 h de INUMET e INIA |
+
+Cada fila enlaza con su estación en el mapa. El histórico se dibuja hasta 2.000
+filas por vez —el conteo declara cuántas quedaron fuera— y el CSV exporta la
+selección completa. La serie publicada excluye los valores que el control de
+calidad rechazó o dejó en duda; los snapshots de `data/historico/` los
+conservan con su bandera.
+
+El directorio `web/public/data/` es también un paquete de datos documentado:
+
+- [`datapackage.json`](web/public/data/datapackage.json) inventaría los 16
+  productos, sus fuentes, clasificación (observado, oficial, pronosticado o
+  estimado), licencia conocida, limitaciones, tamaño, hash, extensión espacial
+  o temporal y esquema observado.
+- [`checksums.sha256`](web/public/data/checksums.sha256) permite verificar que
+  los productos y los esquemas no fueron alterados. Desde `web/public/data/`,
+  ejecutar `sha256sum -c checksums.sha256`.
+- [`estado-v3.schema.json`](web/public/data/schema/estado-v3.schema.json)
+  documenta el contrato de `estado_actual.json`, incluidas las banderas de
+  calidad y la cobertura de activación.
+- [`validacion_activacion.json`](web/public/data/validacion_activacion.json) y
+  su [`esquema v1`](web/public/data/schema/validacion-activacion-v1.schema.json)
+  publican el análisis por evento completo y cuenca, los archivos fuente con
+  su hash, la cobertura faltante y todos los bloqueos de cada candidata.
+- [`catalogo_base.json`](data/referencia/catalogo_base.json) contiene los
+  metadatos humanos; `pipeline/build_catalogo.py` deriva conteos, extensiones y
+  hashes. CI exige que el catálogo se pueda reconstruir sin diferencias.
+
+Las geometrías se almacenan en **OGC:CRS84**, con orden longitud/latitud. El
+procesamiento métrico usa **EPSG:32721** cuando el recurso lo declara. Los
+niveles usan referencias verticales mixtas —incluidos ceros locales, Wharton y
+Ex Wharton— y no deben compararse entre estaciones sin una transformación
+vertical documentada. El catálogo declara resolución, fecha, procedencia y
+vacíos de cobertura por producto.
+
+Las 19 configuraciones candidatas se clasifican por mecanismo antes de
+evaluarlas: 15 fluviales, 2 costeras/estuarinas, 1 pluvial urbana y 1 mixta
+sin separar. Diecisiete tienen una estación superficial cercana y solo 14
+coinciden además con el curso. La asociación anterior de Salto con un
+piezómetro del acuífero Guaraní fue retirada: lluvia o nivel subterráneo no se
+usan como atajo para inferir una mancha.
 
 HydroRIVERS se descarga aparte (95 MB) a `data/raw/`:
 <https://data.hydrosheds.org/file/HydroRIVERS/HydroRIVERS_v10_sa_shp.zip>
@@ -92,11 +157,23 @@ combina tres niveles de datos:
 3. **Contexto**: precipitación horaria de INUMET (CKAN, actualización diaria).
 4. **Modo creciente**: manchas oficiales de inundación de DINAGUA por período
    de retorno (`curvas_tr`), inundaciones históricas registradas
-   (`curvas_cri`) y zonas urbanas con amenaza de drenaje, activables según el
-   nivel actual de las estaciones.
+   (`curvas_cri`) y zonas urbanas con amenaza de drenaje. Los escenarios son
+   manuales; la activación por nivel permanece cerrada hasta validar cada
+   relación estación→localidad.
 
 El frontend es un sitio estático (MapLibre GL + capa animada WebGL) alimentado
 por archivos generados por un pipeline Python programado (GitHub Actions).
+
+### Control de calidad hidrométrico
+
+`estado_actual.json` usa el esquema 3 y contiene `qc_nivel`/`qc_caudal` por
+estación, más un resumen reproducible en `control_calidad`. Los estados son
+`ok`, `vencido`, `dudoso`, `rechazado` y `sin_dato`. La referencia de
+continuidad solo avanza con una observación aceptada: nunca se desplaza una
+serie para acomodar un cambio de datum. Este QC es operativo; no sustituye la
+calibración del sensor, una curva de gasto ni la verificación del datum
+vertical, y no detecta derivas lentas ni cambios entre lecturas separadas por
+más de 2 h.
 
 ## Licencia y datos
 

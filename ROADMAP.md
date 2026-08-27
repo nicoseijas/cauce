@@ -148,13 +148,14 @@ extrema, usando los productos oficiales de DINAGUA (ver
       varias localidades (referencia local sin documentar) → incertidumbre
       declarada de ±1 m en la UI; confirmar el significado de `cota_local`
       con `dinagua.servicios@ambiente.gub.uy`. 19 localidades con umbrales
-      utilizables (`web/public/data/activacion.json`).
-- [x] Activación automática: `build_estado.py` compara el nivel fresco
-      (<48 h) de la estación asociada contra los umbrales y emite
-      `activacion` por localidad (mancha superada + margen a la siguiente).
-      El mapa pinta las manchas activas en rojo intenso, el popup antepone
-      "ACTIVA AHORA" y el panel resume ("Carmelo: a 0,74 m de su mancha de
-      10 años").
+      candidatos, ninguno habilitado automáticamente
+      (`web/public/data/activacion.json`).
+- [x] Compuerta de activación *fail-closed* (2026-08-21): `build_estado.py`
+      solo compara niveles de <24 h cuando la localidad tiene
+      `auto_habilitada=true`, datum aprobado y relación hidráulica validada.
+      Las configuraciones antiguas no habilitan nada por omisión. Resultado
+      actual: 19 localidades candidatas, 0 habilitadas automáticamente; los
+      escenarios oficiales manuales siguen visibles.
 - [ ] (Opcional/avanzado) Estimación HAND con MDT de IDEuy para zonas sin
       estudio oficial, siempre etiquetada como estimación propia. Elección
       de DEM, acondicionamiento y derivación de drenaje según la skill
@@ -230,19 +231,27 @@ Objetivo: pasar de "infraestructura de datos abierta" a producto con error
 declarado. Sale de la auditoría de 2026-08-21 (bloque B); los ítems de
 lenguaje y descargo de responsabilidad del bloque A ya están resueltos.
 
+- [x] Puerta de seguridad pública: estado global vencido a las 6 h, factores
+      descartados a las 48 h, activación descartada a las 24 h, fecha real de
+      Salto Grande, cobertura evaluada/configurada visible y estado por fuente
+      con última observación. La UI distingue observado, pronosticado y
+      estimado; nunca convierte falta de datos en «ninguna mancha superada».
+
 - [x] Validación retrospectiva de la activación de manchas contra `curvas_cri`
       (82 polígonos, `fecha_evento` de 1941 a 2025-07-03).
       **El bloqueo se levantó (2026-08-21):** DINAGUA publica en CKAN las
       lecturas horarias de nivel de 2017, 2018 y 2019
       (`ambiente-dinagua-mediciones-de-nivel-AAAA`, odc-uy, ~50 MB por año),
       que es la serie histórica de las estaciones uruguayas que el WFS no
-      sirve. `pipeline/validar_activacion.py` reproduce la regla del sitio día
-      a día sobre esos años y la contrasta con los eventos registrados.
-      Resultado sobre 2019, el único año con eventos y cobertura simultáneas:
+      sirve. `pipeline/build_validacion_activacion.py` publica un informe
+      reproducible con hashes de los tres CSV, partición por evento completo y
+      subcuenca, cobertura, criterios de completitud y bloqueos. Nunca divide
+      aleatoriamente lecturas de un mismo evento. Resultado 2017–2019: 10
+      eventos registrados, 5 sin cobertura y 5 con hidrograma completo:
   - **4 aciertos y 1 fallo** sobre 5 eventos con umbral y serie. Aciertos:
     Paysandú 2019-01-23 (pico 8,43 m → TR10), Florida 2019-06-16 (10,03 →
     TR10), Aguas Corrientes 2019-06-17 (11,48 → TR9999) y Santa Lucía
-    2019-06-18 (11,48 → TR100). Los tres hidrogramas se verificaron
+    2019-06-18 (11,48 → TR100). Los cinco hidrogramas evaluados se verificaron
     físicamente coherentes (ascenso, pico y recesión).
   - **Fallo estructural en 25 de Agosto (FD-2DA):** su único umbral utilizable
     es el de creciente extrema (14,22 m), así que el pico real de 11,48 m no
@@ -252,11 +261,17 @@ lenguaje y descargo de responsabilidad del bloque A ya están resueltos.
     extrema para una crecida ordinaria porque sus umbrales de TR100 y de CMP
     están a **0,23 m** uno del otro, cuatro veces menos que la incertidumbre
     declarada de ±1 m.
-  - Sin cobertura: Salto, Fray Bentos y San Gregorio de Polanco no figuran en
-    los CSV; Mercedes deja de transmitir el 13-03-2019, antes de su evento de
-    junio.
+  - Sin cobertura evaluable: 5 de los 10 eventos. Salto ya no se asocia al
+    piezómetro «Club Remeros Salto (Sa1)»: mide el acuífero Guaraní y no es una
+    estación de agua superficial. Juan Lacaze queda bloqueada porque sus
+    curvas mezclan mecanismo costero y pluvial sin separarlos.
+  - Dictamen: **0 de 19 localidades habilitables**. Hay 15 casos fluviales,
+    2 costeros/estuarinos, 1 pluvial urbano y 1 mixto; 17 tienen estación
+    superficial y 14 coinciden además con el curso. Todos carecen de datum y
+    relación hidráulica completamente validados; el registro CRI tampoco
+    aporta negativos exhaustivos.
 - [ ] Actuar sobre los hallazgos de la validación:
-  - 21 de los 32 pares de umbrales consecutivos están a menos de 2 m, o sea
+  - 19 de los 27 pares de umbrales consecutivos están a menos de 2 m, o sea
     dentro de ±1 m en ambos. El caso extremo es Constitución: TR10 = 3,31 m,
     TR100 = 3,45 m y CMP = 3,93 m, los tres escenarios en 62 cm. Colapsar los
     umbrales indistinguibles en uno solo en vez de nombrar un período de
@@ -268,7 +283,13 @@ lenguaje y descargo de responsabilidad del bloque A ya están resueltos.
     alarmas confirmadas: el registro CRI es incompleto.
   - `curvas_cri` como capa de verificación no basta para medir falsa alarma.
     Para eso hace falta un registro de eventos negativo, que no existe.
-- [ ] Control de calidad en el pipeline en vivo, no solo en el análisis. La
+- [x] Control de calidad en el pipeline en vivo, no solo en el análisis
+      (2026-08-21). Cada nivel/caudal conserva el valor original y publica
+      estado, códigos, controles aplicados y última referencia aceptada. Los
+      valores futuros/no finitos/fuera de rango se rechazan; los cambios de
+      nivel >1 m en ≤2 h quedan dudosos. Ninguno alimenta factores ni
+      activaciones, y `build_series.py` los excluye de la serie visual sin
+      borrarlos de los snapshots. La UI muestra cobertura e incidencias. La
       validación encontró que Santa Lucía R-11 —la estación que alimenta tres
       de las 19 localidades con umbral— cambió su marco de referencia dos
       veces en catorce meses: **+12,91 m el 2018-12-16** y **−9,40 m el
@@ -280,6 +301,18 @@ lenguaje y descargo de responsabilidad del bloque A ya están resueltos.
       Nota metodológica: corregir un escalón desplazando el tramo previo
       **inventa activaciones** (produjo 42 espurias en diciembre de 2018 antes
       de detectarse); el tramo con otro marco hay que descartarlo.
+- [x] Contrato reproducible para científicos (2026-08-21): catálogo legible
+      por máquinas de los 16 productos, fuente/licencia/clasificación y
+      limitaciones por recurso, CRS horizontal y referencia vertical
+      explícitos, esquemas JSON del estado v3 y de la validación retrospectiva,
+      lockfiles, hashes SHA-256 y CI que detecta deriva, JSON no estricto y
+      coordenadas fuera de CRS84. La unión a subcuencas corrige de forma
+      explícita el CRS erróneo de la capa WFS (declara EPSG:4326 pero entrega
+      coordenadas UTM 21S) y conserva ambos metadatos en el informe.
+- [ ] Migrar la telemetría ANA al nuevo HidroWebService autenticado. El
+      servicio SOAP usado hoy tenía fin de soporte anunciado para 2026-06-30;
+      aún responde, pero constituye un punto único de falla sin continuidad
+      garantizada para Cuareim y Yaguarón.
 - [x] Climatología nacional en lugar de la media modelada de HydroRIVERS
       (`DIS_AV_CMS` viene de WaterGAP con clima 1971–2000). **Hecho
       (2026-08-21).** Fuente: *Regionalización de estadísticas de caudales* de

@@ -100,8 +100,31 @@ valor", no una serie temporal. El pipeline debe filtrar por antigüedad.
 - `ambiente-dinagua-mediciones-de-nivel-2017/2018/2019`: CSV de niveles,
   congelados desde 2022. **No hay datasets de caudal en CKAN**; los caudales
   históricos viven en PDFs (Anuario Hidrológico 2021–2024 en gub.uy).
+- `pipeline/build_validacion_activacion.py` conserva para cada CSV la URL
+  exacta, bytes y SHA-256. La hora no incluye zona horaria en los archivos y
+  se publica como hora local *naive*, sin inventar una conversión. La unidad
+  de contraste es el evento completo dentro de la subcuenca, nunca una
+  partición aleatoria de observaciones.
 
-## 8. Geometría de la red hidrográfica
+## 8. Fuentes regionales y costeras — VERIFICADO
+
+- **UTE** publica una previsión determinista de niveles y caudales del río
+  Negro a 7 días. El portal requiere obtener primero una cookie de sesión
+  anónima; no publica probabilidad ni incertidumbre. Es pronóstico, no una
+  observación de operación en vivo.
+- **ANA (Brasil)** entrega nivel, caudal y lluvia por un WebService SOAP para
+  estaciones de cuencas compartidas. Es un servicio legado: ANA anunció que
+  lo mantendría solo hasta el 2026-06-30 y solicita migrar a la nueva API
+  autenticada. El endpoint todavía respondió al snapshot del 2026-08-22,
+  pero debe considerarse sin garantía de continuidad y la UI debe exhibir su
+  caída si deja de hacerlo.
+- **SOHMA** publica observaciones de mareógrafos cada 5 minutos en
+  `https://meteo.armada.mil.uy/`. El pipeline usa Punta Lobos y La Paloma; las
+  coordenadas son aproximadas porque la página fuente no las incluye. Son una
+  señal costera/estuarina, separada de la inundación fluvial y del drenaje
+  pluvial urbano.
+
+## 9. Geometría de la red hidrográfica
 
 | Fuente | Rol | Estado |
 |---|---|---|
@@ -111,7 +134,7 @@ valor", no una serie temporal. El pipeline debe filtrar por antigüedad.
 | MTOP GeoServer (`https://geoservicios.mtop.gub.uy/geoserver/`, capas `hidro_pl`, `hidro_pg`, `v_cursos_nav_flot`) | Alternativa de referencia; sin caudal | VERIFICADO |
 | OSM/Geofabrik (`uruguay-latest.osm.pbf`) | Complemento; topología inconsistente | NO VERIFICADO |
 
-## 9. Riesgo de inundación — GeoServer DINAGUA — VERIFICADO
+## 10. Riesgo de inundación — GeoServer DINAGUA — VERIFICADO
 
 Mismo endpoint WFS de §1. Verificado el 2026-08-20 con GetFeature; estas capas
 son la base del "modo creciente" del mapa.
@@ -136,21 +159,28 @@ Limitaciones:
   de las estaciones (§1) para saber qué mancha está activa o cerca de
   activarse — verificar que el datum coincida con la "Cota Cero (Wh)" del
   catálogo de estaciones antes de comparar.
+- Las manchas se clasifican y evalúan por mecanismo: fluvial, pluvial urbana y
+  costera/estuarina. Una localidad con mecanismos mezclados queda bloqueada
+  hasta separarlos. Un piezómetro no es una estación superficial y no puede
+  activar una mancha fluvial o pluvial.
 - Para zonas sin estudio oficial, una estimación nacional exige modelado
   propio (ver HAND en `02-arquitectura.md`); el MDT nacional de IDEuy
   (vuelo 2017/18) es el insumo — NO VERIFICADA su descarga en este
   relevamiento.
 
-## 10. Huecos confirmados
+## 11. Huecos confirmados
 
 1. **No existe API pública de caudales en tiempo real de Uruguay.** Lo más
    cercano es el "último valor" del WFS de DINAGUA.
 2. **No hay series temporales de caudal descargables** (solo niveles CKAN
    2017–2019 y PDFs de anuarios). Consecuencia: el proyecto debe persistir
    sus propios snapshots desde el día uno.
-3. **UTE no publica datos operativos de sus represas** (Bonete, Baygorria,
-   Palmar). Proxy: informes PDF diarios de ADME (`adme.com.uy`, requiere
-   parsing de PDF) o las estaciones DINAGUA sobre el Río Negro.
+3. **UTE no ofrece una API de observaciones operativas en vivo de sus
+   represas** (Bonete, Baygorria, Palmar). Sí publica una previsión web a 7
+   días, sin probabilidad ni incertidumbre; como respaldo quedan informes PDF
+   de ADME o estaciones DINAGUA sobre el río Negro.
 4. **Las curvas de gasto (nivel→caudal) no son públicas**: convertir nivel a
    caudal exige pedirlas a DINAGUA o usar heurísticas declaradas como tales.
-5. CARP/Río de la Plata sin datos abiertos; proxy: SOHMA (boletines) e INA.
+5. No hay una fuente abierta única de CARP/Río de la Plata. SOHMA aporta
+   mareógrafos en vivo e INA alturas argentinas, con referencias verticales y
+   coberturas distintas que no deben fusionarse como si fueran equivalentes.

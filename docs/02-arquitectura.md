@@ -166,6 +166,29 @@ con cota cero conocida. Con eso:
   necesita.
 - Presupuesto de payload inicial: < 3 MB comprimido.
 
+## Contrato de publicación científica
+
+`web/public/data/datapackage.json` es el inventario legible por máquinas de
+los productos que consume el sitio. Combina los metadatos revisados en
+`data/referencia/catalogo_base.json` con propiedades derivadas directamente de
+cada artefacto: SHA-256, bytes, cantidad de registros, esquema observado,
+geometrías, bbox y cobertura temporal cuando existe. El build falla si aparece
+un JSON/GeoJSON sin registrar, falta un recurso declarado, hay JSON no estricto
+o una coordenada queda fuera de OGC:CRS84.
+
+Las coordenadas publicadas usan OGC:CRS84 en orden longitud/latitud; las
+operaciones métricas usan EPSG:32721 cuando se declara. Datum vertical,
+resolución, fecha, procedencia, clasificación y limitaciones quedan a nivel de
+recurso. El estado dinámico tiene un contrato adicional en
+`web/public/data/schema/estado-v3.schema.json`. La evidencia retrospectiva se
+publica en `validacion_activacion.json`, con esquema v1, unidad por evento
+completo y partición por cuenca. Distingue fluvial, pluvial urbana,
+costera/estuarina y mecanismo mixto; una coincidencia se rotula estimación no
+operativa y nunca autoriza por sí sola una activación. `checksums.sha256` cubre
+los 16 productos, ambos esquemas y el propio catálogo. El workflow operativo
+reconstruye catálogo y sumas tras cada actualización; CI ejecuta el modo
+`--check` para detectar deriva.
+
 ## Decisiones abiertas (resolver en Fase 0)
 
 | Decisión | Opciones | Criterio |
