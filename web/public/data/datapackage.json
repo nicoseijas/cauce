@@ -13,7 +13,7 @@
     "inundación",
     "GeoJSON"
   ],
-  "created": "2026-08-22T01:58:19Z",
+  "created": "2026-08-27T13:48:32Z",
   "metadata_schema_version": 1,
   "licenses": [
     {
@@ -967,8 +967,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 126625,
-      "hash": "sha256:179fd56ae81c3f2c682f5208e3622ea50bef6d4b3c2912a412d822bf57b5c772",
+      "bytes": 117531,
+      "hash": "sha256:176441b6b904f527b90e46ffc7ab21447fcab3f019d9a80b1438948c4a2fb0e2",
       "title": "Estado hídrico consolidado",
       "description": "Últimas observaciones, pronóstico UTE, estimaciones visuales, frescura, QC y cobertura de activación.",
       "sources": [
@@ -1135,13 +1135,13 @@
         "scope": "fechas de medición publicadas, incluidas vencidas o rechazadas"
       },
       "usable_temporal": {
-        "start": "2026-08-20T06:00:00Z",
-        "end": "2026-08-22T01:50:00Z",
+        "start": "2026-08-25T18:00:00Z",
+        "end": "2026-08-27T13:43:00Z",
         "scope": "mediciones aptas para derivados según QC al generar el snapshot"
       },
       "forecast_temporal": {
-        "start": "2026-08-21T00:00:00Z",
-        "end": "2026-08-28T00:00:00Z",
+        "start": "2026-08-27T00:00:00Z",
+        "end": "2026-09-03T00:00:00Z",
         "horizon_days": 7,
         "probability": null,
         "uncertainty": "no publicada por UTE"
@@ -1589,8 +1589,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 4669,
-      "hash": "sha256:4fb175ccf1a8e5e6c8470c3e1d279cc8ec3d56e0717032b8f1a8b3320251f2b7",
+      "bytes": 13640,
+      "hash": "sha256:785806e6542bcf906ecc1825523124d41195ba0afba9cee136180e330cb1509f",
       "title": "Series recientes reconstruidas desde snapshots",
       "description": "Niveles y caudales deduplicados por fecha de observación a partir del archivo histórico de Cauce.",
       "sources": [
@@ -1651,12 +1651,12 @@
           }
         ]
       },
-      "record_count": 39,
+      "record_count": 47,
       "window_days": 45,
       "qc_version": "1.0.0",
       "temporal": {
-        "start": "2026-08-19T06:00:00Z",
-        "end": "2026-08-22T01:50:00Z"
+        "start": "2026-08-17T00:00:00Z",
+        "end": "2026-08-27T13:43:00Z"
       }
     },
     {
