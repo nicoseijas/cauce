@@ -1,0 +1,6 @@
+# Los productos de datos se publican junto a su SHA-256. El fin de línea debe
+# ser idéntico en toda plataforma o build_catalogo.py --check falla al
+# comparar un archivo con CRLF contra el hash calculado sobre LF.
+*.json text eol=lf
+*.geojson text eol=lf
+*.sha256 text eol=lf

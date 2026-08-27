@@ -171,8 +171,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 37960,
-      "hash": "sha256:ba7325807689078b37d000204506c7ca43b91986f6ae1d6d6e16757e98e8ccef",
+      "bytes": 36521,
+      "hash": "sha256:bb22adf2314fb9d153215c30be3dd6db3562f9e9c923cb5338b62a6eca7cbd85",
       "title": "Configuraciones candidatas de activación de escenarios",
       "description": "Relaciones estación-localidad y umbrales candidatos. Ninguna relación se habilita automáticamente sin datum y relación hidráulica validados.",
       "sources": [
@@ -807,8 +807,8 @@
       "profile": "data-resource",
       "format": "geojson",
       "mediatype": "application/geo+json",
-      "bytes": 41189,
-      "hash": "sha256:9fbbb6c5dd7b9d6ab360f237f1b88023caa10864bc9315dc56a88e5a0d7d13b8",
+      "bytes": 41081,
+      "hash": "sha256:e7b379ba3feccbc0b125f8a969fadb63c598b14b30ba90c1ad491f67fcd01985",
       "title": "Catálogo estático de estaciones y emparejamiento con la red",
       "description": "Estaciones DINAGUA y pseudoestación Salto Grande con tramo cercano, área, caudal medio y diagnóstico del join.",
       "sources": [
@@ -1665,8 +1665,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 91277,
-      "hash": "sha256:5d7c13df8c0548e23eb043908b59aa47a11ef5cfa7c8534813996e456aca6a41",
+      "bytes": 88454,
+      "hash": "sha256:d4d597548bf2e8e16666edb94cb97b59a45d8be1ee371c1bbae0a0123086e970",
       "title": "Evidencia retrospectiva de activaciones candidatas",
       "description": "Evaluación reproducible por evento completo, localidad y cuenca de umbrales candidatos frente a niveles históricos 2017-2019.",
       "sources": [
