@@ -167,6 +167,21 @@ declarado de organismos, de modo que agregar una estación nueva no reasigne
 los slugs ya publicados. El `estacion_id` funciona como enlace alternativo y
 redirige al slug vigente.
 
+La columna izquierda ordena la lectura como conclusión → mapa → dato. El
+resumen (`web/src/resumen.ts`) responde «¿hay algo que mirar hoy?» antes de
+que el usuario tenga que decodificar la leyenda, y solo enuncia categorías que
+los datos sostienen. El corte entre «dentro de lo habitual» y fuera vive en
+`CORTE_ANOMALIA` (1,5× y su recíproco, simétrico en escala logarítmica como la
+rampa de color) y lo comparten el resumen y la ficha de estación, para que la
+aplicación no describa tres escalas distintas.
+
+Dos separaciones deliberadas: el color comunica estado del río y nunca
+antigüedad del dato —la frescura se distingue por relleno y contorno, porque
+verde y amarillo se leen como «normal / precaución» y significan otra cosa—, y
+las capas que el usuario elige responden solo a su casilla, no a que el bloque
+de escenarios esté desplegado. Ese bloque arranca cerrado: sus 2,6 MB de
+manchas se descargan únicamente si alguien las pide.
+
 La página de estación (`web/src/estacion.ts`) se arma en el cliente desde
 `estado_actual.json`, `series.json` y `datapackage.json`. Ese último alimenta
 el bloque de procedencia: la ficha cita el mismo catálogo que se publica como

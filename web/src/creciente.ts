@@ -583,24 +583,26 @@ function visibilidad(map: Map, id: string, on: boolean): void {
   map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
 }
 
-function aplicarVisibilidad(map: Map, activo: boolean): void {
+/** `escenarios` gobierna solo las manchas precalculadas, que pertenecen a ese
+ * bloque. Las capas que el usuario elige en «Capas» responden a su casilla y a
+ * nada más: si dependieran de tener los escenarios desplegados, marcarlas no
+ * haría nada visible. */
+function aplicarVisibilidad(map: Map, escenarios: boolean): void {
   const conCri = (document.getElementById("chk-cri") as HTMLInputElement).checked;
   const conDre = (document.getElementById("chk-dre") as HTMLInputElement).checked;
   const conLlu = (document.getElementById("chk-llu") as HTMLInputElement).checked;
   const visibles: Record<string, boolean> = {
-    "inund-tr-fill": activo,
-    "inund-tr-line": activo,
-    "inund-activa": activo,
-    "inund-activa-line": activo,
-    "inund-cri": activo && conCri,
-    "inund-cri-fill": activo && conCri,
-    "drenaje-fill": activo && conDre,
-    "amenazas": activo && conDre,
-    "lluvia": activo && conLlu,
-    // el aviso por lluvia abundante es excepcional: se muestra siempre que
-    // el modo creciente esté activo, sin depender del checkbox de lluvia
-    "cuencas-lluvia-fill": activo,
-    "cuencas-lluvia-line": activo,
+    "inund-tr-fill": escenarios,
+    "inund-tr-line": escenarios,
+    "inund-activa": escenarios,
+    "inund-activa-line": escenarios,
+    "inund-cri": conCri,
+    "inund-cri-fill": conCri,
+    "drenaje-fill": conDre,
+    "amenazas": conDre,
+    "lluvia": conLlu,
+    "cuencas-lluvia-fill": conLlu,
+    "cuencas-lluvia-line": conLlu,
   };
   for (const [id, on] of Object.entries(visibles)) {
     if (map.getLayer(id)) visibilidad(map, id, on);
@@ -635,16 +637,20 @@ export function setupCreciente(
   llenarControlCalidad(estado);
   llenarPrevision();
 
+  const asegurarCapas = async (): Promise<void> => {
+    if (cargado) return;
+    cargado = true;
+    const rotulo = titulo.textContent;
+    titulo.textContent = "Cargando…";
+    await cargarCapas(map, base);
+    titulo.textContent = rotulo;
+    aplicarEscenario(map);
+  };
+
   toggle.addEventListener("click", async () => {
     const activo = panel.classList.toggle("activo");
     opciones.style.display = activo ? "block" : "none";
-    if (activo && !cargado) {
-      cargado = true;
-      titulo.textContent = "Cargando…";
-      await cargarCapas(map, base);
-      titulo.textContent = "Modo creciente";
-      aplicarEscenario(map);
-    }
+    if (activo) await asegurarCapas();
     if (map.getLayer("inund-tr-fill")) aplicarVisibilidad(map, activo);
   });
 
@@ -658,11 +664,12 @@ export function setupCreciente(
     });
   }
   for (const id of ["chk-cri", "chk-dre", "chk-llu"]) {
-    (document.getElementById(id) as HTMLInputElement).addEventListener("change", () => {
+    (document.getElementById(id) as HTMLInputElement).addEventListener("change", async () => {
+      await asegurarCapas();
       aplicarVisibilidad(map, panel.classList.contains("activo"));
     });
   }
 
-  // abierto por defecto: el estado de activación es lo primero que se ve
-  (toggle as HTMLButtonElement).click();
+  // Cerrado al abrir: la conclusión del día la da el resumen, y así las capas
+  // de inundación (2,6 MB) solo se descargan si alguien las pide.
 }

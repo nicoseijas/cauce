@@ -224,6 +224,13 @@ hay dato de estación fresco, cuál está activa hoy.
       procedencia leída del catálogo publicado; CSV por estación. El popup del
       mapa pasa a ser un paso intermedio con «Ver estación →». Verificado en
       Chrome. ✔
+- [x] Jerarquía de la columna izquierda (2026-08-27): resumen «Ahora» como
+      primera lectura, decisión Caudal / vs. habitual subida a la cabecera,
+      diagnóstico técnico al pie, color reservado al estado hidrológico,
+      escenarios de creciente bajados de nivel y cerrados por defecto. ✔
+- [ ] Aviso contextual: mostrar el descargo de forma prominente solo cuando
+      exista una situación interpretable como alerta. Hoy no se da el caso
+      (0 localidades habilitadas), así que el descargo vive en el pie.
 - [ ] Contexto histórico de la estación: depende de publicar 2017–2019
       (paso 4 del V2); hoy el bloque declara por qué no puede responder.
 - [ ] Detalle 1:10.000 de IDEuy en zooms altos (solo estética).

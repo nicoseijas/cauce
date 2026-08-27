@@ -488,3 +488,21 @@ export function estacionesComoGeoJSON(estado: Estado) {
     features: [...propias, ...ina, ...ana, ...sohma],
   };
 }
+
+/** Corte entre «dentro de lo habitual» y fuera, sobre el factor caudal/media.
+ *
+ * Es simétrico en escala logarítmica —1,5× y su recíproco 0,67×— porque la
+ * rampa de color del mapa también es logarítmica: así el resumen, la leyenda y
+ * la ficha de estación no describen tres escalas distintas. El valor es una
+ * convención de presentación de Cauce, no un umbral hidrológico de ningún
+ * organismo, y por eso la interfaz lo declara donde lo usa.
+ */
+export const CORTE_ANOMALIA = 1.5;
+
+export type CategoriaAnomalia = "encima" | "habitual" | "debajo";
+
+export function categoriaAnomalia(factor: number): CategoriaAnomalia {
+  if (factor >= CORTE_ANOMALIA) return "encima";
+  if (factor <= 1 / CORTE_ANOMALIA) return "debajo";
+  return "habitual";
+}
