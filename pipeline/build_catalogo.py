@@ -24,6 +24,7 @@ BASE_PATH = ROOT / "data" / "referencia" / "catalogo_base.json"
 CATALOG_PATH = DATA_DIR / "datapackage.json"
 CHECKSUM_PATH = DATA_DIR / "checksums.sha256"
 GENERATED_NAMES = {CATALOG_PATH.name, CHECKSUM_PATH.name}
+TEXTO_SOLO_LF = {".json", ".geojson", ".sha256"}
 QC_STATES = {"ok", "vencido", "dudoso", "rechazado", "sin_dato"}
 SOURCE_STATES = {"ok", "caida", "vencida", "sin_fecha", "no_implementada"}
 
@@ -52,8 +53,26 @@ def _sha256(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
+def _nombre_legible(path: Path) -> str:
+    """Ruta relativa al repositorio cuando lo está; completa en otro caso."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def _file_hash(path: Path) -> str:
-    return _sha256(path.read_bytes())
+    contenido = path.read_bytes()
+    # El hash publicado identifica bytes, así que un archivo de texto guardado
+    # con CRLF en Windows y con LF en Linux daría dos sumas para el mismo
+    # contenido. .gitattributes fija LF; esto detecta el archivo que se escapó
+    # antes de que la diferencia aparezca como un fallo remoto inexplicable.
+    if path.suffix in TEXTO_SOLO_LF and b"\r\n" in contenido:
+        raise CatalogError(
+            f"{_nombre_legible(path)} tiene fin de línea CRLF; el hash publicado "
+            f"dejaría de coincidir en otra plataforma. Regrabar el archivo con LF."
+        )
+    return _sha256(contenido)
 
 
 def _json_type(value: Any) -> str:

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from pipeline import build_catalogo
 from pipeline.build_catalogo import (
     CatalogError,
     analyze_geojson,
@@ -132,3 +133,27 @@ class JsonContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFinDeLinea(unittest.TestCase):
+    """Un hash publicado identifica bytes: el mismo contenido guardado con CRLF
+    y con LF daría dos sumas distintas según la plataforma."""
+
+    def test_los_recursos_publicados_no_tienen_crlf(self):
+        data = ROOT / "web" / "public" / "data"
+        con_crlf = [
+            ruta.relative_to(data).as_posix()
+            for ruta in sorted(data.rglob("*"))
+            if ruta.is_file()
+            and ruta.suffix in build_catalogo.TEXTO_SOLO_LF
+            and b"\r\n" in ruta.read_bytes()
+        ]
+        self.assertEqual(con_crlf, [])
+
+    def test_el_catalogo_rechaza_un_recurso_con_crlf(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            archivo = Path(tmp) / "prueba.json"
+            archivo.write_bytes(b'{\r\n  "a": 1\r\n}\r\n')
+            with self.assertRaises(CatalogError) as caso:
+                build_catalogo._file_hash(archivo)
+            self.assertIn("CRLF", str(caso.exception))
