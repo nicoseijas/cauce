@@ -132,8 +132,17 @@ class JsonContractTests(unittest.TestCase):
         state = next(resource for resource in catalog["resources"] if resource["path"] == "estado_actual.json")
         self.assertIn("incluidas vencidas o rechazadas", state["temporal"]["scope"])
         self.assertIn("usable_temporal", state)
-        self.assertEqual(state["forecast_temporal"]["horizon_days"], 7)
-        self.assertIsNone(state["forecast_temporal"]["probability"])
+        # El pronóstico de UTE puede faltar: si la fuente estaba caída al generar
+        # el snapshot, el catálogo debe omitirlo en vez de declarar un horizonte
+        # que nadie publicó.
+        ute = load_json_strict(
+            ROOT / "web/public/data/estado_actual.json"
+        ).get("ute_rio_negro")
+        if isinstance(ute, dict) and ute.get("dias"):
+            self.assertEqual(state["forecast_temporal"]["horizon_days"], ute["horizonte_dias"])
+            self.assertEqual(state["forecast_temporal"]["probability"], ute["probabilidad"])
+        else:
+            self.assertNotIn("forecast_temporal", state)
         self.assertIn(b"datapackage.json", checksum_bytes)
         self.assertIn(b"schema/estado-v3.schema.json", checksum_bytes)
         self.assertIn(b"schema/validacion-activacion-v1.schema.json", checksum_bytes)
