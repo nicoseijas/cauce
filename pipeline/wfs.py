@@ -40,11 +40,15 @@ def _get(type_name: str, cql_filter: str | None = None,
     except requests.RequestException as exc:
         log.warning("request fallida: %s", exc)
         return None
-    if "json" not in r.headers.get("content-type", ""):
+    tipo = r.headers.get("content-type", "")
+    if "json" not in tipo:
+        log.warning("%s respondió %s con content-type %r (%d bytes)",
+                    type_name, r.status_code, tipo, len(r.content))
         return None
     try:
         return r.json().get("features", [])
     except ValueError:
+        log.warning("%s respondió JSON ilegible (%d bytes)", type_name, len(r.content))
         return None
 
 
