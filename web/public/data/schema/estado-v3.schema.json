@@ -723,20 +723,35 @@
                 "format": "date"
               },
               "san_gregorio_local": {
-                "type": "number"
+                "type": [
+                  "number",
+                  "null"
+                ]
               },
               "paso_toros_oficial": {
-                "type": "number"
+                "type": [
+                  "number",
+                  "null"
+                ]
               },
               "mercedes_local": {
-                "type": "number"
+                "type": [
+                  "number",
+                  "null"
+                ]
               },
               "erogado_bonete": {
-                "type": "number",
+                "type": [
+                  "number",
+                  "null"
+                ],
                 "minimum": 0
               },
               "erogado_palmar": {
-                "type": "number",
+                "type": [
+                  "number",
+                  "null"
+                ],
                 "minimum": 0
               }
             }

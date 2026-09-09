@@ -106,6 +106,25 @@ class JsonContractTests(unittest.TestCase):
         errors = sorted(validator.iter_errors(state), key=lambda error: list(error.path))
         self.assertEqual([], [f"{'/'.join(map(str, error.path))}: {error.message}" for error in errors])
 
+    def test_estado_ute_admite_lecturas_diarias_ausentes(self):
+        """UTE puede publicar una previsión con una celda sin lectura numérica."""
+        schema = load_json_strict(ROOT / "web/public/data/schema/estado-v3.schema.json")
+        state = load_json_strict(ROOT / "web/public/data/estado_actual.json")
+        state = json.loads(json.dumps(state))
+        dia = state["ute_rio_negro"]["dias"][0]
+        for campo in (
+            "san_gregorio_local",
+            "paso_toros_oficial",
+            "mercedes_local",
+            "erogado_bonete",
+            "erogado_palmar",
+        ):
+            dia[campo] = None
+
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        errors = sorted(validator.iter_errors(state), key=lambda error: list(error.path))
+        self.assertEqual([], [f"{'/'.join(map(str, error.path))}: {error.message}" for error in errors])
+
     def test_validacion_retrospectiva_valida_con_su_esquema(self):
         schema = load_json_strict(
             ROOT / "web/public/data/schema/validacion-activacion-v1.schema.json"
