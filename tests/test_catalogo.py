@@ -110,16 +110,26 @@ class JsonContractTests(unittest.TestCase):
         """UTE puede publicar una previsión con una celda sin lectura numérica."""
         schema = load_json_strict(ROOT / "web/public/data/schema/estado-v3.schema.json")
         state = load_json_strict(ROOT / "web/public/data/estado_actual.json")
-        state = json.loads(json.dumps(state))
-        dia = state["ute_rio_negro"]["dias"][0]
-        for campo in (
-            "san_gregorio_local",
-            "paso_toros_oficial",
-            "mercedes_local",
-            "erogado_bonete",
-            "erogado_palmar",
-        ):
-            dia[campo] = None
+        # El snapshot publicado trae ute_rio_negro = null cuando UTE estaba caída.
+        state["ute_rio_negro"] = {
+            "actualizado": "2026-09-09T12:00-03:00",
+            "clasificacion": "pronosticado",
+            "oficial": True,
+            "horizonte_dias": 7,
+            "probabilidad": None,
+            "incertidumbre": "no publicada por UTE",
+            "dias": [
+                {
+                    "fecha": "2026-09-09",
+                    "san_gregorio_local": None,
+                    "paso_toros_oficial": None,
+                    "mercedes_local": None,
+                    "erogado_bonete": None,
+                    "erogado_palmar": None,
+                }
+            ],
+            "maximos": [],
+        }
 
         validator = Draft202012Validator(schema, format_checker=FormatChecker())
         errors = sorted(validator.iter_errors(state), key=lambda error: list(error.path))
