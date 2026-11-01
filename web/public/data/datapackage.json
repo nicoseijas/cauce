@@ -13,7 +13,7 @@
     "inundación",
     "GeoJSON"
   ],
-  "created": "2026-11-01T13:25:44Z",
+  "created": "2026-11-01T18:58:13Z",
   "metadata_schema_version": 1,
   "licenses": [
     {
@@ -475,7 +475,7 @@
       "format": "json",
       "mediatype": "application/json",
       "bytes": 163745,
-      "hash": "sha256:1ee8d53a947d54be667703306f0d9c4649007205e0ac1566742bd95a21b5668c",
+      "hash": "sha256:8e55e8a1b1cac51682cbcc1bce8a8d4c755430b00957622bd2ba30133e8ce6bc",
       "title": "Índice de búsqueda de entidades",
       "description": "Estaciones, cursos, localidades, departamentos y represas con su nombre y dónde encuadrarlos en el mapa. Sirve para navegar, no para analizar: no contiene mediciones.",
       "sources": [
@@ -1032,8 +1032,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 131703,
-      "hash": "sha256:62ad1eeb97b66dda5a7c8c88594fa092ed482be10a51b17176c24a5ee131f8eb",
+      "bytes": 131840,
+      "hash": "sha256:db1a8a28290c6b399972e836a5facba1f8f87d87ec401fdfa721ef9bee8f82da",
       "title": "Estado hídrico consolidado",
       "description": "Últimas observaciones, pronóstico UTE, estimaciones visuales, frescura, QC y cobertura de activación.",
       "sources": [
@@ -1196,12 +1196,12 @@
       "qc_version": "1.0.0",
       "temporal": {
         "start": "1969-04-30T07:00:00Z",
-        "end": "2026-11-01T13:20:00Z",
+        "end": "2026-11-01T18:55:00Z",
         "scope": "fechas de medición publicadas, incluidas vencidas o rechazadas"
       },
       "usable_temporal": {
-        "start": "2026-10-30T18:00:00Z",
-        "end": "2026-11-01T13:20:00Z",
+        "start": "2026-10-31T00:00:00Z",
+        "end": "2026-11-01T18:55:00Z",
         "scope": "mediciones aptas para derivados según QC al generar el snapshot"
       },
       "forecast_temporal": {
@@ -1654,8 +1654,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 38647,
-      "hash": "sha256:b3b006521260321f074764a662b4e5c5e63de86738a0a5ca8e03df500b27af0a",
+      "bytes": 39168,
+      "hash": "sha256:0275bf7a080ad381080562a9e424a706a573bab4be77a57aada6e5a0008696b1",
       "title": "Series recientes reconstruidas desde snapshots",
       "description": "Niveles y caudales deduplicados por fecha de observación a partir del archivo histórico de Cauce.",
       "sources": [
@@ -1720,8 +1720,8 @@
       "window_days": 45,
       "qc_version": "1.0.0",
       "temporal": {
-        "start": "2026-09-17T17:00:00Z",
-        "end": "2026-11-01T13:20:00Z"
+        "start": "2026-09-17T20:00:00Z",
+        "end": "2026-11-01T18:55:00Z"
       }
     },
     {
