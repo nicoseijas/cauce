@@ -13,7 +13,7 @@
     "inundación",
     "GeoJSON"
   ],
-  "created": "2026-11-04T02:20:22Z",
+  "created": "2026-11-04T12:07:49Z",
   "metadata_schema_version": 1,
   "licenses": [
     {
@@ -474,8 +474,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 163745,
-      "hash": "sha256:5db5bd5ff89b34adcb7901c5b490a8c46e1129946e8cf3cedb5ae7fdcf7fcaea",
+      "bytes": 163591,
+      "hash": "sha256:e7ec7751d9339ca8a0ec2c9d09b84032b1ec9acb5b2bc1f0574d0eca90707883",
       "title": "Índice de búsqueda de entidades",
       "description": "Estaciones, cursos, localidades, departamentos y represas con su nombre y dónde encuadrarlos en el mapa. Sirve para navegar, no para analizar: no contiene mediciones.",
       "sources": [
@@ -1032,8 +1032,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 130035,
-      "hash": "sha256:31a9126659efacad8449d97545a1a9dad0742e83373311422d9bdfe1beb6179b",
+      "bytes": 129648,
+      "hash": "sha256:445c596095109e719898203101e60b351d960281debd62d69c243530c3156c19",
       "title": "Estado hídrico consolidado",
       "description": "Últimas observaciones, pronóstico UTE, estimaciones visuales, frescura, QC y cobertura de activación.",
       "sources": [
@@ -1183,33 +1183,26 @@
           },
           {
             "name": "ute_rio_negro",
-            "type": "object",
-            "nullable": false,
+            "type": "any",
+            "nullable": true,
             "observed_types": [
-              "object"
+              "null"
             ]
           }
         ]
       },
-      "record_count": 112,
+      "record_count": 111,
       "schema_version": 3,
       "qc_version": "1.0.0",
       "temporal": {
         "start": "1969-04-30T07:00:00Z",
-        "end": "2026-11-04T02:15:00Z",
+        "end": "2026-11-04T12:05:00Z",
         "scope": "fechas de medición publicadas, incluidas vencidas o rechazadas"
       },
       "usable_temporal": {
-        "start": "2026-11-02T06:00:00Z",
-        "end": "2026-11-04T02:15:00Z",
+        "start": "2026-11-02T18:00:00Z",
+        "end": "2026-11-04T12:05:00Z",
         "scope": "mediciones aptas para derivados según QC al generar el snapshot"
-      },
-      "forecast_temporal": {
-        "start": "2026-11-03T00:00:00Z",
-        "end": "2026-11-10T00:00:00Z",
-        "horizon_days": 7,
-        "probability": null,
-        "uncertainty": "no publicada por UTE"
       }
     },
     {
@@ -1654,8 +1647,8 @@
       "profile": "data-resource",
       "format": "json",
       "mediatype": "application/json",
-      "bytes": 40990,
-      "hash": "sha256:ca53c6cf7787a5eff32a928dfffac3e7dadbce5b209d0ec947bd0a86731d79f8",
+      "bytes": 41684,
+      "hash": "sha256:38d93785d68f3a0d562a932f5f5106f8f691637d02494a8585a57f4d906f1bcb",
       "title": "Series recientes reconstruidas desde snapshots",
       "description": "Niveles y caudales deduplicados por fecha de observación a partir del archivo histórico de Cauce.",
       "sources": [
@@ -1721,7 +1714,7 @@
       "qc_version": "1.0.0",
       "temporal": {
         "start": "2026-09-23T03:00:00Z",
-        "end": "2026-11-04T02:15:00Z"
+        "end": "2026-11-04T12:05:00Z"
       }
     },
     {
